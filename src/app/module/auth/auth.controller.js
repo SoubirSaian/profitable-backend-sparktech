@@ -1,7 +1,7 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
-import UserModel from "../user/user.model.js";
-import { userLoginService, userRegistrationProcess } from "./auth.service.js";
+// import UserModel from "../user/user.model.js";
+import {  forgetPasswordOtpVerifyService, forgetPasswordService, resetPasswordService, selectUsersRoleService, userLoginService, userRegistrationProcess, verifyEmailSendOtpService, verifyEmailVerifyOtpService } from "./auth.service.js";
 
 
 
@@ -95,3 +95,74 @@ export const loginUser = catchAsync(async (req, res) => {
         data: result,
     });
 });
+
+//api ending point to verify email
+export const verifyEmailSendOtp = catchAsync(async (req, res) => {
+    await verifyEmailSendOtpService(req.body);
+
+    //send response
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Check your email"
+    });
+});
+
+//api ending point to verify email otp
+export const verifyEmailVerifyOtp = catchAsync( async (req,res) => {
+    const result =  await verifyEmailVerifyOtpService(req.body);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Code verified successfully",
+        data: result
+    });
+});
+
+//api ending point for forgetPassword
+export const forgetPassword = catchAsync(async (req,res) => {
+    await forgetPasswordService(req.body);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Check your email"
+    });
+});
+
+//api ending point for forget password verify otp
+export const forgetPasswordVerifyOtp = catchAsync( async (req,res) => {
+    const result = await forgetPasswordOtpVerifyService(req.body);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Code verified successfully",
+        data: result
+    });
+});
+
+//api ending point for reset password
+export const resetPassword = catchAsync( async (req,res) => {
+    await resetPasswordService(req.body);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Password has been reset successfully.",
+    });
+});
+
+//api ending point to select role
+export const selectUsersRole = catchAsync(async (req,res) => {
+
+    await selectUsersRoleService(req.body);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: " User role added successfully"
+    });
+});
+

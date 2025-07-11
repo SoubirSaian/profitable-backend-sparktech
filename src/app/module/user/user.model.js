@@ -33,13 +33,23 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true,"country name is required"]
     },
-    isVerified:{
+    isEmailVerified:{
         type: Boolean,
         default: false
     },
     isUserActive:{
         type: Boolean,
         default: false
+    },
+    verificationCode: {
+        type: String
+    },
+    verificationCodeExpire: {
+        type: Date
+    },
+    role:{
+        type: String,
+        enum: ["Buyer","Seller","Investor","Broker","Asset Seller","Francise Seller","Business Idea Lister"]
     }
 },{
     timestamps: true
