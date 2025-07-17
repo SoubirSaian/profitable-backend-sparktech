@@ -24,7 +24,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true,"confirmPassword is required"]
     },
-    
+    image: {
+        type: String,
+    },
+    profession:{
+        type: String
+    },
+    location: {
+        type: String
+    },
+    description: {
+        type: String
+    },
     mobile:{
         type: Number,
         require: [true,"mobile number is required"]
