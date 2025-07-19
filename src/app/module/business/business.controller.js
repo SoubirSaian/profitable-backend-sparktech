@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, getASingleBusinessByIdService, updateABusinessService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, getASingleBusinessByIdService, updateABusinessService, advancedSearchService } from "./business.service.js";
 
 
 //api ending point to create a new business
@@ -48,5 +48,18 @@ export const getASingleBusiness = catchAsync(async (req,res) => {
         statusCode: 200,
         success: true,
         data : business
+    });
+});
+
+//api ending point to implement advanced search
+export const advancedBusinessSearch = catchAsync(async (req,res) => {
+
+    const searchResult = await advancedSearchService(req.body);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Advanced search implemented successfully",
+        data: searchResult
     });
 });

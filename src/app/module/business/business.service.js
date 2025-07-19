@@ -81,3 +81,55 @@ export const getASingleBusinessByIdService = async (payload) => {
     return business;
 
 }  
+
+//advanced search service
+export const advancedSearchService = async (payload) => {
+    const {category,country,location,askingPrice,businessType,ownerShipType} = payload;
+
+    //implement search
+    // const searchedBusiness = await BusinessModel.findOne({
+    //     category: category, country: country, location: location, askingPrice: askingPrice,businessType: businessType, ownerShipType: ownerShipType
+    // });
+
+    let priceQuery;
+
+    if(askingPrice === "less than $100000") { priceQuery = {$lte : 100000}}
+    else if(askingPrice === "$100000 to $500000") { 
+        priceQuery = {$and: [ { askingPrice: { $gte: 100000 } },{askingPrice: { $lte: 500000 } } ]}
+    }
+    // else if(askingPrice === "less than $100000") { priceQuery = {$lt : 100000}}
+    // else if(askingPrice === "less than $100000") { priceQuery = {$lt : 100000}}
+    
+    
+
+    const filters = {
+        category: category,
+        country: country,
+        location: location,
+        // askingPrice: { $lte: 500000 }, // Example: less than or equal to 500k
+        businessType: businessType,
+        ownerShipType: ownerShipType
+    };
+
+    const searchedBusiness = await BusinessModel.aggregate([
+      {
+         $match: {
+            category: filters.category,
+            country: filters.country,
+            location: filters.location,
+            askingPrice: priceQuery, // You can also use $gte, $lte here
+            businessType: filters.businessType,
+            ownerShipType: filters.ownerShipType
+        }
+      }
+    ]);
+
+    if(!searchedBusiness){
+        throw new ApiError(500, "No business data found");
+    }
+
+    return searchedBusiness;
+}
+
+
+// https://chatgpt.com/?utm_source=google&utm_medium=paidsearch_brand&utm_campaign=DEPT_SEM_Google_Brand_Acquisition_APAC_Bangladesh_Consumer_CPA_BAU_Mix_Bengali&utm_term=chatgpt&gad_source=1&gad_campaignid=22545504846&gbraid=0AAAAA-IW-UWe4CEZpysejQfJXl9BmOax1&gclid=EAIaIQobChMI9Z_Lic6sjgMVFySDAx0LwAfFEAAYASAAEgJDJPD_BwE
