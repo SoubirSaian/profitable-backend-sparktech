@@ -36,4 +36,6 @@ const sendEmail = async (options) => {
   await transporter.sendMail(mailOptions);
 };
 
+//may be need to write a new email helper to send all the information to the owner to get business valuation
+
 export default sendEmail;

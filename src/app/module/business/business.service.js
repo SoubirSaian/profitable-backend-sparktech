@@ -131,5 +131,13 @@ export const advancedSearchService = async (payload) => {
     return searchedBusiness;
 }
 
+// get business valuation service
+export const getBusinessValuationService = async (payload) => {
+    //destructure all data from payload
+    const { ownerName,BusinessName,email, countryCode, mobile, region, country,location, annualTurnover, currency, yearOfEstablishment, annualExpenses,purpose, annualProfit,valueOfAsset,valueOfStock,plReportPdf,equipmentListPdf,businessProfilePdf,businessImagesPdf,message } = payload;
+    
+    //then send all the data to owner through node mailer
+}
+
 
 // https://chatgpt.com/?utm_source=google&utm_medium=paidsearch_brand&utm_campaign=DEPT_SEM_Google_Brand_Acquisition_APAC_Bangladesh_Consumer_CPA_BAU_Mix_Bengali&utm_term=chatgpt&gad_source=1&gad_campaignid=22545504846&gbraid=0AAAAA-IW-UWe4CEZpysejQfJXl9BmOax1&gclid=EAIaIQobChMI9Z_Lic6sjgMVFySDAx0LwAfFEAAYASAAEgJDJPD_BwE

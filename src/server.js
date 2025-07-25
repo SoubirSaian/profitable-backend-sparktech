@@ -1,14 +1,14 @@
 import app from "./app.js";
 import config from "./config/index.js";
 import { errorLogger, logger } from "./utils/logger.js";
-
+import mongoDBConnection from "./DB/dbConnection.js";
 
 let port = config.port ;
 
 async function main(){
     try {
         //db connection
-
+        mongoDBConnection();
 
         //server hitting in particular port
         app.listen(port,()=>{
@@ -36,3 +36,6 @@ async function main(){
 }
 
 main();
+
+//mongodb local connection url
+// mongodb://localhost:27017

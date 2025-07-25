@@ -65,6 +65,16 @@ const userSchema = new mongoose.Schema({
     isSubscribed:{
         type: Boolean,
         default: false
+    },
+    subscriptionPlan:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SubscriptionPlanModel"
+    },
+    subscriptionStartDate:{
+        type: Date
+    },
+    subscriptionEndDate:{
+        type: Date
     }
 },{
     timestamps: true

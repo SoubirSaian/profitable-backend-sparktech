@@ -31,6 +31,10 @@ const businessSchema = new mongoose.Schema({
     },
     description: {
         type: String
+    },
+    isApproved: {
+        type: Boolean,
+        default: false
     }
 },{timestamps: true});
 
