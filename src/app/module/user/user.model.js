@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
     },
     role:{
         type: String,
-        enum: ["Buyer","Seller","Investor","Broker","Asset Seller","Francise Seller","Business Idea Lister"]
+        enum: ["Admin","Buyer","Seller","Investor","Broker","Asset Seller","Francise Seller","Business Idea Lister"]
     },
     isSubscribed:{
         type: Boolean,
