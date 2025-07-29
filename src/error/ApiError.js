@@ -9,3 +9,10 @@ class ApiError extends Error {
 }
 
 export default ApiError;
+
+/*
+  export function ApiError(statusCode,errorMsg){
+
+    return res.status(statusCode).json({error: errorMsg});
+  }
+*/
