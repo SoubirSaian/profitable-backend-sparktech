@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { getAllInterestedUsersService, makeAnUserInterestedService } from "./interested.service.js";
+import { getAllInterestedBusinessByUserService, getAllInterestedUsersService, makeAnUserInterestedService } from "./interested.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -9,9 +9,9 @@ export const makeAnUserInterested = catchAsync(async (req,res) => {
     const newInterestedUser = await makeAnUserInterestedService(req.body);
 
     sendResponse(res,{
-        statusCode: 200,
+        statusCode: 201,
         success: true,
-        message: "listed user as interested",
+        message: "listed a user as interested to a business",
         data: newInterestedUser
     });
 });
@@ -19,12 +19,25 @@ export const makeAnUserInterested = catchAsync(async (req,res) => {
 
 //get all interested user filter by a single Business
 export const getInterestedUsersByBusiness = catchAsync(async (req,res) => {
-    const allInterestedUsers = await getAllInterestedUsersService(req.body);
+    const allInterestedUsers = await getAllInterestedUsersService(req.query);
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
         message: "got all interested user",
         data: allInterestedUsers
+    });
+});
+
+
+//get all interested business filter by user
+export const getInterestedBusinessByUser = catchAsync(async (req,res) => {
+    const allInterestedBusiness = await getAllInterestedBusinessByUserService(req.query);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "got all interested business",
+        data: allInterestedBusiness
     });
 });

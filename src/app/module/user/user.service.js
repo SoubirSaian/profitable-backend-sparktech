@@ -1,18 +1,31 @@
+import mongoose from "mongoose";
+import ApiError from "../../../error/ApiError.js";
+import UserModel from "./user.model.js";
 
 
 
 
 //user profile update service
-export const userProfileUpdateService = async (payload) => {
-    const {image, name, email,number, profession, location, description} = payload;
+export const userProfileUpdateService = async (req) => {
+    const userId = req.user.userId;
+
+    let image;
+    
+    if(req.file){
+         image = req.file.filename;
+    }
+
+    const {name,email, mobile, profession, location, description} = req.body;
 
     //need user email id to find out user in db
+    const user = await UserModel.findByIdAndUpdate(userId,{
+        image,name,email, mobile, profession, location, description
+    }).select('name email role location');
 
-    //then findout user by email and update all the necessary fields
-    //const user = await UserModel.findOne({email});
-
-    //if(image)  user.image = image;
-    //if(description) user.description = description;
-    // await user.save();
+    if(!user){
+        throw new ApiError(404, "User not found and failed to update profile");
+    }
+    
+    return user;
 
 }

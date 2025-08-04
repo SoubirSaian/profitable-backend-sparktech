@@ -1,19 +1,21 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { createNewBusiness, getAllBusiness, updateABusiness } from "./business.controller.js";
+import { createNewBusiness, getAllBusiness, getASingleBusiness, updateABusiness } from "./business.controller.js";
+import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 
 
 const businessRouter = express.Router();
 
 //upload business image to local upload folder
-const uploadFolder = "../../../../upload/business-image"
+// const uploadFolder = "../../../../upload/business-image";
 
 //define the storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadFolder);
+    cb(null, "uploads/business-image");
   },
+
   filename: (req, file, cb) => {
     //extract the file extension from filename
     const fileExtension = path.extname(file.originalname);
@@ -45,9 +47,10 @@ var upload = multer({
   },
 });
 
-businessRouter.post("/create", upload.single("image"), createNewBusiness);
-businessRouter.post("/update", updateABusiness);
-businessRouter.get("/allBusiness", getAllBusiness);
+businessRouter.post("/create-business", authorizeUser , upload.single("business-image"), createNewBusiness);
+businessRouter.patch("/update-business/:businessId", updateABusiness);
+businessRouter.get("/all-business", getAllBusiness);
+businessRouter.get("/get-one-business", getASingleBusiness);
 businessRouter.post("/advanced-search", getAllBusiness);
 //business valuation route
 businessRouter.post("/business-valuation", getAllBusiness);

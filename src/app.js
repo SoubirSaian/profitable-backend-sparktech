@@ -5,7 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import globalErrorHandler from "./app/middleware/globalErrorHandler.js";
 import NotFoundHandler from "./error/NotFoundHandler.js";
-import authRouter from "./app/module/auth/auth.route.js";
+// import authRouter from "./app/module/auth/auth.route.js";
 import allRouter from "./app/routes/routes.js";
 
 

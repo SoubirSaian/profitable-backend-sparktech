@@ -1,7 +1,7 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
 // import UserModel from "../user/user.model.js";
-import {  forgetPasswordOtpVerifyService, forgetPasswordService, resetPasswordService, selectUsersRoleService, userLoginService, userRegistrationProcess, verifyEmailSendOtpService, verifyEmailVerifyOtpService } from "./auth.service.js";
+import {  forgetPasswordOtpVerifyService, forgetPasswordService, resetPasswordService, userLoginService, userRegistrationProcess, verifyEmailSendOtpService, verifyEmailVerifyOtpService } from "./auth.service.js";
 
 
 
@@ -12,65 +12,16 @@ export const registerUser = catchAsync(async (req,res) => {
     console.log(result);
     
 
-    const isSuccess = (result.message === "Account created successfully. Please check your email" );
+    const isSuccess = (result.message === "Account created successfully. Please login" ? true : false);
 
     sendResponse(res, {
-        statusCode: isSuccess ? 200 : 400,
+        statusCode: isSuccess ? 201 : 400,
         success: isSuccess,
-        message: result.message || "Something went wrong",
+        message: result.message || "Something went wrong to register user",
         data: result
     });
 
-    // const {name,email,password,confirmPassword,mobile,country} = req.body;
-    // try {
-    //     //first check all fields are available
-    //     if(!name || !email || !password || !confirmPassword || !mobile || !country ){
-    //         return res.status(400).json({
-    //             success: false,
-    //             message: "all the fields must be filled"
-    //         });
-    //     }
-
-    //     //then check both password matched or not
-    //     if(password !== confirmPassword){
-    //         return res.json({
-    //             success: false,
-    //             message: "both password hav to become equal"
-    //         });
-    //     }
-
-    //     //then check if user already exists or not
-    //     const isExist = await UserModel.findOne({email});
-    //     if(isExist){
-    //         return res.json({
-    //             success: false,
-    //             message: "user already exists. please login"
-    //         });
-    //     }
-
-    //     //hash password
-
-    //     //if there is no issue with meta data then
-    //     //a new user will be created
-    //     const newUser = new UserModel({
-    //         name,email,password,country,mobile
-    //     });
-
-    //     await newUser.save();
-
-    //     // 
-    //     sendResponse(res,{
-    //         success: true,
-    //     });
-        
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(500).json({
-    //         success: false,
-    //         message: "register user api failed",
-    //         error
-    //     });
-    // }
+    
 });
 
 
@@ -98,13 +49,14 @@ export const loginUser = catchAsync(async (req, res) => {
 
 //api ending point to verify email
 export const verifyEmailSendOtp = catchAsync(async (req, res) => {
-    await verifyEmailSendOtpService(req.body);
+    const response = await verifyEmailSendOtpService(req.body);
 
     //send response
     sendResponse(res,{
         statusCode: 200,
         success: true,
-        message: "Check your email"
+        message: "Check your email",
+        data: response
     });
 });
 
@@ -115,7 +67,7 @@ export const verifyEmailVerifyOtp = catchAsync( async (req,res) => {
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Code verified successfully",
+        message: "Email verified successfully",
         data: result
     });
 });
@@ -138,7 +90,7 @@ export const forgetPasswordVerifyOtp = catchAsync( async (req,res) => {
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Code verified successfully",
+        message: "forget password otp verified successfully",
         data: result
     });
 });
@@ -155,14 +107,14 @@ export const resetPassword = catchAsync( async (req,res) => {
 });
 
 //api ending point to select role
-export const selectUsersRole = catchAsync(async (req,res) => {
+// export const selectUsersRole = catchAsync(async (req,res) => {
 
-    await selectUsersRoleService(req.body);
+//     await selectUsersRoleService(req.body);
 
-    sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: " User role added successfully"
-    });
-});
+//     sendResponse(res, {
+//         statusCode: 200,
+//         success: true,
+//         message: " User role added successfully"
+//     });
+// });
 

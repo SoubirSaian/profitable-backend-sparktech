@@ -4,11 +4,11 @@ const adminNotificationSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      required: [true,"Notification title is required to create a new notification"],
     },
     message: {
       type: String,
-      required: true,
+      required: [true,"Notification message is required to create a new notification"],
     },
     isRead: {
       type: Boolean,

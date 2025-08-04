@@ -7,4 +7,8 @@ const hashPassword = async (newPassword) => {
 
 };
 
+export const comapreUserPassword = async (userPassword, encryptedPassword) => {
+  return await bcrypt.compare(userPassword,encryptedPassword);
+}
+
 export default hashPassword;

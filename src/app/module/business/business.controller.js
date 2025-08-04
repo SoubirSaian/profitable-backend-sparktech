@@ -1,15 +1,16 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import { createNewBusinessService, getAllBusinessService, getASingleBusinessByIdService, updateABusinessService, advancedSearchService, getBusinessValuationService } from "./business.service.js";
+import sendResponse from "../../../utils/sendResponse.js";
 
 
 //api ending point to create a new business
 export const createNewBusiness = catchAsync(async (req,res) => {
-    const newBusiness = await createNewBusinessService(req.body);
+    const newBusiness = await createNewBusinessService(req);
 
 
     sendResponse(res, {
-        statusCode: 200,
-        success: false,
+        statusCode: 201,
+        success: true,
         message: "new business created successfully",
         data: newBusiness
     });
@@ -18,12 +19,12 @@ export const createNewBusiness = catchAsync(async (req,res) => {
 //api ending point to update a business
 export const updateABusiness = catchAsync(async (req,res) => {
 
-     await updateABusinessService(req.body);
+     await updateABusinessService(req);
 
     sendResponse(res, {
-        statusCode: 200,
-        success: false,
-        message: "new business updated successfully",
+        statusCode: 204,
+        success: true,
+        message: "business updated successfully",
        
     });
 });
@@ -42,11 +43,12 @@ export const getAllBusiness = catchAsync(async (req,res) => {
 
 //api ending point to get a single business
 export const getASingleBusiness = catchAsync(async (req,res) => {
-    const business = await getASingleBusinessByIdService(req.params);
+    const business = await getASingleBusinessByIdService(req.query);
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
+        message: "Successfully get a business by id",
         data : business
     });
 });

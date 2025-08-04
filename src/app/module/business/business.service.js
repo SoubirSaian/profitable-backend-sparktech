@@ -4,17 +4,23 @@ import BusinessModel from "./business.model.js";
 
 
 //create new business service
-export const createNewBusinessService = async (payload) => {
-    const {image, title, category, country, location, askingPrice, ownerShipType, businessType, industryName, description} = payload;
+export const createNewBusinessService = async (req) => {
+    const userId = req.user.userId;
+    const image = req.file.filename;
+    if(!image){
+        throw new ApiError(400, "Image is required to create new business");
+    }
+
+    const { title, category, country, location, askingPrice, ownershipType, businessType, industryName, description} = req.body;
 
     //check if all the fields are available
-    validateFields(payload,[
-        image, title, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+    validateFields(req.body,[
+         "title", "category", "country", "location", "askingPrice", "ownershipType", "businessType"
     ]);
 
     //create a new business
     const newBusiness = await BusinessModel.create({
-        image, title, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+        user: userId,image, title, category, country, location, askingPrice, ownershipType, businessType, industryName, description
     });
 
     //check if business is created or not
@@ -27,28 +33,27 @@ export const createNewBusinessService = async (payload) => {
 }
 
 //update a business service
-export const updateABusinessService = async (payload) => {
+export const updateABusinessService = async (req) => {
+    //if image comes then have to extract image name from req.file.filename
+    const businessId = req.params.businessId;
+    // console.log(businessId);
+    
+    if(!businessId){
+        throw new ApiError(400, "Business id is required to update a business");
+    }
     //destructure property
-    const { category, country, location, askingPrice, ownerShipType, businessType, industryName, description} = payload;
+    const { category, country, location, askingPrice, ownershipType, businessType, industryName, description} = req.body;
+
+    //no need to validate update service payload . because during updation all fields are not necessery
 
     //findout which business instance have to update
-    const business = await BusinessModel.findById(payload.businessId);
-    if(!business){
+    const updatedBusiness = await BusinessModel.findByIdAndUpdate(businessId,{
+        category, country, location, askingPrice, ownershipType, businessType, industryName, description
+    },{new: true});
+
+    if(!updatedBusiness){
         throw new ApiError(500, "Failed to update a business");
     }
-
-    //now if a field is available then change that field
-    if(category) business.category = category;
-    if(country) business.country = country;
-    if(location) business.location = location;
-    if(askingPrice) business.askingPrice = askingPrice;
-    if(ownerShipType) business.ownerShipType = ownerShipType;
-    if(businessType) business.businessType = businessType;
-    if(industryName) business.industryName = industryName;
-    if(description) business.description = description;
-
-    //save the changes
-    await business.save();
 
 }
 
@@ -66,14 +71,17 @@ export const getAllBusinessService = async () => {
 }
 
 //get a single business by id
-export const getASingleBusinessByIdService = async (payload) => {
+export const getASingleBusinessByIdService = async (query) => {
 
-    const {id} = payload;
-    if(!id){
+    const {businessId} = query;
+    // console.log(businessId);
+    
+    if(!businessId){
         throw new ApiError(400,"business id is required to perform search");
     }
 
-    const business = await BusinessModel.findById(id);
+    const business = await BusinessModel.findById(businessId);
+
     if(!business){
         throw new ApiError(500, "No business details found");
     }

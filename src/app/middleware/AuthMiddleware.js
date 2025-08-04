@@ -4,7 +4,7 @@ import ApiError from "../../error/ApiError.js";
 import { verifyToken } from "../../utils/jwtHelpers.js";
 
 
-export function authorizeUserToken(req, res, next) {
+export function authorizeUser(req, res, next) {
 
     try {
 
@@ -12,7 +12,7 @@ export function authorizeUserToken(req, res, next) {
     
       if (!authHeader) {
         // return res.status(401).json({ message: 'Authorization header missing' });
-        throw new ApiError( 401, "You are not authorized for this role");
+        throw new ApiError( 401, "You are not authorized to perform this action");
       }
     
       // Expecting format: "Bearer <token>"
@@ -24,6 +24,8 @@ export function authorizeUserToken(req, res, next) {
       }
 
       const verifyUser = verifyToken(token, config.jwt.secret);
+      console.log(verifyUser);
+      
 
       req.user = verifyUser;
 

@@ -20,7 +20,20 @@ export const sendEmailVerifyEmail = async (email, data) => {
     });
   } catch (error) {
     console.log(error);
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, "Email was not sent");
+    throw new ApiError(500, "Email was not sent");
+  }
+};
+
+export const sendResetPasswordEmail = async (email, data) => {
+  try {
+    await sendEmail({
+      email,
+      subject: "Password Reset Code",
+      html: resetPassEmailTemp(data),
+    });
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(500, "Email was not sent");
   }
 };
 
@@ -50,18 +63,7 @@ export const sendOtpResendEmail = async (email, data) => {
   }
 };
 
-export const sendResetPasswordEmail = async (email, data) => {
-  try {
-    await sendEmail({
-      email,
-      subject: "Password Reset Code",
-      html: resetPassEmailTemp(data),
-    });
-  } catch (error) {
-    console.log(error);
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, "Email was not sent");
-  }
-};
+
 
 export const sendAddAdminEmailTemp = async (email, data) => {
   try {

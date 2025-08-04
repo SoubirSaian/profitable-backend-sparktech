@@ -69,16 +69,16 @@ const verifyEmailTemp = (data) => `
         <div class="logo">
           <img src="${process.env.EMAIL_TEMP_IMAGE}" alt="Logo" class="logo-img" />
         </div>
-        <h1>Welcome to BetWise Picks</h1>
+        <h1>Welcome to Profitable Business</h1>
         <p>Hello, ${data.name}</p>
-        <p>Thank you for registering with BetWise Picks. To activate your account, please use the following activation code:</p>
+        <p>Thank you for registering with Profitable Business. To activate your account, please use the following activation code:</p>
         <div class="code">${data.code}</div>
         <p>Please enter this code on the activation page within the next <strong>${data.codeExpireTime} minutes</strong>.</p>
-        <p>If you have any questions, please contact us at <a href="mailto:thakursaad613@gmail.com">thakursaad613@gmail.com</a>.</p>
-        <p>Thank you,<br>The BetWise Picks Team</p>
+        <p>If you have any questions, please contact us at <a href="soubir.sparktech19820@gmail.com">soubir.sparktech19820@gmail.com</a>.</p>
+        <p>Thank you,<br>Profitable business Team</p>
       </div>
       <div class="footer">
-        <p>&copy; BetWise Picks - All Rights Reserved.</p>
+        <p> Profitabe Business - All Rights Reserved.</p>
         <p>
           <a href="https://yourwebsite.com/privacy">Privacy Policy</a> |
           <a href="https://yourwebsite.com/contact">Contact Support</a>

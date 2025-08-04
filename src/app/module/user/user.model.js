@@ -5,7 +5,7 @@ import validator from "validator";
 const userSchema = new mongoose.Schema({
     name:{
         type: String,
-        required: true
+        required: [true,"User name is required"]
     },
     email:{
         type: String,
@@ -22,19 +22,23 @@ const userSchema = new mongoose.Schema({
     },
     confirmPassword:{
         type: String,
-        required: [true,"confirmPassword is required"]
+        
     },
     image: {
         type: String,
+        default: null
     },
     profession:{
-        type: String
+        type: String,
+        default: null
     },
     location: {
-        type: String
+        type: String,
+        default: null
     },
     description: {
-        type: String
+        type: String,
+        default: null
     },
     mobile:{
         type: Number,
@@ -53,28 +57,34 @@ const userSchema = new mongoose.Schema({
         default: false
     },
     verificationCode: {
-        type: String
+        type: String,
+        default: null
     },
     verificationCodeExpire: {
-        type: Date
+        type: Date,
+        default:null
     },
     role:{
         type: String,
+        required: [true, "User's role is required to complete register"],
         enum: ["Admin","Buyer","Seller","Investor","Broker","Asset Seller","Francise Seller","Business Idea Lister"]
     },
     isSubscribed:{
         type: Boolean,
-        default: false
+        default: false,
     },
     subscriptionPlan:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SubscriptionPlanModel"
+        ref: "SubscriptionPlanModel",
+        default: null
     },
     subscriptionStartDate:{
-        type: Date
+        type: Date,
+        default: null
     },
     subscriptionEndDate:{
-        type: Date
+        type: Date,
+        default: null
     }
 },{
     timestamps: true

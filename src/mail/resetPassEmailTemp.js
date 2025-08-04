@@ -76,20 +76,20 @@ const resetPassEmailTemp = (data) => `
         <p>
           We have received a request to reset your password. Please use the code below to proceed with resetting your password:
         </p>
-        <div class="code">${data.verificationCode}</div>
+        <div class="code">${data.code}</div>
         <p>
           This code will be valid for the next <strong>${
-            data.verificationCodeExpire
+            data.codeExpireTime
           } minutes</strong> and can only be used once.
           If you attempt to reset your password again, you will need a new code.
         </p>
         <p>
           If you did not request a password reset, please disregard this email or contact support.
         </p>
-        <p>Thank you,<br>The BetWise Picks Team</p>
+        <p>Thank you,<br>Profitable Business</p>
       </div>
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} BetWise Picks - All Rights Reserved.</p>
+        <p>&copy; ${new Date().getFullYear()} Profitable Business - All Rights Reserved.</p>
         <p>
           <a href="https://yourwebsite.com/privacy">Privacy Policy</a> |
           <a href="https://yourwebsite.com/contact">Contact Support</a>

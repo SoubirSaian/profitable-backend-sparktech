@@ -2,6 +2,11 @@ import express from "express";
 import authRouter from "../module/auth/auth.route.js";
 import subscriptionRouter from "../module/subscriptionPlan/subscription.route.js";
 import paymentRouter from "../module/payment/payment.route.js";
+import userRouter from "../module/user/user.route.js";
+import businessRouter from "../module/business/business.route.js";
+import interestedRouter from "../module/interested/interested.route.js";
+import subscriberRouter from "../module/subscriber/subscriber.route.js";
+import scheduleRouter from "../module/schedule/schedule.route.js";
 
 
 const allRouter = express.Router();
@@ -19,6 +24,23 @@ const moduleRoutes = [
         path: "/payment",
         router: paymentRouter
     },
+    {
+        path: "/user",
+        router: userRouter
+    },
+    {
+        path: "/business",
+        router: businessRouter
+    },
+    {
+        path: "/interested",
+        router: interestedRouter
+    },
+    {
+        path: "/subscriber",
+        router: subscriberRouter
+    },
+    
     
 
 ];

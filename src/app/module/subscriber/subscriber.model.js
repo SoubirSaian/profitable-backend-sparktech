@@ -7,6 +7,7 @@ const subscriberSchema = new mongoose.Schema({
     }
 },{ timestamps: true });
 
+
 const SubscriberModel = mongoose.models.SubscriberList || mongoose.model("SubscriberList",subscriberSchema);
 
 export default SubscriberModel;

@@ -6,33 +6,37 @@ const interestedSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Business'
     },
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
     name :{
         type: String,
-        required: true
+       
     },
     mobile :{
         type: String,
-        required: true
+        // required: true
     },
     sector :{
         type: String,
-        required: true
+        // required: true
     },
     activity :{
         type: String,
-        required: true
+        // required: true
     },
     email :{
         type: String,
-        required: true
+        // required: true
     },
     serviceZone :{
         type: String,
-        required: true
+        // required: true
     },
     message :{
         type: String,
-        required: true
+        // required: true
     },
 
 },{timestamps: true});

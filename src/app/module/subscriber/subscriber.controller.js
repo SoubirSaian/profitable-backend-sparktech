@@ -34,7 +34,7 @@ export const retrieveSubscriberList = catchAsync(
 
         const subscriberList = await SubscriberModel.find({});
         if(!subscriberList){
-            throw new ApiError(404,"Failed to get subscriber list");
+            throw new ApiError(500,"Failed to get subscriber list");
         }
 
         sendResponse(res,{
