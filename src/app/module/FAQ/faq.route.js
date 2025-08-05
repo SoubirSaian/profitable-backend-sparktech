@@ -5,8 +5,8 @@ import { createNewFaq, deleteFaq, getAllFaqbyUserRole, updateFaq } from "./faq.c
 
 const faqRouter = express.Router();
 
-faqRouter.post("create", createNewFaq);
-faqRouter.get("/frequently-asked-question", getAllFaqbyUserRole);
+faqRouter.post("/create-faq", createNewFaq);
+faqRouter.get("/get-all-faq", getAllFaqbyUserRole);
 faqRouter.patch("/update-faq", updateFaq);
 faqRouter.delete("/delete-faq", deleteFaq);
 

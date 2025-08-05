@@ -4,8 +4,8 @@ import { createNewCoupon, deleteCoupon, getAllCoupon, updateCoupon } from "./cou
 
 const couponRouter = express.Router();
 
-couponRouter.post("/create", createNewCoupon);
-couponRouter.get("/all-coupon", getAllCoupon);
+couponRouter.post("/create-coupon", createNewCoupon);
+couponRouter.get("/get-all-coupon", getAllCoupon);
 couponRouter.put("/update-coupon", updateCoupon);
 couponRouter.delete("/delete-coupon", deleteCoupon);
 

@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, getASingleBusinessByIdService, updateABusinessService, advancedSearchService, getBusinessValuationService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService } from "./business.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -22,7 +22,7 @@ export const updateABusiness = catchAsync(async (req,res) => {
      await updateABusinessService(req);
 
     sendResponse(res, {
-        statusCode: 204,
+        statusCode: 200,
         success: true,
         message: "business updated successfully",
        
@@ -42,14 +42,41 @@ export const getAllBusiness = catchAsync(async (req,res) => {
 });
 
 //api ending point to get a single business
-export const getASingleBusiness = catchAsync(async (req,res) => {
-    const business = await getASingleBusinessByIdService(req.query);
+export const getASingleBusinessWithusers = catchAsync(async (req,res) => {
+    const response = await getASingleBusinessByIdWithUsersService(req.query);
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
         message: "Successfully get a business by id",
-        data : business
+        data : {business: response.business, interestedUsers: response.interestedUsers}
+    });
+});
+
+//api ending point to get a single business
+export const getASingleBusinessDetails = catchAsync(async (req,res) => {
+
+    const response = await singleBusinessDetailsService(req);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Successfully get a business details",
+        data : response
+    });
+    
+});
+
+//interested buyers details
+export const interestedBuyersDetails = catchAsync( async (req,res) => {
+
+    const {business,interestedUser} = await interestedBuyersDetailsService(req.query);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "retrieved interested buyers details",
+        data: {business,interestedUser}
     });
 });
 
@@ -69,7 +96,7 @@ export const advancedBusinessSearch = catchAsync(async (req,res) => {
 //api ending point to implement business valuation
 export const getBusinessValuation = catchAsync(async (req,res) => {
 
-    await getBusinessValuationService(req.body)
+    await getBusinessValuationService(req);
 
     sendResponse(res,{
         statusCode: 200,

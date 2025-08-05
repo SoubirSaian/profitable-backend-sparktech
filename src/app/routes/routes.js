@@ -7,6 +7,9 @@ import businessRouter from "../module/business/business.route.js";
 import interestedRouter from "../module/interested/interested.route.js";
 import subscriberRouter from "../module/subscriber/subscriber.route.js";
 import scheduleRouter from "../module/schedule/schedule.route.js";
+import couponRouter from "../module/coupon/coupon.route.js";
+import faqRouter from "../module/FAQ/faq.route.js";
+import formationRouter from "../module/formation/formation.router.js";
 
 
 const allRouter = express.Router();
@@ -40,6 +43,23 @@ const moduleRoutes = [
         path: "/subscriber",
         router: subscriberRouter
     },
+    {
+        path: "/coupon",
+        router: couponRouter
+    },
+    {
+        path: "/faq",
+        router: faqRouter
+    },
+    {
+        path: "/formation",
+        router: formationRouter
+    },
+    {
+        path: "/schedule",
+        router: scheduleRouter
+    },
+
     
     
 

@@ -13,7 +13,7 @@ export const createNewCoupon = catchAsync( async (req,res) => {
     sendResponse(res,{
         statusCode: 201,
         success: true,
-        message: "created new faq coupon",
+        message: "created new coupon",
         data: result
     });
 });
@@ -35,11 +35,11 @@ export const getAllCoupon = catchAsync(async (req,res) => {
 //api ending point to update a Faq
 export const updateCoupon = catchAsync( async (req,res) => {
 
-    const result = await updateCouponService(req.body);
+    const result = await updateCouponService(req);
 
     sendResponse(res,{
         statusCode: 200,
-        success: false,
+        success: true,
         message: "Coupon updation successful",
         data: result
     });
@@ -49,12 +49,12 @@ export const updateCoupon = catchAsync( async (req,res) => {
 //api ending pint to delete a faq
 export const deleteCoupon = catchAsync( async (req,res) => {
 
-    const result = await deleteCouponService(req.query);
+    await deleteCouponService(req.query);
 
     sendResponse(res,{
-        statusCode: 204,
-        success: false,
+        statusCode: 200,
+        success: true,
         message: "coupon deleted successfully",
-        data: result
+
     })
 });

@@ -25,7 +25,9 @@ export const getAllFaqbyUserRoleService = async (query) => {
     const { role } = query;
 
     //check if role field is available
-    validateFields(query,["role"]);
+    if(!role){
+        throw new ApiError(400, "user role is required to filter faq");
+    }
 
     //filter faq by user role from faq collection
     const allFaq = await FaqModel.find({role: role});
@@ -38,15 +40,19 @@ export const getAllFaqbyUserRoleService = async (query) => {
 }
 
 //update a faq service
-export const updateFaqService = async (payload) => {
+export const updateFaqService = async (req) => {
+    const  {faqId } = req.query;
+    if(!faqId){
+        throw new ApiError(400, "Faq id is required to update a faq");
+    }
 
-    const { faqId, question, answer } = payload;
+    const { question, answer } = req.body;
 
     //check if faqId is available or not
-    validateFields(payload,["faqId","question","answer"]);
+    validateFields(req.body,["question","answer"]);
 
     //update a faq
-    const updatedFaq = await FaqModel.findByIdAndUpdate({_id: faqId},{
+    const updatedFaq = await FaqModel.findByIdAndUpdate(faqId,{
         $set:{
             question: question, answer: answer
         }
@@ -66,8 +72,9 @@ export const deleteFaqService = async (query) => {
 
     //if needed convert faqId to mongoose Object id type
     //using createHexString() static method
-
-    validateFields(query,["faqId"]);
+    if(!faqId){
+        throw new ApiError(400, "Faq Id is required to delete a faq");
+    }
 
     //find faq by id and then delete
     const deletedFaq = await FaqModel.findByIdAndDelete(faqId);

@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 
+
 const couponSchema = new mongoose.Schema({
     couponCode:{
         type: String,
@@ -13,7 +14,7 @@ const couponSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    validfrom:{
+    validFrom:{
         type: Date,
         required: true
     },
@@ -27,7 +28,8 @@ const couponSchema = new mongoose.Schema({
     },
     status:{
         type: String,
-        enum: ["active","expired"]
+        enum: ["Active","Expired"],
+        default: "Active"
     },
     couponUsesCount:{
         type: Number,

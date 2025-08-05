@@ -8,7 +8,7 @@ import { createNewFormatService, deleteFormatservice, getAllFormationService, up
 //api ending point to create a new format
 export const createNewFormat = catchAsync( async (req,res) => {
 
-    const result = await createNewFormatService(req.body);
+    const result = await createNewFormatService(req);
 
     sendResponse(res,{
         statusCode: 201,
@@ -35,7 +35,7 @@ export const getAllFormation = catchAsync( async (req,res) => {
 //api ending point 
 export const updateFormation = catchAsync( async (req,res) => {
 
-    const response = await updateFormationService(req.body);
+    const response = await updateFormationService(req);
 
     sendResponse(res,{
         statusCode: 200,
@@ -48,7 +48,7 @@ export const updateFormation = catchAsync( async (req,res) => {
 //api ending point to delete formation
 export const deleteFormation = catchAsync( async (req,res) => {
 
-    const response = await deleteFormatservice(req.params);
+    const response = await deleteFormatservice(req.query);
 
     sendResponse(res, {
         statusCode: 200,

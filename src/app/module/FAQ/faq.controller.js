@@ -34,11 +34,11 @@ export const getAllFaqbyUserRole = catchAsync(async (req,res) => {
 //api ending point to update a Faq
 export const updateFaq = catchAsync( async (req,res) => {
 
-    const result = await updateFaqService(req.body);
+    const result = await updateFaqService(req);
 
     sendResponse(res,{
         statusCode: 200,
-        success: false,
+        success: true,
         message: "Faq updation successful",
         data: result
     });
@@ -51,8 +51,8 @@ export const deleteFaq = catchAsync( async (req,res) => {
     const result = await deleteFaqService(req.query);
 
     sendResponse(res,{
-        statusCode: 204,
-        success: false,
+        statusCode: 200,
+        success: true,
         message: "Faq deleted successfully",
         data: result
     })
