@@ -2,6 +2,7 @@ import mongoose, { Mongoose } from "mongoose";
 
 
 const businessSchema = new mongoose.Schema({
+
     user:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -14,6 +15,11 @@ const businessSchema = new mongoose.Schema({
     title: {
         type: String,
         required: [true, "Business title is required"]
+    },
+    businessRole:{
+        type: String,
+        required: [true, "business role is required"],
+        enum:["Sellers-business","Franchise","Asset-seller","Business-Idea-lister","Broker-business"]
     },
     category: {
         type: String,
@@ -31,7 +37,7 @@ const businessSchema = new mongoose.Schema({
         type: String,
         required: [true, "Business asking price is required"]
     },
-    ownershipType: {
+    ownerShipType: {
         type: String,
         required: [true, "Business ownership type is required"]
     },
@@ -48,6 +54,14 @@ const businessSchema = new mongoose.Schema({
     isApproved: {
         type: Boolean,
         default: false
+    },
+    isSold:{
+        type: Boolean,
+        default: false
+    },
+    views: {
+        type: Number,
+        default: 0,
     }
 },{timestamps: true});
 

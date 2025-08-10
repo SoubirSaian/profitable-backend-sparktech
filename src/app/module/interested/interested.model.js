@@ -4,15 +4,25 @@ import mongoose from "mongoose";
 const interestedSchema = new mongoose.Schema({
     businessId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Business'
+        ref: 'Business',
+        required: [true, "Business Id is required to create new Interested"]
     },
     userId:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        required: [true, "User Id is required to create new Interested"]
+    },
+     businessRole:{
+        type: String,
+        required: [true, "business role is required"],
+        enum:["Sellers-business","Franchise","Asset-seller","Business-Idea-lister","Broker-business"]
     },
     name :{
         type: String,
        
+    },
+    countryCode:{
+        type: String,
     },
     mobile :{
         type: String,

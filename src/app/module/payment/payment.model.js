@@ -5,7 +5,7 @@ const paymentSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "UserModel",
+      ref: "User",
     },
     amount: {
       type: Number,
@@ -23,7 +23,7 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: "unpaid",
       enum: {
-        values: ["unpaid", "paid"],
+        values: ["Unpaid", "Paid"],
         message: `Invalid payment status. Allowed values: paid or unpaid`,
       },
     },
@@ -42,7 +42,7 @@ const paymentSchema = new mongoose.Schema(
     },
     subscriptionPlan: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SubscriptionPlanModel",
+      ref: "SubscriptionPlan",
     },
   }, { timestamps: true,}
 );

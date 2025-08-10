@@ -10,7 +10,6 @@ const userSchema = new mongoose.Schema({
     email:{
         type: String,
         required: [true, "Email is required"],
-        unique: true,
         validate:{
             validator: (value) => validator.isEmail(value),
             message: "Please provide a valid email address"
@@ -75,7 +74,7 @@ const userSchema = new mongoose.Schema({
     },
     subscriptionPlan:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "SubscriptionPlanModel",
+        ref: "SubscriptionPlan",
         default: null
     },
     subscriptionStartDate:{

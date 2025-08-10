@@ -66,9 +66,6 @@ const verifyEmailTemp = (data) => `
     </head>
     <body>
       <div class="container">
-        <div class="logo">
-          <img src="${process.env.EMAIL_TEMP_IMAGE}" alt="Logo" class="logo-img" />
-        </div>
         <h1>Welcome to Profitable Business</h1>
         <p>Hello, ${data.name}</p>
         <p>Thank you for registering with Profitable Business. To activate your account, please use the following activation code:</p>

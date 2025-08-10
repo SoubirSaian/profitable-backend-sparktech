@@ -24,7 +24,7 @@ export function authorizeUser(req, res, next) {
       }
 
       const verifyUser = verifyToken(token, config.jwt.secret);
-      console.log(verifyUser);
+      // console.log(verifyUser);
       
 
       req.user = verifyUser;

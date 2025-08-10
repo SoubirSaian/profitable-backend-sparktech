@@ -6,10 +6,10 @@ import SubscriptionPlanModel from "./subscription.model.js";
 
 
 //post a new subscription plan service
-export const postNewSubscriptionPlanService = async (userData,payload) => {
+export const postNewSubscriptionPlanService = async (payload) => {
     const {subscriptionPlanType, subscriptionPlanRole,features, price, duration  } = payload;
 
-    validateFields(payload,[subscriptionPlanType,subscriptionPlanRole,features,price,duration]);
+    validateFields(payload,["subscriptionPlanType","subscriptionPlanRole","features","price","duration"]);
 
     //create a new subscription plan
     const newSubscriptionPlan = await SubscriptionPlanModel.create({
@@ -26,16 +26,16 @@ export const postNewSubscriptionPlanService = async (userData,payload) => {
 }
 
 //get user role based subscription plan service
-export const getAllSubscriptionPlanByUserRoleService = async(userDetail) => {
-    const userRole = userDetail.role;
+export const getAllSubscriptionPlanByUserRoleService = async(query) => {
+    const {role} = query;
 
     //check if role is available or not
-    if(!userRole){
+    if(!role){
         throw new ApiError(400, "User role is needed to get user's subscription option");   
      }
 
     //filter subscriptions from subscription collection
-    const allSubscription = await SubscriptionPlanModel.find({subscriptionPlanRole: userRole});
+    const allSubscription = await SubscriptionPlanModel.find({subscriptionPlanRole: role});
 
     if(!allSubscription){
         throw new ApiError(500, "failed to get subscription option");

@@ -1,10 +1,10 @@
-const express = require("express");
-const { webhookManager } = require("./payment.controller.js");
+import express from "express";
+import { webhookManager } from "./payment.controller.js";
 
-const webhokRouter = express.Router();
+const webhookRouter = express.Router();
 
-webhokRouter.post( "/", express.raw({ type: "application/json" }),
+webhookRouter.post( "/", express.raw({ type: "application/json" }),
   webhookManager
 );
 
-export default webhokRouter;
+export default webhookRouter;

@@ -1,8 +1,9 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { createNewBusiness, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, updateABusiness } from "./business.controller.js";
+import { advancedBusinessSearch, createNewBusiness, filterBusinessByBusinessRole, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, updateABusiness } from "./business.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
+
 
 
 const businessRouter = express.Router();
@@ -78,9 +79,15 @@ businessRouter.get("/get-single-business-with-users", getASingleBusinessWithuser
 
 businessRouter.get("/interested-buyers-details", interestedBuyersDetails);
 
-businessRouter.post("/advanced-search", getAllBusiness);
+businessRouter.get("/advanced-search", advancedBusinessSearch);
 //business valuation route
 businessRouter.post("/business-valuation",uploadPdf.array('pdfs', 4), getBusinessValuation);
+
+//filter business by various fields
+businessRouter.get("/filter-business", filterBusinessByVariousFields);
+
+//filter business by different business role
+businessRouter.get("/filter-business-by-business-role", filterBusinessByBusinessRole);
 
 
 export default businessRouter;

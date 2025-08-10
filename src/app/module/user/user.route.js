@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path"
-import { updateUserProfile } from "./user.controller.js";
+import { getUserDetails, updateUserProfile } from "./user.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 
 const userRouter = express.Router();
@@ -48,6 +48,7 @@ var upload = multer({
 //upload.single("image")
 
 //here have to use userAuthentication middleware
+userRouter.get("/user-detail",authorizeUser, getUserDetails );
 userRouter.patch("/update-profile",authorizeUser ,upload.single("profile-image"), updateUserProfile);
 
 export default userRouter;

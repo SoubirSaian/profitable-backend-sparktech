@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService } from "./business.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -83,13 +83,13 @@ export const interestedBuyersDetails = catchAsync( async (req,res) => {
 //api ending point to implement advanced search
 export const advancedBusinessSearch = catchAsync(async (req,res) => {
 
-    const searchResult = await advancedSearchService(req.body);
+    const response = await advancedSearchService(req.query);
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
         message: "Advanced search implemented successfully",
-        data: searchResult
+        data: response
     });
 });
 
@@ -104,3 +104,32 @@ export const getBusinessValuation = catchAsync(async (req,res) => {
         message: "Your information submitted to get valuation"
     });
 });
+
+//filter business by various field
+export const filterBusinessByVariousFields = catchAsync (
+    async (req,res) => {
+        const response = await filterBusinessService(req.query);
+
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "Retrieved business as per your condition",
+            data: response
+        });
+    }
+);
+
+//api ending point to filter business by business role
+export const filterBusinessByBusinessRole = catchAsync(
+    async (req,res) => {
+
+        const response = await filterBusinessByBusinessRoleService(req.query);
+        
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "retrieved business as per business role",
+            data: response
+        })
+    }
+);

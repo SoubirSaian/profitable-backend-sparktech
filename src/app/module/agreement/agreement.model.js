@@ -1,0 +1,46 @@
+import mongoose from "mongoose";
+
+
+const agreementSchema = new mongoose.Schema({
+    user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "User Id is required to create new Aggrement"]
+    },
+    role:{
+        type: String,
+        required: [true, "User role is required to create new Aggrement"]
+    },
+    name:{
+        type: String,
+        required: [true, "Name is required to create new Aggrement"]
+    },
+    email:{
+        type: String,
+        required: [true, "Email is required to create new Aggrement"]
+    },
+    phone:{
+        type: String,
+        required: [true, "Mobile Number is required to create new Aggrement"]
+    },
+    nidPassportNumber:{
+        type: String,
+        required: [true, "Passport/Nid number is required to create new Aggrement"]
+    },
+    nidPassportPdf:{
+        type: String,
+        
+    },
+    tradeLicensePdf:{
+        type: String,
+        
+    },
+    signaturePdf:{
+        type: String,
+        
+    },
+},{ timestamps: true });
+
+const Agreement = mongoose.models.Agreement || mongoose.model("Agreement", agreementSchema);
+
+export default Agreement;

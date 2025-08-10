@@ -69,15 +69,9 @@ const bookingEmailTemp = (data) =>
         <body>
           <div class="container">
 
-            <div class="logo">
-              <img src="${
-                process.env.EMAIL_TEMP_IMAGE
-              }" alt="Logo" class="logo-img" />
-            </div>
-
             <h1>Subscription Confirmation</h1>
             <p>Hello, ${data.name},</p>
-            <p>Thank you for subscribing with <strong>BetWise Picks</strong>. Here are your subscription details:</p>
+            <p>Thank you for subscribing with <strong>Profitable Business</strong>. Here are your subscription details:</p>
 
             <table>
               <tr>
@@ -103,10 +97,10 @@ const bookingEmailTemp = (data) =>
             </table>
 
             <p>We look forward to serving you. If you have any questions, feel free to contact us at <a href="mailto:thakursaad613@gmail.com">thakursaad613@gmail.com</a>.</p>
-            <p>Best regards,<br>The BetWise Picks Team</p>
+            <p>Best regards,<br>The Profitable Business Team</p>
           </div>
           <div class="footer">
-            <p>&copy; BetWise Picks - All Rights Reserved.</p>
+            <p>&copy; Profitable Business - All Rights Reserved.</p>
             <p><a href="https://yourwebsite.com/privacy">Privacy Policy</a> | <a href="https://yourwebsite.com/contact">Contact Support</a></p>
           </div>
         </body>

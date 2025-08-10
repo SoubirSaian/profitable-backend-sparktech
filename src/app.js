@@ -7,6 +7,7 @@ import globalErrorHandler from "./app/middleware/globalErrorHandler.js";
 import NotFoundHandler from "./error/NotFoundHandler.js";
 // import authRouter from "./app/module/auth/auth.route.js";
 import allRouter from "./app/routes/routes.js";
+import webhookRouter from "./app/module/payment/webhook.routes.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,10 +15,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+//to get/retrieve upload folder image
+app.use('/uploads', express.static('uploads'));
+
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.use(cors());
+//use webhook route before app.use(express.json())
+app.use("/api/v1/webhook", webhookRouter);
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());

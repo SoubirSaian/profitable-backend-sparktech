@@ -1,18 +1,20 @@
 import ApiError from "../../../error/ApiError.js";
 import validateFields from "../../../utils/validateFields.js";
+import BusinessModel from "../business/business.model.js";
 import InterestedModel from "./interested.model.js";
 
 
 
 //make an user interested to a particular service
-export const makeAnUserInterestedService = async (payload) => {
-    const {businessId,userId,name,mobile,sector,activity,email,serviceZone,message} = payload;
+export const makeAnUserInterestedService = async (req) => {
+    // const userRole = req.user.role;
+    const {businessId,userId,name,countryCode,mobile,sector,activity,email,serviceZone,message,businessRole} = req.body;
 
     //check if all the fields are available
-    validateFields(payload,["businessId","userId","name","email"]);
+    validateFields(req.body,["businessId","userId","name","email","businessRole"]);
 
     const newInterestedUser = await InterestedModel.create({
-        businessId,userId,name,mobile,sector,activity,email,serviceZone,message
+        businessId,userId,businessRole,name,countryCode,mobile,sector,activity,email,serviceZone,message
     });
 
     if(!newInterestedUser){
@@ -41,18 +43,64 @@ export const getAllInterestedUsersService = async (query) => {
 
 
 //get all interested Business filtered by user
-export const getAllInterestedBusinessByUserService = async (query) => {
-    const { userId } = query;
+export const getAllInterestedBusinessByUserService = async (req) => {
+    const { userId,role } = req.user;
 
-    if(!userId){
-        throw new ApiError(400, "userId  is required to filter interested business");
+    if(!userId || !role){
+        throw new ApiError(400, "userId and role  is required to filter interested business");
     }
 
-    const interestedBusiness = await InterestedModel.find({userId:  userId});
+    //now check user role and perform query
+    if(role === "Buyer"){
+        const interestedBusiness = await InterestedModel.find({userId: userId, businessRole: "Sellers-business" }).populate({ path: "businessId"});
+        const interestedBusinessAsset = await InterestedModel.find({userId: userId, businessRole: "Asset-seller" }).populate({ path: "businessId"});
+        const interestedFranchise = await InterestedModel.find({userId: userId, businessRole: "Franchise" }).populate({ path: "businessId"});
+        const interestedBusinessIdeas = await InterestedModel.find({userId: userId, businessRole: "Business-Idea-lister" }).populate({ path: "businessId"});
+
+        return {interestedBusiness,interestedBusinessAsset,interestedFranchise,interestedBusinessIdeas}
+        
+    }
+    else if(role === "Seller"){
+        const myBusiness = await BusinessModel.find({user: userId});
+        const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
+
+        return {myBusiness,mySoldBusiness}
+    }   
+
+    else if(role === "Broker"){
+        const myBusiness = await BusinessModel.find({user: userId});
+        const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
+
+        return {myBusiness,mySoldBusiness}
+    }   
+    else if(role === "Francise Seller"){
+        const myBusiness = await BusinessModel.find({user: userId});
+        const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
+
+        return {myBusiness,mySoldBusiness}
+    }   
+    else if(role === "Investor"){
+        const interestedBusiness = await InterestedModel.find({userId: userId, businessRole: "Sellers-business" }).populate({ path: "businessId"});
+        const interestedBusinessAsset = await InterestedModel.find({userId: userId, businessRole: "Asset-seller" }).populate({ path: "businessId"});
+        const interestedFranchise = await InterestedModel.find({userId: userId, businessRole: "Franchise" }).populate({ path: "businessId"});
+        const interestedBusinessIdeas = await InterestedModel.find({userId: userId, businessRole: "Business-Idea-lister" }).populate({ path: "businessId"});
+
+        return {interestedBusiness,interestedBusinessAsset,interestedFranchise,interestedBusinessIdeas}
+        
+    }
+    else if(role === "Business Idea Lister"){
+        const myBusiness = await BusinessModel.find({user: userId});
+        const mySoldBusiness  = await BusinessModel.find({user: userId, isSold: true});
+
+        return {myBusiness,mySoldBusiness}
+    }  
+    else if(role === "Asset Seller"){
+        const myBusiness = await BusinessModel.find({user: userId});
+        const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
+
+        return {myBusiness,mySoldBusiness}
+    }  
     
-    if(!interestedBusiness){
-        throw new ApiError(500, "failed to get all interested user");
-    }
 
-    return interestedBusiness;
+   
 }

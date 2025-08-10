@@ -4,8 +4,8 @@ import { createSubscriptionPlan, getAllSubscriptionPlanByUserRole } from "./subs
 
 const subscriptionRouter = express.Router();
 
-subscriptionRouter.post("/create", createSubscriptionPlan);
-subscriptionRouter.get("/getSubscriptionPlan", getAllSubscriptionPlanByUserRole);
+subscriptionRouter.post("/create-subscription", createSubscriptionPlan);
+subscriptionRouter.get("/get-subscription-plan", getAllSubscriptionPlanByUserRole);
 
 
 export default subscriptionRouter;

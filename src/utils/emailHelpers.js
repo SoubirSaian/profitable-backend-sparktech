@@ -82,7 +82,7 @@ export const sendSubscriptionEmail = async (email, data) => {
   try {
     await sendEmail({
       email,
-      subject: "BetWise Picks Subscription",
+      subject: "Profitable Business Subscription",
       html: bookingEmailTemp(data),
     });
   } catch (error) {

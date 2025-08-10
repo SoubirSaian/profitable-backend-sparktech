@@ -1,7 +1,20 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
-import { userProfileUpdateService } from "./user.service.js";
+import { getUserDetailsService, userProfileUpdateService } from "./user.service.js";
 
+
+//api ending point to update user
+export const getUserDetails = catchAsync( async (req,res) => {
+   
+    const response = await getUserDetailsService(req.user);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "User details got successfully",
+        data: response
+    });
+});
 
 //api ending point to update user
 export const updateUserProfile = catchAsync( async (req,res) => {

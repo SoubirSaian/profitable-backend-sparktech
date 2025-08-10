@@ -5,8 +5,8 @@ import sendResponse from "../../../utils/sendResponse.js";
 
 
 //api ending point to make an user interested
-export const makeAnUserInterested = catchAsync(async (req,res) => {
-    const newInterestedUser = await makeAnUserInterestedService(req.body);
+export const  makeAnUserInterested = catchAsync(async (req,res) => {
+    const newInterestedUser = await makeAnUserInterestedService(req);
 
     sendResponse(res,{
         statusCode: 201,
@@ -32,12 +32,12 @@ export const getInterestedUsersByBusiness = catchAsync(async (req,res) => {
 
 //get all interested business filter by user
 export const getInterestedBusinessByUser = catchAsync(async (req,res) => {
-    const allInterestedBusiness = await getAllInterestedBusinessByUserService(req.query);
+    const response = await getAllInterestedBusinessByUserService(req);
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
-        message: "got all interested business",
-        data: allInterestedBusiness
+        message: "got all business related to you",
+        data: response
     });
 });

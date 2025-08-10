@@ -5,12 +5,11 @@ const subscriptionPlanSchema = new mongoose.Schema({
     subscriptionPlanType: {
         type: String,
         required: true,
-        enum: ["free","bronze","silver","gold"]
     },
     subscriptionPlanRole:{
         type: String,
         required: true,
-        enum: ["Buyer","Seller","Broker","Invester","Francise Owner","Business Idea Lister","Business Asset Seller"]
+        enum: ["Buyer","Asset Seller","Seller","Broker","Investor","Francise Seller","Business Idea Lister"]
     },
     features: {
         type: Array,
@@ -23,7 +22,7 @@ const subscriptionPlanSchema = new mongoose.Schema({
     duration: {
         type: String,
         required: true,
-        enum: ["daily","monthly","yearly"]
+        enum: ["15 Days","1 Month","3 Month","6 Month"]
     }
 },{ timestamps: true});
 

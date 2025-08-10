@@ -5,7 +5,8 @@ import { postCheckoutService, webhookManagerService } from "./stripe.service.js"
 
 //to display payment success page
 export const successPage = catchAsync(async (req, res) => {
-  res.render("success.ejs");
+  // res.render("success.ejs");
+  res.send("payment successful");
 });
 
 //to display payment cancelation page

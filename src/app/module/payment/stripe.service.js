@@ -7,6 +7,8 @@ import ApiError from "../../../error/ApiError.js";
 import PaymentModel from "./payment.model.js";
 import UserModel from "../user/user.model.js";
 import { sendSubscriptionEmail } from "../../../utils/emailHelpers.js";
+// import config from "../../../config/index.js";
+// import { createToken } from "../../../utils/jwtHelpers.js";
 
 //add new stripe with stripe secret key
 const stripe = new Stripe(config.stripe.stripe_secret_key);
@@ -17,12 +19,18 @@ const endPointSecret = config.stripe.stripe_webhook_secret_test;
 //need to update this function
 const getEndDate = (duration) => {
   switch (duration) {
-    case EnumSubscriptionPlanDuration.DAILY:
-      return new Date(new Date().setDate(new Date().getDate() + 1)); //  first hour of next day
-    case EnumSubscriptionPlanDuration.MONTHLY:
+    case "15 Days":
+      return new Date(new Date().setDate(new Date().getDate() + 15)); //  first hour of next day
+
+    case "1 Month":
       return new Date(new Date().setMonth(new Date().getMonth() + 1)); //  first hour of next month
-    case EnumSubscriptionPlanDuration.YEARLY:
-      return new Date(new Date().setFullYear(new Date().getFullYear() + 1)); // first hour of next year
+
+    case "3 Month":
+      return new Date(new Date().setMonth(new Date().getMonth() + 3));; // first hour of next year
+
+    case "6 Month":
+      return new Date(new Date().setMonth(new Date().getMonth() + 6));; // first hour of next year
+
     default:
       throw new ApiError(400, "Invalid duration");
   }
@@ -39,7 +47,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
       {
         $set: {
           payment_intent_id: payment_intent,
-          status: "paid",
+          status: "Paid",
           subscriptionStatus: "active",
         },
       },
@@ -48,7 +56,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
     )
     .populate([
       {
-        path: "subscriptionType",
+        path: "subscriptionPlan",
         select: "subscriptionPlanType price duration",
       },
     ]);
@@ -61,7 +69,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
     const updateUserData = {
       $set: {
         isSubscribed: true,
-        subscriptionPlan: payment.subscriptionPlan,
+        subscriptionPlan: payment.subscriptionPlan._id,
         subscriptionStartDate,
         subscriptionEndDate,
       },
@@ -109,7 +117,8 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
 
 //perform stripe checkout service
 export const postCheckoutService = async (userData, payload) => {
-
+  const {userId} = userData;
+  const {subscriptionId} = payload;
   validateFields(payload, ["subscriptionId"]);
 
   // check if user is already subscribed
@@ -119,7 +128,7 @@ export const postCheckoutService = async (userData, payload) => {
   //   throw new ApiError(status.BAD_REQUEST, "User is already subscribed");
 
   const subscriptionPlan = await SubscriptionPlanModel.findById(
-    payload.subscriptionId
+    subscriptionId
   ).lean();
 
   if (!subscriptionPlan){
@@ -128,14 +137,14 @@ export const postCheckoutService = async (userData, payload) => {
   }
 
   let session = {};
-  const amountInCents = Math.ceil( Number(subscriptionPlan.price).toFixed(2) * 100 );
+  const amountInCents = Math.ceil( subscriptionPlan.price.toFixed(2) * 100 );
   const amount = amountInCents / 100;
 
   const sessionData = {
     payment_method_types: ["card"],
     mode: "payment",
-    success_url: `http://${config.base_url}:${config.port}/payment/success`,
-    cancel_url: `http://${config.base_url}:${config.port}/payment/cancel`,
+    success_url: `http://10.10.20.60:3005/payment-successfull`,
+    cancel_url: `http://10.10.20.60:3005/Error-payment`,
     line_items: [
       {
         price_data: {
@@ -164,16 +173,17 @@ export const postCheckoutService = async (userData, payload) => {
   const subscriptionEndDate = getEndDate(subscriptionPlan.duration);
 
   const paymentData = {
-    user: userData.userId,
+    user: userId,
     amount,
     checkout_session_id,
     subscriptionPlan: subscriptionPlan._id,
-    status: EnumPaymentStatus.UNPAID,
+    status: "Unpaid",
     subscriptionStartDate,
     subscriptionEndDate,
   };
 
   const payment = await PaymentModel.create(paymentData);
+  if(!payment) throw new ApiError(500," Failed to create new Payment");
 
   return url;
 };

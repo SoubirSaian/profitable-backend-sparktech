@@ -10,6 +10,11 @@ import scheduleRouter from "../module/schedule/schedule.route.js";
 import couponRouter from "../module/coupon/coupon.route.js";
 import faqRouter from "../module/FAQ/faq.route.js";
 import formationRouter from "../module/formation/formation.router.js";
+import homeRouter from "../module/home/home.route.js";
+import ndaRouter from "../module/NDA/nda.route.js";
+import agreementRouter from "../module/agreement/agreement.route.js";
+import webhookRouter from "../module/payment/webhook.routes.js";
+import categoryRouter from "../module/category/category.route.js";
 
 
 const allRouter = express.Router();
@@ -59,6 +64,23 @@ const moduleRoutes = [
         path: "/schedule",
         router: scheduleRouter
     },
+    {
+        path: "/home",
+        router: homeRouter
+    },
+    {
+        path: "/nda",
+        router: ndaRouter
+    },
+    {
+        path: "/agreement",
+        router: agreementRouter
+    },
+    {
+        path: "/category",
+        router: categoryRouter
+    },
+    
 
     
     

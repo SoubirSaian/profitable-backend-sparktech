@@ -12,7 +12,7 @@ export const registerUser = catchAsync(async (req,res) => {
     console.log(result);
     
 
-    const isSuccess = (result.message === "Account created successfully. Please login" ? true : false);
+    const isSuccess = (result.message === "Account created successfully. Verify your email" ? true : false);
 
     sendResponse(res, {
         statusCode: isSuccess ? 201 : 400,

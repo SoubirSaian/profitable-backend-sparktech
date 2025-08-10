@@ -5,10 +5,10 @@ import sendResponse from "../../../utils/sendResponse.js";
 //api ending point to create a subscription plan
 export const createSubscriptionPlan = catchAsync( async (req,res) => {
 
-    const newPlan = await postNewSubscriptionPlanService(req.user,req.body);
+    const newPlan = await postNewSubscriptionPlanService(req.body);
 
     sendResponse(res,{
-        statusCode: 200,
+        statusCode: 201,
         success: true,
         message: "Subscription plan created",
         data: newPlan
@@ -18,7 +18,7 @@ export const createSubscriptionPlan = catchAsync( async (req,res) => {
 //api ending point to get all subscription based on user role
 export const getAllSubscriptionPlanByUserRole = catchAsync( async (req,res) =>{
 
-    const allPlan = await getAllSubscriptionPlanByUserRoleService(req.user);
+    const allPlan = await getAllSubscriptionPlanByUserRoleService(req.query);
 
     sendResponse(res, {
         statusCode: 200,
