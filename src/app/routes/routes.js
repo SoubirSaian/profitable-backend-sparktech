@@ -13,8 +13,9 @@ import formationRouter from "../module/formation/formation.router.js";
 import homeRouter from "../module/home/home.route.js";
 import ndaRouter from "../module/NDA/nda.route.js";
 import agreementRouter from "../module/agreement/agreement.route.js";
-import webhookRouter from "../module/payment/webhook.routes.js";
+// import webhookRouter from "../module/payment/webhook.routes.js";
 import categoryRouter from "../module/category/category.route.js";
+import chatRouteRouter from "../module/chat/chat.routes.js";
 
 
 const allRouter = express.Router();
@@ -79,6 +80,10 @@ const moduleRoutes = [
     {
         path: "/category",
         router: categoryRouter
+    },
+    {
+        path: "/chat",
+        router: chatRouteRouter
     },
     
 

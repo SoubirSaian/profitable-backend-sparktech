@@ -2,11 +2,14 @@ import Stripe from "stripe";
 import config from "../../../config/index.js";
 import validateFields from "../../../utils/validateFields.js";
 import SubscriptionPlanModel from "../subscriptionPlan/subscription.model.js";
-import { errorLogger} from "../../../utils/logger.js";
+import { errorLogger,logger} from "../../../utils/logger.js";
 import ApiError from "../../../error/ApiError.js";
 import PaymentModel from "./payment.model.js";
 import UserModel from "../user/user.model.js";
-import { sendSubscriptionEmail } from "../../../utils/emailHelpers.js";
+import { sendSubscriptionEmail,sendSubscriptionExpiredEmail } from "../../../utils/emailHelpers.js";
+import CouponModel from "../coupon/coupon.model.js";
+import catchAsync from "../../../utils/catchAsync.js";
+import cron from "node-cron";
 // import config from "../../../config/index.js";
 // import { createToken } from "../../../utils/jwtHelpers.js";
 
@@ -48,7 +51,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
         $set: {
           payment_intent_id: payment_intent,
           status: "Paid",
-          subscriptionStatus: "active",
+          subscriptionStatus: "Active",
         },
       },
       { new: true, runValidators: true }
@@ -69,6 +72,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
     const updateUserData = {
       $set: {
         isSubscribed: true,
+        subscriptionPlanPrice: payment.subscriptionPlan.price ,
         subscriptionPlan: payment.subscriptionPlan._id,
         subscriptionStartDate,
         subscriptionEndDate,
@@ -118,7 +122,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
 //perform stripe checkout service
 export const postCheckoutService = async (userData, payload) => {
   const {userId} = userData;
-  const {subscriptionId} = payload;
+  const {subscriptionId,couponCode} = payload;
   validateFields(payload, ["subscriptionId"]);
 
   // check if user is already subscribed
@@ -132,13 +136,52 @@ export const postCheckoutService = async (userData, payload) => {
   ).lean();
 
   if (!subscriptionPlan){
-
       throw new ApiError(400 , "SubscriptionPlan not found");
   }
 
+  //check if it is a free plan or not
+  if(subscriptionPlan.price === 0){
+    return 'http://10.10.20.60:3005/payment-successfull';
+  }
+
+  //get the amount in bdt and convert it to dollar
+  var amountInCents = Math.ceil( subscriptionPlan.price.toFixed(2) * 100 );
+  var amount = amountInCents / 100;
+
+  //handle coupon
+        if (couponCode) {
+
+          // 2️⃣ Find the coupon
+          const coupon = await CouponModel.findOne({ couponCode: couponCode });
+
+          if (!coupon) {
+              throw new ApiError(404, "Coupon Not found by this Coupon Code");
+          }
+
+          // 3️⃣ Check if coupon is active
+          if (coupon.status !== "Active") {
+              throw new ApiError(400, "COupon is already Expired");
+          }
+
+          // 4️⃣ Check date validity
+          const today = new Date();
+          if (today < coupon.validFrom || today > coupon.validTo) {
+              throw new ApiError(400,  "Coupon is expired or not yet valid." );
+          }
+
+          // 5️⃣ Calculate discount
+          const discountAmount = (amountInCents * coupon.discount) / 100; // discount as percentage
+           amountInCents = amountInCents - discountAmount;
+
+          // 6️⃣ Increase usage count
+          coupon.couponUsesCount += 1;
+          await coupon.save();
+
+      }
+  //complete payment using stripe
   let session = {};
-  const amountInCents = Math.ceil( subscriptionPlan.price.toFixed(2) * 100 );
-  const amount = amountInCents / 100;
+  // const amountInCents = Math.ceil( subscriptionPlan.price.toFixed(2) * 100 );
+  // const amount = amountInCents / 100;
 
   const sessionData = {
     payment_method_types: ["card"],
@@ -218,3 +261,89 @@ export const webhookManagerService = async (req) => {
       );
   }
 };
+
+// Delete unpaid payments
+const deleteUnpaidPayments = catchAsync(async () => {
+  const paymentDeletionResult = await PaymentModel.deleteMany({
+    status: "Unpaid",
+  });
+
+  if (paymentDeletionResult.deletedCount > 0) {
+    logger.info(
+      `Deleted ${paymentDeletionResult.deletedCount} unpaid payments`
+    );
+  }
+});
+
+// Update expired subscriptions
+const updateExpiredSubscriptions = catchAsync(async () => {
+
+  const expiredSubscriptions = await PaymentModel.updateMany(
+    {
+      subscriptionStatus: "Active",
+      subscriptionEndDate: { $lt: new Date() },
+    },
+    {
+      $set: {
+        subscriptionStatus: "Expired",
+      },
+    }
+  );
+
+  if (expiredSubscriptions.modifiedCount > 0) {
+    logger.info(
+      `Updated ${expiredSubscriptions.modifiedCount} expired subscriptions`
+    );
+  }
+});
+
+// update user subscription status
+const updateUserSubscriptionStatus = catchAsync(async () => {
+
+  const subscriptionExpiredUsers = await UserModel.find({
+    isSubscribed: true,
+    subscriptionEndDate: { $lt: new Date() },
+  });
+
+  const emailOfExpiredUsers = subscriptionExpiredUsers.map(
+    (user) => user.email
+  );
+
+  // send email to each expired user
+  emailOfExpiredUsers.forEach((email) => {
+    sendSubscriptionExpiredEmail(email);
+    console.log("email sent to", email);
+  });
+
+  const updatedUser = await UserModel.updateMany(
+    {
+      isSubscribed: true,
+      subscriptionEndDate: { $lt: new Date() },
+    },
+    {
+      $set: {
+        isSubscribed: false,
+        subscriptionPlanPrice: null,
+        subscriptionPlan: null,
+        subscriptionStartDate: null,
+        subscriptionEndDate: null,
+      },
+    }
+  );
+
+  if (updatedUser.modifiedCount > 0) {
+    logger.info(
+      `Updated user ${updatedUser.modifiedCount} subscription status`
+    );
+  }
+});
+
+// Run cron job every day at midnight
+cron.schedule("0 0 * * *", () => {
+  // cron.schedule("* * * * *", () => {
+  deleteUnpaidPayments();
+  updateExpiredSubscriptions();
+  updateUserSubscriptionStatus();
+});
+
+

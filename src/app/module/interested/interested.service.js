@@ -21,7 +21,7 @@ export const makeAnUserInterestedService = async (req) => {
         throw new ApiError(500,"Failed to create new user interested to a Business");
     }
 
-    return newInterestedUser
+    return newInterestedUser;
 }
 
 //get all interested users filtered by business
@@ -57,27 +57,27 @@ export const getAllInterestedBusinessByUserService = async (req) => {
         const interestedFranchise = await InterestedModel.find({userId: userId, businessRole: "Franchise" }).populate({ path: "businessId"});
         const interestedBusinessIdeas = await InterestedModel.find({userId: userId, businessRole: "Business-Idea-lister" }).populate({ path: "businessId"});
 
-        return {interestedBusiness,interestedBusinessAsset,interestedFranchise,interestedBusinessIdeas}
+        return {interestedBusiness,interestedBusinessAsset,interestedFranchise,interestedBusinessIdeas};
         
     }
     else if(role === "Seller"){
         const myBusiness = await BusinessModel.find({user: userId});
         const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
 
-        return {myBusiness,mySoldBusiness}
+        return {myBusiness,mySoldBusiness};
     }   
 
     else if(role === "Broker"){
         const myBusiness = await BusinessModel.find({user: userId});
         const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
 
-        return {myBusiness,mySoldBusiness}
+        return {myBusiness,mySoldBusiness};
     }   
     else if(role === "Francise Seller"){
         const myBusiness = await BusinessModel.find({user: userId});
         const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
 
-        return {myBusiness,mySoldBusiness}
+        return {myBusiness,mySoldBusiness};
     }   
     else if(role === "Investor"){
         const interestedBusiness = await InterestedModel.find({userId: userId, businessRole: "Sellers-business" }).populate({ path: "businessId"});
@@ -85,20 +85,20 @@ export const getAllInterestedBusinessByUserService = async (req) => {
         const interestedFranchise = await InterestedModel.find({userId: userId, businessRole: "Franchise" }).populate({ path: "businessId"});
         const interestedBusinessIdeas = await InterestedModel.find({userId: userId, businessRole: "Business-Idea-lister" }).populate({ path: "businessId"});
 
-        return {interestedBusiness,interestedBusinessAsset,interestedFranchise,interestedBusinessIdeas}
+        return {interestedBusiness,interestedBusinessAsset,interestedFranchise,interestedBusinessIdeas};
         
     }
     else if(role === "Business Idea Lister"){
         const myBusiness = await BusinessModel.find({user: userId});
         const mySoldBusiness  = await BusinessModel.find({user: userId, isSold: true});
 
-        return {myBusiness,mySoldBusiness}
+        return {myBusiness,mySoldBusiness};
     }  
     else if(role === "Asset Seller"){
         const myBusiness = await BusinessModel.find({user: userId});
         const mySoldBusiness = await BusinessModel.find({user: userId, isSold: true});
 
-        return {myBusiness,mySoldBusiness}
+        return {myBusiness,mySoldBusiness};
     }  
     
 

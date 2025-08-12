@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService } from "./business.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -54,6 +54,20 @@ export const getASingleBusinessWithusers = catchAsync(async (req,res) => {
 });
 
 //api ending point to get a single business
+export const deleteBusiness = catchAsync(async (req,res) => {
+
+    const response = await deleteBusinessService(req.query);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Successfully deleteted a business",
+        data : response
+    });
+    
+});
+
+//api ending point to get a single business
 export const getASingleBusinessDetails = catchAsync(async (req,res) => {
 
     const response = await singleBusinessDetailsService(req);
@@ -66,6 +80,8 @@ export const getASingleBusinessDetails = catchAsync(async (req,res) => {
     });
     
 });
+
+
 
 //interested buyers details
 export const interestedBuyersDetails = catchAsync( async (req,res) => {
@@ -130,6 +146,62 @@ export const filterBusinessByBusinessRole = catchAsync(
             success: true,
             message: "retrieved business as per business role",
             data: response
-        })
+        });
     }
 );
+
+//api ending point to filter business by most viewed
+export const filterBusinessByMostView = catchAsync(
+    async (req,res) => {
+
+        const response = await filterBusinessByMostViewService();
+        
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "retrieved business as per business view",
+            data: response
+        });
+    }
+);
+
+//api ending point to filter business by most viewed
+export const filterBusinessByCategoryWithBusinessCount = catchAsync(
+    async (req,res) => {
+
+        const response = await filterBusinessByCategoryWithBusinessService();
+        
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "retrieved business as per business category with business count",
+            data: response
+        });
+    }
+);
+
+//api ending point to mark a business sold
+export const markedBusinessAsSold = catchAsync( async (req,res) => {
+
+    const response = await markedBusinessSoldService(req.query);
+
+     sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "Marked your business as sold",
+            data: response
+        });
+});
+
+//api ending point to mark a business sold
+export const featuredBusinessHomePage = catchAsync( async (req,res) => {
+
+    const response = await featuredBusinessService(req.query);
+
+     sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "Got business which business owner's has maximum subscription plan",
+            data: response
+        });
+});

@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { advancedBusinessSearch, createNewBusiness, filterBusinessByBusinessRole, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, updateABusiness } from "./business.controller.js";
+import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 
 
@@ -70,10 +70,12 @@ const uploadPdf = multer({
 
 
 businessRouter.post("/create-business", authorizeUser , upload.single("business-image"), createNewBusiness);
-businessRouter.patch("/update-business/:businessId",    upload.single("business-image"), updateABusiness);
+businessRouter.patch("/update-business", authorizeUser,   upload.single("business-image"), updateABusiness);
 businessRouter.get("/all-business", getAllBusiness);
 
 businessRouter.get("/single-business", getASingleBusinessDetails);
+
+businessRouter.delete("/delete-business", deleteBusiness);
 
 businessRouter.get("/get-single-business-with-users", getASingleBusinessWithusers);
 
@@ -88,6 +90,18 @@ businessRouter.get("/filter-business", filterBusinessByVariousFields);
 
 //filter business by different business role
 businessRouter.get("/filter-business-by-business-role", filterBusinessByBusinessRole);
+
+//most viewed
+businessRouter.get("/most-viewed", filterBusinessByMostView);
+
+//category-wise-most-numbered-business
+businessRouter.get("/top-category", filterBusinessByCategoryWithBusinessCount);
+
+//isSold route.
+businessRouter.patch("/sold-business", markedBusinessAsSold);
+
+//featured business
+businessRouter.get("/featured-business", featuredBusinessHomePage);
 
 
 export default businessRouter;

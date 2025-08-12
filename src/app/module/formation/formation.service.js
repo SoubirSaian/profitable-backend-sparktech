@@ -1,6 +1,7 @@
 import validateFields from "../../../utils/validateFields.js";
 import FormationModel from "./formation.model.js";
 import ApiError from "../../../error/ApiError.js";
+import FormationInterestedModel from "./formationInterested.model.js";
 
 
 //create new formation service
@@ -25,6 +26,8 @@ export const createNewFormatService = async (req) => {
 
 }
 
+
+
 //get all formation service
 export const getAllFormationService = async () => {
 
@@ -36,6 +39,25 @@ export const getAllFormationService = async () => {
     }
 
     return allFormat;
+}
+
+//get a single formation service
+export const SingleFormationService = async (query) => {
+    const { formationId } = query;
+    if(!formationId){
+        throw new ApiError(400, "Formation Id is required to update a format");
+    }
+
+    //get formation
+    const formation = await FormationModel.findById(formationId);
+
+    if(!formation){
+        throw new ApiError(404, "Failed to retrieve formation details");
+    }
+
+    //now update format
+    
+    return formation;
 }
 
 //update formation service
@@ -83,4 +105,34 @@ export const deleteFormatservice = async (query) => {
 
     return deletedFormat;
 
+}
+
+//make user interested formation service
+export const makeUserInterestedToFormationService = async (payload) => {
+    // const userRole = req.user.role;
+    const {formationId,userId,name,countryCode,mobile,sector,activity,email,serviceZone,message} = payload;
+
+    //check if all the fields are available
+    validateFields(payload,["formationId","userId","name","email"]);
+
+    const newInterestedUser = await FormationInterestedModel.create({
+        formationId,userId,name,countryCode,mobile,sector,activity,email,serviceZone,message
+    });
+
+    if(!newInterestedUser){
+        throw new ApiError(500,"Failed to create new user interested to a Business");
+    }
+
+    return newInterestedUser
+}
+
+//make user interested formation service
+export const getAllInterestedFormationService = async (query) => {
+    // const { formationId } = query;
+
+    const formation = await FormationInterestedModel.find({});
+
+    if(!formation) throw new ApiError(500,"Formation not found");
+
+    return formation;
 }

@@ -49,3 +49,20 @@ export const userProfileUpdateService = async (req) => {
     return user;
 
 }
+
+//get seller detail
+export const sellerDetailService = async (query) => {
+
+    const {userId} = query;
+    if(!userId){
+        throw new ApiError(400, "UserId is required to get seller details");
+    }
+
+    const userDetails = await UserModel.findById(userId).select("name email location mobile role");
+    
+    if(!userDetails){
+        throw new ApiError(404, "user details not found");
+    }
+
+    return userDetails;
+}

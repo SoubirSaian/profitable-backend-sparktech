@@ -65,11 +65,7 @@ const otpResendTemp = (data) => `
     </head>
     <body>
       <div class="container">
-        <div class="logo">
-          <img src="${
-            process.env.EMAIL_TEMP_IMAGE
-          }" alt="Logo" class="logo-img" />
-        </div>            
+                  
         <h1>New OTP</h1>
         <p>Hello, ${data.user}</p>
         <p>We're sending you this message because you've requested to receive a new OTP code.</p>

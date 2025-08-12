@@ -70,9 +70,7 @@ const addAdminEmailTemp = (data) =>
         </head>
         <body>
           <div class="container">
-            <div class="logo">
-              <img src="${process.env.EMAIL_TEMP_IMAGE}" alt="Logo" class="logo-img" />
-            </div>        
+                   
             <h1>Welcome to BetWise Picks!</h1>
             <p>Hello, ${data.name},</p>
             <p>We are thrilled to welcome you as a new admin in our team. Below are your account details:</p>

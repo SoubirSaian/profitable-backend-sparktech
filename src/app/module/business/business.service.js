@@ -5,7 +5,8 @@ import BusinessModel from "./business.model.js";
 import nodemailer from "nodemailer";
 import fs from "fs";
 import config from "../../../config/index.js";
-import { log } from "console";
+import path from "path";
+import CategoryModel from "../category/category.model.js";
 
 
 //create new business service
@@ -66,12 +67,19 @@ export const updateABusinessService = async (req) => {
     if(req.file){
         imgName = req.file.filename;
     }
-    const businessId = req.params.businessId;
+    const {businessId,user} = req.query;
+    const { userId } = req.user;
     // console.log(businessId);
     
-    if(!businessId){
-        throw new ApiError(400, "Business id is required to update a business");
+    if(!businessId || !user){
+        throw new ApiError(400, "BusinessId and userId is required to update a business");
     }
+
+    //check if user can update or not
+    if(userId !== user){
+        throw new ApiError(403,"You can't update this business");
+    }
+
     //destructure property
     const { title,category, country, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
 
@@ -127,6 +135,35 @@ export const getASingleBusinessByIdWithUsersService = async (query) => {
     return {business,interestedUsers};
 
 }  
+
+//delete business service
+export const deleteBusinessService = async (query) => {
+    const { businessId } = query;
+    if(!businessId) throw new ApiError(400, "Business Id is required to delete a businesss");
+
+    // 1️⃣ Find business by ID
+    const business = await BusinessModel.findById(businessId);
+    if (!business) {
+      throw new ApiError(404, "Business not found to delete");
+    }
+
+    // 2️⃣ Delete image from uploads folder if exists
+    if (business.image) {
+      const imagePath = path.join(process.cwd(), "uploads/business-image", business.image);
+
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath); // delete file
+      }
+      console.log("business img deleted");
+      
+    }
+
+    // 3️⃣ Delete business from DB
+    const deleted = await BusinessModel.findByIdAndDelete(businessId);
+
+    return deleted;
+
+}
 
 //get single business details
 export const singleBusinessDetailsService = async (req) => {
@@ -277,7 +314,7 @@ export const getBusinessValuationService = async (req) => {
      catch (error) {
         console.error('Error sending email:', error);
         // res.status(500).json({ message: 'Something went wrong.' });
-        throw new ApiError(500,"failed to send api");
+        throw new ApiError(500,"failed to send email to get your business valuation");
     }
 
 
@@ -448,4 +485,216 @@ export const filterBusinessByBusinessRoleService = async (query) => {
     if(!business) throw new ApiError(404, "No data found");
 
     return business;
+}
+
+//filter business by business role service
+export const filterBusinessByMostViewService = async () => {
+    // const { businessRole } = query;
+
+    // if (!businessRole) throw new ApiError(400, "Business role is required to filter business by role");
+
+    const business = await BusinessModel.find({
+                // isApproved: true,
+                // isSold: false
+            }).sort({ views: -1 });
+
+    if(!business) throw new ApiError(404, "No data found");
+
+    return business;
+}
+
+//filter business by business role service
+export const filterBusinessByCategoryWithBusinessService = async () => {
+    
+    const categories = await BusinessModel.aggregate([
+      // Group businesses by category and count them
+      {
+        $group: {
+          _id: "$category",
+          totalBusinesses: { $sum: 1 }
+        }
+      },
+      // Join with Category collection
+      {
+        $lookup: {
+          from: "categories", // MongoDB auto-pluralizes collection names
+          localField: "_id",  // category name from business
+          foreignField: "categoryName", // category name from category model
+          as: "categoryInfo"
+        }
+      },
+      // Flatten the categoryInfo array
+      {
+        $unwind: {
+          path: "$categoryInfo",
+          preserveNullAndEmptyArrays: true // in case no matching category image
+        }
+      },
+      // Shape the output
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          totalBusinesses: 1,
+          categoryImage: "$categoryInfo.categoryImage"
+        }
+      },
+      // Sort by totalBusinesses (descending)
+      {
+        $sort: { totalBusinesses: -1 }
+      }
+    ]);
+
+
+    return categories;
+}
+
+//marked your business as sold service
+export const markedBusinessSoldService = async (query) => {
+    const { businessId, isSold } = query;
+    if(!businessId) throw new ApiError(400, "business id is required to mark your business as sold");
+
+    //find business and update isSold
+    const business = await BusinessModel.findByIdAndUpdate(businessId,{isSold: isSold},{new: true}).select('isSold');
+
+    if(!business) throw new ApiError(500, "Failed to update business as sold");
+
+    return business;
+}
+
+// //featured business in home page
+// export const featuredBusinessService = async (query) => {
+//     const {businessRole} = query;
+//     if(!businessRole) throw new ApiError(400, "businessRole is required");
+
+//     const businessesWithNineMonthPlan = await BusinessModel.aggregate([
+//         {
+//             $match:{
+//                 businessRole: businessRole,
+//                 isApproved:true
+//             }
+//         },
+//         {
+//             $lookup: {
+//             from: "users", // MongoDB collection name (lowercase & plural by default)
+//             localField: "user", // field in BusinessModel
+//             foreignField: "_id", // field in UserModel
+//             as: "userData"
+//             }
+//         },
+//         {
+//             $unwind: "$userData" // flatten the array
+//         },
+//         {
+//             $match: {
+//             "userData.subscriptionPlanPrice": 900
+//             }
+//         },
+//         {
+//             $project: {
+//                 _id: 1,             // keep business _id
+//                 title: 1,
+//                 image: 1,
+//                 businessRole: 1,
+//                 category: 1,
+//                 country: 1,
+//                 location: 1,
+//                 askingPrice: 1,
+//                 ownershipType: 1,
+//                 businessType: 1,
+//                 industryName: 1,
+//                 description: 1,
+//                 isApproved: 1,
+//                 isSold: 1,
+//                 views: 1,
+//                 createdAt: 1,
+//                 updatedAt: 1,
+//                 subscriptionPlanPrice: "$userData.subscriptionPlanPrice" // only this field from user
+//             }
+//         }
+//     ]);
+
+//     if(!businessesWithNineMonthPlan){
+//         throw new ApiError(404, "No business Found, user having 9 Month Subscription plan");
+//     }
+
+//     return businessesWithNineMonthPlan;
+// }
+
+
+//featured business in home page
+export const featuredBusinessService = async (query) => {
+    const {businessRole} = query;
+    if(!businessRole) throw new ApiError(400, "businessRole is required");
+
+    const businessesWithMaxPricePlan = await BusinessModel.aggregate([
+        // Step 1: Join Business with User
+        {
+             $match:{
+                businessRole: businessRole,
+                isApproved:true
+            }
+        },
+
+        {
+            $lookup: {
+                from: "users",
+                localField: "user",
+                foreignField: "_id",
+                as: "userData"
+            }
+        },
+        { $unwind: "$userData" },
+
+        // 2️⃣ Join with subscription plans
+        {
+            $lookup: {
+            from: "subscriptionplans",
+            localField: "userData.subscriptionPlan",
+            foreignField: "_id",
+            as: "planData"
+            }
+        },
+        { $unwind: "$planData" },
+
+        // 3️⃣ Find max price for each role
+        {
+            $lookup: {
+            from: "subscriptionplans",
+            let: { role: "$planData.subscriptionPlanRole" },
+            pipeline: [
+                { $match: { $expr: { $eq: ["$subscriptionPlanRole", "$$role"] } } },
+                { $group: { _id: null, maxPrice: { $max: "$price" } } }
+            ],
+            as: "maxPriceData"
+            }
+        },
+        { $unwind: "$maxPriceData" },
+
+        // 4️⃣ Keep only businesses where user's plan price == max price for their role
+        {
+            $match: {
+            $expr: { $eq: ["$planData.price", "$maxPriceData.maxPrice"] }
+            }
+        },
+
+        // 5️⃣ Project only business details + subscriptionPlanName
+        {
+            $project: {
+            _id: 1,
+            title: 1,
+            image: 1,
+            category: 1,
+            country: 1,
+            location: 1,
+            askingPrice: 1,
+            businessRole: 1,
+            createdAt: 1,
+            subscriptionPlanPrice: "$userData.subscriptionPlanPrice",
+            planPrice: "$planData.price"
+            }
+        }
+    ]);
+
+    return businessesWithMaxPricePlan;
 }

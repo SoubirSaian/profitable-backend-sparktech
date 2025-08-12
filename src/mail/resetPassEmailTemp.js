@@ -66,11 +66,7 @@ const resetPassEmailTemp = (data) => `
     </head>
     <body>
       <div class="container">
-        <div class="logo">
-          <img src="${
-            process.env.EMAIL_TEMP_IMAGE
-          }" alt="Logo" class="logo-img" />
-        </div>
+        
         <h1>Password Reset Request</h1>
         <p>Hello, ${data.name}</p>
         <p>

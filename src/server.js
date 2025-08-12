@@ -2,6 +2,7 @@ import app from "./app.js";
 import config from "./config/index.js";
 import { errorLogger, logger } from "./utils/logger.js";
 import mongoDBConnection from "./DB/dbConnection.js";
+import mainServer from "./DB/socket.js";
 
 let port = config.port ;
 
@@ -11,9 +12,14 @@ async function main(){
         mongoDBConnection();
 
         //server hitting in particular port
-        app.listen(port,()=>{
+        // app.listen(port,()=>{
+        //     console.log(`server hitting port : ${port}`);
+        // });
+
+         // mainServer.listen(Number(config.port), config.base_url, () => {
+        mainServer.listen(Number(config.port), () => {
+            logger.info(`App listening on http://${config.base_url}:${config.port}`);
             console.log(`server hitting port : ${port}`);
-            
         });
 
         //to handle unhandled error

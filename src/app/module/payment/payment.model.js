@@ -36,7 +36,7 @@ const paymentSchema = new mongoose.Schema(
     subscriptionStatus: {
       type: String,
       enum: {
-        values: ["active", "expired"],
+        values: ["Active", "Expired"],
         message: `Invalid subscription status. Allowed values: active or expired`,
       },
     },

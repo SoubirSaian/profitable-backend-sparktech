@@ -95,7 +95,7 @@ export const sendSubscriptionExpiredEmail = async (email, data) => {
   try {
     await sendEmail({
       email,
-      subject: "BetWise Picks Subscription Expired",
+      subject: "Profitable Business Subscription Expired",
       html: subscriptionExpiredTemp(data),
     });
   } catch (error) {

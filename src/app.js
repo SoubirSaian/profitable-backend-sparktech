@@ -21,7 +21,10 @@ app.use('/uploads', express.static('uploads'));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(cors());
+app.use(cors({
+    origin: ["http://10.10.20.60:3005"],
+    credentials: true
+}));
 //use webhook route before app.use(express.json())
 app.use("/api/v1/webhook", webhookRouter);
 app.use(express.json());

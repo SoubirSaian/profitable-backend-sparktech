@@ -1,6 +1,6 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
-import { createNewFormatService, deleteFormatservice, getAllFormationService, updateFormationService } from "./formation.service.js";
+import { createNewFormatService, deleteFormatservice, getAllFormationService, makeUserInterestedToFormationService, SingleFormationService, updateFormationService } from "./formation.service.js";
 
 
 
@@ -32,6 +32,19 @@ export const getAllFormation = catchAsync( async (req,res) => {
 
 });
 
+//api ending point to get details of single formation
+export const singleFormationDetails = catchAsync( async (req,res) => {
+
+    const response = await SingleFormationService(req.query);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Formation details retrieved successfully",
+        data: response
+    })
+});
+
 //api ending point 
 export const updateFormation = catchAsync( async (req,res) => {
 
@@ -54,6 +67,32 @@ export const deleteFormation = catchAsync( async (req,res) => {
         statusCode: 200,
         success: true,
         message: "Format deleted successfully",
+        data: response
+    })
+});
+
+//api ending point make an user interested to formation
+export const makeUserInterestedToFormation = catchAsync( async (req,res) => {
+
+    const response = await makeUserInterestedToFormationService(req.body);
+
+    sendResponse(res, {
+        statusCode: 201,
+        success: true,
+        message: "Make an user interested to formation successfully",
+        data: response
+    })
+});
+
+//api ending point to get all interested formation
+export const getAllUsersInterestedToFormation = catchAsync( async (req,res) => {
+
+    const response = await getAllFormationService(req.query);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Got all interested formation successfully",
         data: response
     })
 });

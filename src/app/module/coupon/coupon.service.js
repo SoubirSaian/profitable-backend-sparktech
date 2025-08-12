@@ -35,6 +35,17 @@ export const getAllCouponService = async () => {
     return allCoupon;
 }
 
+//get single coupon
+export const getSingleCouponService = async (query) => {
+    const {couponCode} = query;
+    if(!couponCode) throw new ApiError(400, "Coupon code is required to get coupon details");
+
+    const coupon = await CouponModel.findOne({couponCode});
+    if(!coupon) throw new ApiError(404, "No coupon found");
+
+    return coupon;
+}
+
 //update a faq service
 export const updateCouponService = async (req) => {
 

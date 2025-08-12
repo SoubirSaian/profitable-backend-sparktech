@@ -19,7 +19,7 @@ export const postNewChatService = async ( userDetail,payload ) => {
     }
 
     const receiver = await UserModel.findById(receiverId).lean();
-    if(!receiverId){
+    if(!receiver){
         throw new ApiError(404, "Receiver not found");
     }
 
@@ -60,8 +60,8 @@ export const getChatMessagesService = async (userDetail,query) => {
 
 //get all chat message service
 export const getAllChatsService = async (userDetail,query) => {
-    const userId = mongoose.Types.ObjectId.createFromHexString(userDetail.userId);
-
+    // const userId = mongoose.Types.ObjectId.createFromHexString(userDetail.userId);
+    const {userId} = userDetail;
     //get all chatlist by a user
     const chats = await ChatModel.aggregate([
     {

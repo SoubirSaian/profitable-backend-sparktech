@@ -45,4 +45,25 @@ export const getAllSubscriptionPlanByUserRoleService = async(query) => {
 
 }
 
+
+//get user role based subscription plan service
+export const getSingleSubscriptionPlanService = async(query) => {
+    const { subscriptionId } = query;
+
+    //check if role is available or not
+    if(!subscriptionId){
+        throw new ApiError(400, "Subscription Id is needed to get user's subscription plan");   
+     }
+
+    //filter subscriptions from subscription collection
+    const subscription = await SubscriptionPlanModel.findById(subscriptionId);
+
+    if(!subscription){
+        throw new ApiError(500, "failed to get subscription plan");
+    }
+
+    return subscription;
+
+}
+
     

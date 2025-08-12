@@ -1,6 +1,6 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
-import { createNewCouponService, deleteCouponService, getAllCouponService, updateCouponService } from "./coupon.service.js";
+import { createNewCouponService, deleteCouponService, getAllCouponService, getSingleCouponService, updateCouponService } from "./coupon.service.js";
 
 
 
@@ -27,6 +27,20 @@ export const getAllCoupon = catchAsync(async (req,res) => {
         statusCode:200,
         success: true,
         message: "Got all coupon",
+        data: result
+    });
+
+});
+
+//api ending point to get single coupone
+export const getSingleCoupon = catchAsync(async (req,res) => {
+
+    const result = await getSingleCouponService(req.query);
+
+    sendResponse(res,{
+        statusCode:200,
+        success: true,
+        message: "Got single coupon",
         data: result
     });
 

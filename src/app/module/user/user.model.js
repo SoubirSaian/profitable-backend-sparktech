@@ -72,9 +72,14 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    
     subscriptionPlan:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubscriptionPlan",
+        default: null
+    },
+    subscriptionPlanPrice:{
+        type: Number,
         default: null
     },
     subscriptionStartDate:{

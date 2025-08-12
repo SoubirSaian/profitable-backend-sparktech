@@ -69,19 +69,15 @@ const subscriptionExpiredTemp = (data) =>
         <body>
           <div class="container">
 
-            <div class="logo">
-              <img src="${process.env.EMAIL_TEMP_IMAGE}" alt="Logo" class="logo-img" />
-            </div>
-
             <h1>Subscription Expired</h1>
             <p>Hello</p>
             <p>We wanted to let you know that your subscription with <strong>BetWise Picks</strong> has expired.</p>
             <p>To continue enjoying our expert picks and premium features, please consider renewing your subscription.</p>
             <p>If you need any assistance or have questions, feel free to contact us at <a href="mailto:thakursaad613@gmail.com">thakursaad613@gmail.com</a>.</p>
-            <p>Best regards,<br>The BetWise Picks Team</p>
+            <p>Best regards,<br>The Profitable Business Team</p>
           </div>
           <div class="footer">
-            <p>&copy; BetWise Picks - All Rights Reserved.</p>
+            <p>&copy; Profitable Business - All Rights Reserved.</p>
             <p><a href="https://yourwebsite.com/privacy">Privacy Policy</a> | <a href="https://yourwebsite.com/contact">Contact Support</a></p>
           </div>
         </body>
