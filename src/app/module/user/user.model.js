@@ -72,7 +72,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    
+    totalBusiness:{
+        type: Number,
+        default: 0
+    },
     subscriptionPlan:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "SubscriptionPlan",

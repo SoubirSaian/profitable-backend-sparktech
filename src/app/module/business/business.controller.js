@@ -154,7 +154,7 @@ export const filterBusinessByBusinessRole = catchAsync(
 export const filterBusinessByMostView = catchAsync(
     async (req,res) => {
 
-        const response = await filterBusinessByMostViewService();
+        const response = await filterBusinessByMostViewService(req.query);
         
         sendResponse(res,{
             statusCode: 200,

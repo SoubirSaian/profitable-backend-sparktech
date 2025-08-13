@@ -7,37 +7,24 @@ import fs from "fs";
 import config from "../../../config/index.js";
 import path from "path";
 import CategoryModel from "../category/category.model.js";
+import UserModel from "../user/user.model.js";
 
 
 //create new business service
 export const createNewBusinessService = async (req) => {
     const userId = req.user.userId;
-    const image = req.file.filename;
+    console.log(userId);
+    
+    const role = req.user.role;
+    // console.log(req.file.filename); 
+    let image;
+    if(req.file){
+         image = req.file.filename;
+    }
+    
     if(!image){
         throw new ApiError(400, "Image is required to create new business");
     }
-
-    let businessRoleType;
-    switch (req.user.role) {
-        case "Seller":
-            businessRoleType = "Sellers-business";
-            break;
-        case "Asset Seller":
-            businessRoleType = "Asset-seller";
-            break;
-        case "Francise Seller":
-            businessRoleType = "Franchise";
-            break;
-        case "Business Idea Lister":
-            businessRoleType = "Business-Idea-lister";
-            break;
-        case "Broker":
-            businessRoleType = "Broker-business";
-            break;
-        
-        default:
-            businessRoleType = "Sellers-business";
-     }
 
     const { title, category, country, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
 
@@ -46,17 +33,258 @@ export const createNewBusinessService = async (req) => {
          "title", "category", "country", "location", "askingPrice", "ownerShipType", "businessType"
     ]);
 
-    //create a new business
-    const newBusiness = await BusinessModel.create({
-        user: userId,image, title, businessRole: businessRoleType, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-    });
+    //user type and subscription wise different add business functionlity
+    const user = await UserModel.findById(userId).populate({
+            path: "subscriptionPlan", select: "subscriptionPlanType"
+        }).select('isSubscribed totalBusiness');
 
-    //check if business is created or not
-    if(!newBusiness){
-        throw new ApiError(500,"failed to create new business");
+    const businessCount = user.totalBusiness;
+    const subscriptionPlanType = user.subscriptionPlan.subscriptionPlanType;
+
+    //Seller add business
+    if(role === "Seller"){
+
+        if(subscriptionPlanType === "Free Plan"){
+
+            //check if user can add new business or not
+             if(businessCount >= 1) throw new ApiError(400, "Free plan user can't add more than one business");
+             
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+             });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+        else if(subscriptionPlanType === "1 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 2) throw new ApiError(400, "1 month subscription plan user can't add more than 2 business");
+
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+        else if(subscriptionPlanType === "3 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 5) throw new ApiError(400, "3 Months subscription plan user can't add more than 5 business");
+
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+        else if(subscriptionPlanType === "6 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 10) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 10 business");
+
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+    }
+    else if(role === "Asset Seller") {
+
+         if(subscriptionPlanType === "1 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 1) throw new ApiError(400, "1 month subscription plan user can't add more than 1 business");
+
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+         }
+        else if(subscriptionPlanType === "3 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 3) throw new ApiError(400, "3 Months subscription plan user can't add more than 3 business");
+
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+        else if(subscriptionPlanType === "6 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
+
+             const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+    }
+    else if(role === "Business Idea Lister"){
+        //for Business Idea lister there is no limitation to add new Business
+        const newBusiness = await BusinessModel.create({
+            user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+        });
+
+        //check if business is created or not
+        if(!newBusiness){
+            throw new ApiError(500,"failed to create new business");
+        }
+
+        return newBusiness;
     }
 
-    return newBusiness;
+    else if(role === "Broker"){
+
+         if( subscriptionPlanType === "Basic Broker Package"){
+
+            //check if user can add new business or not
+            if(businessCount >= 5) throw new ApiError(400, "Basic broker package subscriptiopn plan user can't add more than 5 business");
+
+            const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+           });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+         else if(subscriptionPlanType === "Professional Broker Package"){
+
+            //check if user can add new business or not
+            if(businessCount >= 15) throw new ApiError(400, "Professional broker package subscriptiopn plan user can't add more than 15 business");
+
+            const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+           });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+         else if(subscriptionPlanType === "Premium Broker Package"){
+
+            //check if user can add new business or not
+            // if(businessCount >= 5) throw new ApiError(400, "Premium broker package subscriptiopn plan user can't add more than 5 business");
+
+            const newBusiness = await BusinessModel.create({
+                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+           });
+
+            //check if business is created or not
+            if(!newBusiness){
+                throw new ApiError(500,"failed to create new business");
+            }
+
+            return newBusiness;
+
+        }
+    }
+
+    else if(role === "Francise Seller"){
+
+        if(subscriptionPlanType === "1 Months"){
+            //check if user can add new business or not
+                if(businessCount >= 1) throw new ApiError(400, "1 Month subscriptiopn plan user can't add more than 1 business");
+    
+                const newBusiness = await BusinessModel.create({
+                    user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+               });
+    
+                //check if business is created or not
+                if(!newBusiness){
+                    throw new ApiError(500,"failed to create new business");
+                }
+    
+                return newBusiness;
+        }
+        else if(subscriptionPlanType === "3 Months"){
+            //check if user can add new business or not
+                if(businessCount >= 3) throw new ApiError(400, "3 Month subscriptiopn plan user can't add more than 3 business");
+    
+                const newBusiness = await BusinessModel.create({
+                    user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+               });
+    
+                //check if business is created or not
+                if(!newBusiness){
+                    throw new ApiError(500,"failed to create new business");
+                }
+    
+                return newBusiness;
+        }
+        else if(subscriptionPlanType === "6 Months"){
+            //check if user can add new business or not
+                if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
+    
+                const newBusiness = await BusinessModel.create({
+                    user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+               });
+    
+                //check if business is created or not
+                if(!newBusiness){
+                    throw new ApiError(500,"failed to create new business");
+                }
+    
+                return newBusiness;
+        }
+
+    }  
 
 }
 
@@ -487,20 +715,62 @@ export const filterBusinessByBusinessRoleService = async (query) => {
     return business;
 }
 
-//filter business by business role service
-export const filterBusinessByMostViewService = async () => {
-    // const { businessRole } = query;
+//filter business by business most viewed
+export const filterBusinessByMostViewService = async (query) => {
+    console.log(query.role,query.userId);
 
-    // if (!businessRole) throw new ApiError(400, "Business role is required to filter business by role");
+    //if no user logged in then this api will work
+    if(!query.role && !query.userId){
+        console.log(query.role,query.userId);
+        // if(!query.role && !query.userId)
+        const business = await BusinessModel.find({isApproved: true}).sort({ views: -1});
 
-    const business = await BusinessModel.find({
-                // isApproved: true,
-                // isSold: false
-            }).sort({ views: -1 });
+        if(!business) throw new ApiError(404, "No data found");
 
-    if(!business) throw new ApiError(404, "No data found");
+        return business;
 
-    return business;
+    }
+
+    //if user logged in then this api will work
+    if(query.userId && (query.role === "Seller" || query.role === "Broker" || query.role === "Asset Seller" || query.role === "Francise Seller" || query.role === "Business Idea Lister" ) ){
+
+        const userId = query.userId;
+        console.log('comoing');
+        
+        const business = await BusinessModel.find({user: userId, isApproved: true}).sort({ views: -1 });
+
+        if(!business) throw new ApiError(404, "No data found");
+    
+        return business;
+
+    }else if(query.role === "Buyer") {
+
+       const business = await BusinessModel.find({
+            businessRole: { 
+                $in: [
+                    "Sellers-business",
+                    "Franchise",
+                    "Asset-seller",
+                    "Broker-business"
+                ]
+            },
+            isApproved: true
+        }).sort( { views: -1 } );
+
+        if(!business) throw new ApiError(404, "No data found");
+                
+        return business;
+    } else if( query.role = "Investor"){
+
+        const business = await BusinessModel.find({ businessRole: "Business-idea-lister", isApproved: true}).sort({ views: -1});
+
+        if(!business) throw new ApiError(404, "No data found");
+
+        return business;
+
+    }
+     
+
 }
 
 //filter business by business role service
@@ -562,66 +832,6 @@ export const markedBusinessSoldService = async (query) => {
     return business;
 }
 
-// //featured business in home page
-// export const featuredBusinessService = async (query) => {
-//     const {businessRole} = query;
-//     if(!businessRole) throw new ApiError(400, "businessRole is required");
-
-//     const businessesWithNineMonthPlan = await BusinessModel.aggregate([
-//         {
-//             $match:{
-//                 businessRole: businessRole,
-//                 isApproved:true
-//             }
-//         },
-//         {
-//             $lookup: {
-//             from: "users", // MongoDB collection name (lowercase & plural by default)
-//             localField: "user", // field in BusinessModel
-//             foreignField: "_id", // field in UserModel
-//             as: "userData"
-//             }
-//         },
-//         {
-//             $unwind: "$userData" // flatten the array
-//         },
-//         {
-//             $match: {
-//             "userData.subscriptionPlanPrice": 900
-//             }
-//         },
-//         {
-//             $project: {
-//                 _id: 1,             // keep business _id
-//                 title: 1,
-//                 image: 1,
-//                 businessRole: 1,
-//                 category: 1,
-//                 country: 1,
-//                 location: 1,
-//                 askingPrice: 1,
-//                 ownershipType: 1,
-//                 businessType: 1,
-//                 industryName: 1,
-//                 description: 1,
-//                 isApproved: 1,
-//                 isSold: 1,
-//                 views: 1,
-//                 createdAt: 1,
-//                 updatedAt: 1,
-//                 subscriptionPlanPrice: "$userData.subscriptionPlanPrice" // only this field from user
-//             }
-//         }
-//     ]);
-
-//     if(!businessesWithNineMonthPlan){
-//         throw new ApiError(404, "No business Found, user having 9 Month Subscription plan");
-//     }
-
-//     return businessesWithNineMonthPlan;
-// }
-
-
 //featured business in home page
 export const featuredBusinessService = async (query) => {
     const {businessRole} = query;
@@ -674,7 +884,7 @@ export const featuredBusinessService = async (query) => {
         // 4️⃣ Keep only businesses where user's plan price == max price for their role
         {
             $match: {
-            $expr: { $eq: ["$planData.price", "$maxPriceData.maxPrice"] }
+                $expr: { $eq: ["$planData.price", "$maxPriceData.maxPrice"] }
             }
         },
 

@@ -93,7 +93,7 @@ export const userLoginService = async (payload) => {
     validateFields(payload,["email","password","role"]);
 
     //checkif user exist
-    const user = await UserModel.findOne({ email,role}).select({name: true, email: true, role: true,password: true, isEmailVerified: true});
+    const user = await UserModel.findOne({ email,role}).select({name: true, email: true, role: true,password: true, isEmailVerified: true, isSubscribed: true});
     console.log(user);
 
     if(!user) {
@@ -116,7 +116,8 @@ export const userLoginService = async (payload) => {
     const tokenPayload = {
         userId: user._id,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isSubscribed: user.isSubscribed
     };
 
     const accessToken =  createToken(tokenPayload, config.jwt.secret, config.jwt.expires_in);
