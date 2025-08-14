@@ -9,7 +9,7 @@ import SubscriptionPlanModel from "./subscription.model.js";
 export const postNewSubscriptionPlanService = async (payload) => {
     const {subscriptionPlanType, subscriptionPlanRole,features, price, duration  } = payload;
 
-    validateFields(payload,["subscriptionPlanType","subscriptionPlanRole","features","price","duration"]);
+    validateFields(payload,["subscriptionPlanType","subscriptionPlanRole","features","price"]);
 
     //create a new subscription plan
     const newSubscriptionPlan = await SubscriptionPlanModel.create({

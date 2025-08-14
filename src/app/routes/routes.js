@@ -16,6 +16,7 @@ import agreementRouter from "../module/agreement/agreement.route.js";
 // import webhookRouter from "../module/payment/webhook.routes.js";
 import categoryRouter from "../module/category/category.route.js";
 import chatRouteRouter from "../module/chat/chat.routes.js";
+import notificationRouter from "../module/notification/notification.route.js";
 
 
 const allRouter = express.Router();
@@ -85,10 +86,11 @@ const moduleRoutes = [
         path: "/chat",
         router: chatRouteRouter
     },
-    
-
-    
-    
+    {
+        path: "/notification",
+        router: notificationRouter
+    },
+     
 
 ];
 

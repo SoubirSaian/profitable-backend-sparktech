@@ -7,6 +7,7 @@ import ApiError from "../../../error/ApiError.js";
 import PaymentModel from "./payment.model.js";
 import UserModel from "../user/user.model.js";
 import { sendSubscriptionEmail,sendSubscriptionExpiredEmail } from "../../../utils/emailHelpers.js";
+import postNotification from "../../../utils/postNotification.js";
 import CouponModel from "../coupon/coupon.model.js";
 import catchAsync from "../../../utils/catchAsync.js";
 import cron from "node-cron";
@@ -25,13 +26,13 @@ const getEndDate = (duration) => {
     case "15 Days":
       return new Date(new Date().setDate(new Date().getDate() + 15)); //  first hour of next day
 
-    case "1 Month":
+    case "1 Months":
       return new Date(new Date().setMonth(new Date().getMonth() + 1)); //  first hour of next month
 
-    case "3 Month":
+    case "3 Months":
       return new Date(new Date().setMonth(new Date().getMonth() + 3));; // first hour of next year
 
-    case "6 Month":
+    case "6 Months":
       return new Date(new Date().setMonth(new Date().getMonth() + 6));; // first hour of next year
 
     default:
@@ -100,16 +101,16 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
     sendSubscriptionEmail(updatedUser.email, emailData);
 
     // send notification
-    // postNotification(
-    //   "Subscription Success",
-    //   "Your subscription has been successfully updated.",
-    //   updatedUser._id
-    // );
+    postNotification(
+      "Subscription Success",
+      "Your subscription has been successfully updated.",
+      updatedUser._id
+    );
 
-    // postNotification(
-    //   "New Subscriber",
-    //   "BetWise Picks got a new subscriber. Check it out!"
-    // );
+    postNotification(
+      "New Subscriber",
+      "Profitable Business got a new subscriber. Check it out!"
+    );
 
   } catch (error) {
 
@@ -138,9 +139,17 @@ export const postCheckoutService = async (userData, payload) => {
   if (!subscriptionPlan){
       throw new ApiError(400 , "SubscriptionPlan not found");
   }
+  //calculate subscription start date and end date
+  const subscriptionStartDate = new Date();
+  const subscriptionEndDate = getEndDate(subscriptionPlan.duration);
 
-  //check if it is a free plan or not
+  //if user prefer a free plan
   if(subscriptionPlan.price === 0){
+
+    await UserModel.findByIdAndUpdate(userId,{
+      isSubscribed: true,subscriptionPlan: subscriptionId, subscriptionPlanPrice: 0, subscriptionStartDate,subscriptionEndDate
+    });
+
     return 'http://10.10.20.60:3005/payment-successfull';
   }
 
@@ -149,35 +158,35 @@ export const postCheckoutService = async (userData, payload) => {
   var amount = amountInCents / 100;
 
   //handle coupon
-        if (couponCode) {
+  if (couponCode) {
 
-          // 2️⃣ Find the coupon
-          const coupon = await CouponModel.findOne({ couponCode: couponCode });
+      // 2️⃣ Find the coupon
+      const coupon = await CouponModel.findOne({ couponCode: couponCode });
 
-          if (!coupon) {
-              throw new ApiError(404, "Coupon Not found by this Coupon Code");
-          }
-
-          // 3️⃣ Check if coupon is active
-          if (coupon.status !== "Active") {
-              throw new ApiError(400, "COupon is already Expired");
-          }
-
-          // 4️⃣ Check date validity
-          const today = new Date();
-          if (today < coupon.validFrom || today > coupon.validTo) {
-              throw new ApiError(400,  "Coupon is expired or not yet valid." );
-          }
-
-          // 5️⃣ Calculate discount
-          const discountAmount = (amountInCents * coupon.discount) / 100; // discount as percentage
-           amountInCents = amountInCents - discountAmount;
-
-          // 6️⃣ Increase usage count
-          coupon.couponUsesCount += 1;
-          await coupon.save();
-
+      if (!coupon) {
+          throw new ApiError(404, "Coupon Not found by this Coupon Code");
       }
+
+      // 3️⃣ Check if coupon is active
+      if (coupon.status !== "Active") {
+          throw new ApiError(400, "COupon is already Expired");
+      }
+
+      // 4️⃣ Check date validity
+      const today = new Date();
+      if (today < coupon.validFrom || today > coupon.validTo) {
+          throw new ApiError(400,  "Coupon is expired or not yet valid." );
+      }
+
+      // 5️⃣ Calculate discount
+      const discountAmount = (amountInCents * coupon.discount) / 100; // discount as percentage
+      amountInCents = amountInCents - discountAmount;
+
+      // 6️⃣ Increase usage count
+      coupon.couponUsesCount += 1;
+      await coupon.save();
+
+  }
   //complete payment using stripe
   let session = {};
   // const amountInCents = Math.ceil( subscriptionPlan.price.toFixed(2) * 100 );
@@ -212,8 +221,8 @@ export const postCheckoutService = async (userData, payload) => {
   }
 
   const { id: checkout_session_id, url } = session || {};
-  const subscriptionStartDate = new Date();
-  const subscriptionEndDate = getEndDate(subscriptionPlan.duration);
+  // const subscriptionStartDate = new Date();
+  // const subscriptionEndDate = getEndDate(subscriptionPlan.duration);
 
   const paymentData = {
     user: userId,
@@ -338,12 +347,14 @@ const updateUserSubscriptionStatus = catchAsync(async () => {
   }
 });
 
-// Run cron job every day at midnight
-cron.schedule("0 0 * * *", () => {
-  // cron.schedule("* * * * *", () => {
-  deleteUnpaidPayments();
-  updateExpiredSubscriptions();
-  updateUserSubscriptionStatus();
-});
+// Run cron job every day at afternoon 03:10
+cron.schedule("10 15 * * *", () => {
+  
+    deleteUnpaidPayments();
+    updateExpiredSubscriptions();
+    updateUserSubscriptionStatus();
+  });
+//node cron is working perfectly
+
 
 

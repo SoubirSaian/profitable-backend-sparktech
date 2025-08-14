@@ -32,7 +32,7 @@ export const updateUserProfile = catchAsync( async (req,res) => {
 //api ending point to update user
 export const getSellerDetail = catchAsync( async (req,res) => {
    
-    const response = await sellerDetailService(req.query);
+    const response = await sellerDetailService(req);
 
     sendResponse(res,{
         statusCode: 200,

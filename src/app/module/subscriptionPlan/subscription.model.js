@@ -21,8 +21,8 @@ const subscriptionPlanSchema = new mongoose.Schema({
     },
     duration: {
         type: String,
-        required: true,
-        enum: ["15 Days","1 Month","3 Month","6 Month"]
+        // required: true,
+        // enum: ["15 Days","1 Months","3 Months","6 Months"]
     }
 },{ timestamps: true});
 

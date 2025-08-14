@@ -51,18 +51,34 @@ export const userProfileUpdateService = async (req) => {
 }
 
 //get seller detail
-export const sellerDetailService = async (query) => {
-
-    const {userId} = query;
-    if(!userId){
-        throw new ApiError(400, "UserId is required to get seller details");
+export const sellerDetailService = async (req) => {
+    const buyerId = req.user.userId;
+    const {userId} = req.query;
+    if(!userId || !buyerId){
+        throw new ApiError(400, "UserId and buyerId required to get seller details");
     }
 
-    const userDetails = await UserModel.findById(userId).select("name email location mobile role");
+    //check buyer's subscription plan
+    const buyer = await UserModel.findById(buyerId).populate({
+        path: "subsacriptionPlan", select: "subscriptionPlanType"
+    }).select('subscriptionPlanPrice');
+
+    if(!buyer) throw new ApiError(404, "User subscription plan not found");
+
+    if(buyer.subscriptionPlan && buyer.subscriptionPlan.subscriptionPlanType === "Free Plan"){
+
+        throw new ApiError(400, "Free Plan user cant see Seller's details");
+    }
     
-    if(!userDetails){
-        throw new ApiError(404, "user details not found");
-    }
+    else if(buyer.subscriptionPlan && buyer.subscriptionPlan.subscriptionPlanType !== "Free Plan"){
+        
+        const userDetails = await UserModel.findById(userId).select("name email image location mobile role");
+        
+        if(!userDetails){
+            throw new ApiError(404, "user details not found");
+        }
+    
+        return userDetails;
+    }   
 
-    return userDetails;
 }

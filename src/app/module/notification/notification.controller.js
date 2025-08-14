@@ -45,7 +45,7 @@ export const updateAsReadUnread = catchAsync(async (req, res) => {
 //api ending point to delete notification
 export const deleteNotification = catchAsync(async (req, res) => {
 
-  const result = await deleteNotificationService(req.user,req.body);
+  const result = await deleteNotificationService(req.user,req.query);
 
   sendResponse(res, {
     statusCode: 200,

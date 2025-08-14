@@ -50,5 +50,5 @@ var upload = multer({
 //here have to use userAuthentication middleware
 userRouter.get("/user-detail",authorizeUser, getUserDetails );
 userRouter.patch("/update-profile",authorizeUser ,upload.single("profile-image"), updateUserProfile);
-userRouter.get("/seller-detail", getSellerDetail);
+userRouter.get("/seller-detail", authorizeUser, getSellerDetail);
 export default userRouter;

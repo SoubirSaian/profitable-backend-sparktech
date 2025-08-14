@@ -1,5 +1,5 @@
 import AdminNotificationModel from "./AdminNotification.model.js";
-import NotificationModel from "./notification.model";
+import NotificationModel from "./notification.model.js";
 import ApiError from "../../../error/ApiError.js";
 import validateFields from "../../../utils/validateFields.js";
 
@@ -7,19 +7,18 @@ import validateFields from "../../../utils/validateFields.js";
 //get notification service
 export const getNotificationService = async (userdata,query) => {
         const role = userdata.role;
+        const notificationId = query.notificationId;
 
-        //check if notification id is available or not
-        if(role !== "Admin"){
-            validateFields(query,["notificationId"]);
-        }
+        //check if notification id is available or not      
+        validateFields(query,["notificationId"]);
 
         let notification;
 
         if(role === "Admin"){
-            notification = await AdminNotificationModel.findOne({});
+            notification = await AdminNotificationModel.findByIdAndUpdate(notificationId,{isRead: true},{ new: true });
         }
         else{
-            notification = await NotificationModel.findOne({_id:query.notificationId});
+            notification = await NotificationModel.findByIdAndUpdate(notificationId,{ isRead: true }, { new: true });
         }
 
         //check if user notification is found or not
@@ -33,14 +32,14 @@ export const getNotificationService = async (userdata,query) => {
 
 //get all notification service
 export const getAllNotificationService = async (userData,query) => {
-    const { role } = userData;
+    const { role,userId } = userData;
 
     let notification;
 
     if(role === "Admin"){
-        notification = await AdminNotificationModel.find({});
+        notification = await AdminNotificationModel.find({}).sort({ createdAt: -1 });
     }else{
-        notification = await NotificationModel.find({});
+        notification = await NotificationModel.find({toId: userId}).sort({ createdAt: -1 });
     }
 
     if(!notification){
@@ -72,22 +71,23 @@ export const updateNotificationReadUnreadService = async (userData,payload) => {
 }
 
 //delete notification service
-export const deleteNotificationService = async (userData,payload) => {
+export const deleteNotificationService = async (userData,query) => {
     const { role } = userData;
+    const notificationId = query.notificationId;
 
-    validateFields(payload,["notificationId"]);
+    validateFields(query,["notificationId"]);
 
     let deletedNotification;
 
     if(role === "Admin"){
-        deleteNotificationService = await AdminNotificationModel.deleteOne({_id: payload.notificationId});
+        deletedNotification = await AdminNotificationModel.findByIdAndDelete(notificationId);
     }
     else{
-        deletedNotification = await NotificationModel.deleteOne({_id: payload.notificationId});
+        deletedNotification = await NotificationModel.findByIdAndDelete(notificationId);
     }
 
     //check if notification deleted or not
-    if(!deletedNotification.deletedCount){
+    if(!deletedNotification){
         throw new ApiError(500, "notification not found");
     }
 

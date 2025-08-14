@@ -11,7 +11,7 @@ export const successPage = catchAsync(async (req, res) => {
 
 //to display payment cancelation page
 export const cancelPage = catchAsync(async (req, res) => {
-  res.render("cancel.ejs");
+  res.send("payment unsuccessful");
 });
 
 //api ending point to perform payment checkout in stripe
