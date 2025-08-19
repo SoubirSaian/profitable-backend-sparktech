@@ -94,7 +94,7 @@ export const userLoginService = async (payload) => {
 
     //checkif user exist
     const user = await UserModel.findOne({ email,role}).select({name: true, email: true, role: true,password: true, isEmailVerified: true, isSubscribed: true});
-    console.log(user);
+    // console.log(user);
 
     if(!user) {
         throw new ApiError(404,"User not found");

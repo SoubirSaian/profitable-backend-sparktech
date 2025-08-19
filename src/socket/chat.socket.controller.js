@@ -33,7 +33,7 @@ export const sendMessage = socketCatchAsync(async (socket, io, payload) => {
     ChatModel.updateOne({ _id: chatId }, { $push: { messages: newMessage._id } }),
   ]);
 
-  // Broadcast to user
+  // Broadcast to user means send msg to user
   io.to(userId).emit(
     "send_message",
     emitResult({

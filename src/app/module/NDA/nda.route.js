@@ -1,9 +1,10 @@
 import express from "express";
-import { authorizeUser } from "../../middleware/AuthMiddleware.js";
+// import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 import { getNdaFilteredByUserRole } from "./nda.controller.js";
 
 const ndaRouter = express.Router();
 
-ndaRouter.get("/get-nda", authorizeUser, getNdaFilteredByUserRole );
+ndaRouter.post("/create-nda", getNdaFilteredByUserRole );
+ndaRouter.get("/get-nda", getNdaFilteredByUserRole );
 
 export default ndaRouter;

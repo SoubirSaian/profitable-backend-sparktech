@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { createNewCategory, deleteCategory, getAllCategory, updateCategory } from "./category.controller.js";
+import { createNewCategory, createSubCategory, deleteCategory, getAllCategoryWithSubCategory, updateCategory } from "./category.controller.js";
 
 const categoryRouter = express.Router();
 
@@ -42,9 +42,13 @@ var upload = multer({
   },
 });
 
+//create category
 categoryRouter.post("/create-category", upload.single("category-image") , createNewCategory);
 
-categoryRouter.get("/get-all-category", getAllCategory);
+//create sub category
+categoryRouter.post("/create-sub-category", createSubCategory);
+
+categoryRouter.get("/get-all-category", getAllCategoryWithSubCategory);
 
 categoryRouter.patch("/update-category",upload.single("category-image") , updateCategory );
 
@@ -53,4 +57,12 @@ categoryRouter.delete("/delete-category", deleteCategory);
 export default categoryRouter;
 
 
-[   {     "name": "Food & Beverage",     "subcategories": [       { "name": "Restaurants & Cafés" },       { "name": "Fast Food & Takeaway" },       { "name": "Bars, Pubs & Lounges" },       { "name": "Coffee Shops" },       { "name": "Catering Services" },       { "name": "Bakeries & Confectionery" },       { "name": "Food Trucks & Kiosks" },       { "name": "Juice Bars & Smoothie Shops" },       { "name": "Food Manufacturing & Processing" },       { "name": "Ice Cream Shops" },       { "name": "Breweries & Wineries" },       { "name": "Specialty Food Stores" },       { "name": "Other Food & Beverage Businesses" }     ]   },   {     "name": "Retail & E-Commerce",     "subcategories": [       { "name": "Clothing & Fashion" },       { "name": "Grocery & Supermarkets" },       { "name": "Electronics & Mobile Shops" },       { "name": "Furniture & Home Décor" },       { "name": "Jewelry & Accessories" },       { "name": "Online Stores & Marketplaces" },       { "name": "Specialty Stores" },       { "name": "Convenience Stores" },       { "name": "Flower Shops" },       { "name": "Pet Shops & Pet Supplies" },       { "name": "Bookstores" },       { "name": "Toy & Hobby Stores" },       { "name": "Other Retail & E-Commerce Businesses" }     ]   } ]
+[   {    
+   "name": "Food & Beverage",   
+          "subcategories": [       { "name": "Restaurants & Cafés" },       { "name": "Fast Food & Takeaway" },       { "name": "Bars, Pubs & Lounges" },       { "name": "Coffee Shops" },       { "name": "Catering Services" },       { "name": "Bakeries & Confectionery" },       { "name": "Food Trucks & Kiosks" },       { "name": "Juice Bars & Smoothie Shops" },       { "name": "Food Manufacturing & Processing" },       { "name": "Ice Cream Shops" },       { "name": "Breweries & Wineries" },       { "name": "Specialty Food Stores" },       { "name": "Other Food & Beverage Businesses" }     ]
+          
+           },   
+    {"name": "Retail & E-Commerce",     
+          "subcategories": [       { "name": "Clothing & Fashion" },       { "name": "Grocery & Supermarkets" },       { "name": "Electronics & Mobile Shops" },       { "name": "Furniture & Home Décor" },       { "name": "Jewelry & Accessories" },       { "name": "Online Stores & Marketplaces" },       { "name": "Specialty Stores" },       { "name": "Convenience Stores" },       { "name": "Flower Shops" },       { "name": "Pet Shops & Pet Supplies" },       { "name": "Bookstores" },       { "name": "Toy & Hobby Stores" },       { "name": "Other Retail & E-Commerce Businesses" }     ]   
+} 
+]

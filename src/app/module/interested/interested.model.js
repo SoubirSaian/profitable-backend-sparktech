@@ -15,7 +15,7 @@ const interestedSchema = new mongoose.Schema({
      businessRole:{
         type: String,
         required: [true, "business role is required"],
-        enum:["Sellers-business","Franchise","Asset-seller","Business-Idea-lister","Broker-business"]
+        enum:["Seller","Francise Seller","Asset Seller","Business Idea Lister","Broker"]
     },
     name :{
         type: String,

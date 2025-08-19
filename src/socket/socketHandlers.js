@@ -28,6 +28,7 @@ export const socketHandlers = socketCatchAsync(async (socket, io, activeDrivers)
     sendMessage(socket, io, { ...payload, userId });
   });
 
+  //if user disconnected then update user's isOnline status
   socket.on("disconnect", () => {
     updateOnlineStatus(socket, io, {
       userId,

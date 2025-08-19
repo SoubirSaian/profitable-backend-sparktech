@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService, topCountryWithMaximumBusinesService } from "./business.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -19,13 +19,13 @@ export const createNewBusiness = catchAsync(async (req,res) => {
 //api ending point to update a business
 export const updateABusiness = catchAsync(async (req,res) => {
 
-     await updateABusinessService(req);
+     const response = await updateABusinessService(req);
 
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: "business updated successfully",
-       
+        data: response
     });
 });
 
@@ -165,7 +165,7 @@ export const filterBusinessByMostView = catchAsync(
     }
 );
 
-//api ending point to filter business by most viewed
+//api ending point to filter business by top category
 export const filterBusinessByCategoryWithBusinessCount = catchAsync(
     async (req,res) => {
 
@@ -175,6 +175,21 @@ export const filterBusinessByCategoryWithBusinessCount = catchAsync(
             statusCode: 200,
             success: true,
             message: "retrieved business as per business category with business count",
+            data: response
+        });
+    }
+);
+
+//api ending point to filter business by top country
+export const filterBusinessByCountryWithBusinessCount = catchAsync(
+    async (req,res) => {
+
+        const response = await topCountryWithMaximumBusinesService(req.query);
+        
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "retrieved business as per country with business count",
             data: response
         });
     }

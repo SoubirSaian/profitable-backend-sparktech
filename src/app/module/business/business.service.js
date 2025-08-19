@@ -17,16 +17,16 @@ export const createNewBusinessService = async (req) => {
     // console.log(userId); 
     const role = req.user.role;
     // console.log(req.file.filename); 
-    let image;
-    if(req.file){
-         image = req.file.filename;
+    let images;
+    if(req.files){
+         images = req.files.map((file) => file.filename );
     }
     
-    if(!image){
+    if(!images){
         throw new ApiError(400, "Image is required to create new business");
     }
 
-    const { title, category, country, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
+    const { title, category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
 
     //check if all the fields are available
     validateFields(req.body,[
@@ -41,193 +41,11 @@ export const createNewBusinessService = async (req) => {
     const businessCount = user.totalBusiness;
     const subscriptionPlanType = user.subscriptionPlan.subscriptionPlanType;
 
-    //Seller add business
-    if(role === "Seller"){
+    //create new business function
+    const addNewBusiness = async () => {
 
-        if(subscriptionPlanType === "Free Plan"){
-
-            //check if user can add new business or not
-             if(businessCount >= 1) throw new ApiError(400, "Free plan user can't add more than one business");
-             
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-             });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-        }
-        else if(subscriptionPlanType === "1 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 2) throw new ApiError(400, "1 month subscription plan user can't add more than 2 business");
-
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-        }
-        else if(subscriptionPlanType === "3 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 5) throw new ApiError(400, "3 Months subscription plan user can't add more than 5 business");
-
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-        }
-        else if(subscriptionPlanType === "6 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 10) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 10 business");
-
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-        }
-    }
-
-    else if(role === "Asset Seller") {
-
-         if(subscriptionPlanType === "1 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 1) throw new ApiError(400, "1 month subscription plan user can't add more than 1 business");
-
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-         }
-        else if(subscriptionPlanType === "3 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 3) throw new ApiError(400, "3 Months subscription plan user can't add more than 3 business");
-
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-        }
-        else if(subscriptionPlanType === "6 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
-
-             const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
-
-        }
-    }
-    else if(role === "Business Idea Lister"){
-        //for Business Idea lister there is no limitation to add new Business
         const newBusiness = await BusinessModel.create({
-            user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
+            user: userId,image: images, title, businessRole: role, category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description
         });
 
         //check if business is created or not
@@ -246,6 +64,73 @@ export const createNewBusinessService = async (req) => {
         return newBusiness;
     }
 
+    //Seller add business
+    if(role === "Seller"){
+
+        if(subscriptionPlanType === "Free Plan"){
+
+            //check if user can add new business or not
+             if(businessCount >= 1) throw new ApiError(400, "Free plan user can't add more than one business");
+             
+             await addNewBusiness();
+
+        }
+        else if(subscriptionPlanType === "1 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 2) throw new ApiError(400, "1 month subscription plan user can't add more than 2 business");
+
+             await addNewBusiness();
+
+        }
+        else if(subscriptionPlanType === "3 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 5) throw new ApiError(400, "3 Months subscription plan user can't add more than 5 business");
+
+             await addNewBusiness();
+
+        }
+        else if(subscriptionPlanType === "6 Months"){
+
+            //check if user can add new business or not
+            if(businessCount >= 10) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 10 business");
+
+            await addNewBusiness();
+
+        }
+    }
+    else if(role === "Asset Seller") {
+
+         if(subscriptionPlanType === "1 Months"){
+
+            //check if user can add new business or not
+            if(businessCount >= 1) throw new ApiError(400, "1 month subscription plan user can't add more than 1 business");
+
+            await addNewBusiness();
+
+         }
+        else if(subscriptionPlanType === "3 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 3) throw new ApiError(400, "3 Months subscription plan user can't add more than 3 business");
+
+             await addNewBusiness();
+
+        }
+        else if(subscriptionPlanType === "6 Months"){
+
+            //check if user can add new business or not
+             if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
+
+             await addNewBusiness();
+
+        }
+    }
+    else if(role === "Business Idea Lister"){
+        //for Business Idea lister there is no limitation to add new Business
+        await addNewBusiness();
+    }
     else if(role === "Broker"){
 
          if( subscriptionPlanType === "Basic Broker Package"){
@@ -253,24 +138,7 @@ export const createNewBusinessService = async (req) => {
             //check if user can add new business or not
             if(businessCount >= 5) throw new ApiError(400, "Basic broker package subscriptiopn plan user can't add more than 5 business");
 
-            const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-           });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
+            await addNewBusiness();
 
         }
          else if(subscriptionPlanType === "Professional Broker Package"){
@@ -278,24 +146,7 @@ export const createNewBusinessService = async (req) => {
             //check if user can add new business or not
             if(businessCount >= 15) throw new ApiError(400, "Professional broker package subscriptiopn plan user can't add more than 15 business");
 
-            const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-           });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
+            await addNewBusiness();
 
         }
          else if(subscriptionPlanType === "Premium Broker Package"){
@@ -303,98 +154,29 @@ export const createNewBusinessService = async (req) => {
             //check if user can add new business or not
             // if(businessCount >= 5) throw new ApiError(400, "Premium broker package subscriptiopn plan user can't add more than 5 business");
 
-            const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-           });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
+            await addNewBusiness();
 
         }
     }
-
     else if(role === "Francise Seller"){
 
         if(subscriptionPlanType === "1 Months"){
             //check if user can add new business or not
             if(businessCount >= 1) throw new ApiError(400, "1 Month subscriptiopn plan user can't add more than 1 business");
 
-            const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
+            await addNewBusiness();
         }
         else if(subscriptionPlanType === "3 Months"){
             //check if user can add new business or not
             if(businessCount >= 3) throw new ApiError(400, "3 Month subscriptiopn plan user can't add more than 3 business");
 
-            const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
+            await addNewBusiness();
         }
         else if(subscriptionPlanType === "6 Months"){
             //check if user can add new business or not
             if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
 
-            const newBusiness = await BusinessModel.create({
-                user: userId,image, title, businessRole: role, category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-            });
-
-            //check if business is created or not
-            if(!newBusiness){
-                throw new ApiError(500,"failed to create new business");
-            }
-
-            //update user's total business
-            user.totalBusiness += 1;
-            await user.save();
-
-            //send notification to admin and user
-            postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
-            postNotification('Your business listed successfully','Now wait for admins approval', user._id);
-
-            return newBusiness;
+            await addNewBusiness();
         }
 
     }  
@@ -404,10 +186,11 @@ export const createNewBusinessService = async (req) => {
 //update a business service
 export const updateABusinessService = async (req) => {
     //if image comes then have to extract image name from req.file.filename
-    let imgName;
-    if(req.file){
-        imgName = req.file.filename;
+    let imgNames;
+    if(req.files){
+        imgNames = req.files.map( (file) => file.filename);
     }
+
     const {businessId,user} = req.query;
     const { userId } = req.user;
     // console.log(businessId);
@@ -422,20 +205,46 @@ export const updateABusinessService = async (req) => {
     }
 
     //destructure property
-    const { title,category, country, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
+    const { title,category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
 
     //no need to validate update service payload . because during updation all fields are not necessery
+    //before update delete previous listed image
+     const business = await BusinessModel.findById(businessId).select('title user image');
+      if (!business) {
+        throw new ApiError(404, "Busines not found to update");
+      }
+
+      // Step 2: Remove old images from filesystem
+      if(req.files){
+
+          if (business.image && business.image.length > 0) {
+    
+            business.image.forEach((img) => {
+    
+              const filePath = path.join("uploads/business-image", img);
+    
+              if (fs.existsSync(filePath)) {
+    
+                fs.unlinkSync(filePath); // delete the file
+              }
+            });
+          }
+          console.log('deleted');
+          
+      }
 
     //findout which business instance have to update
     const updatedBusiness = await BusinessModel.findByIdAndUpdate(businessId,{
-        image: imgName,title,category, country, location, askingPrice, ownerShipType, businessType, industryName, description
-    },{ new: true }).select('title');
+        image: imgNames,title,category,subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description
+    },{ new: true });
 
     if(!updatedBusiness){
         throw new ApiError(500, "Failed to update a business");
     }
     //send update notification to user
-    postNotification(" Your business is updated", `Your bisness named ${updatedBusiness.title} is updated`);
+    postNotification(" Your business is updated", `Your business named ${updatedBusiness.title} is updated`, userId);
+
+    return updatedBusiness;
 }
 
 //get all business service
@@ -470,7 +279,7 @@ export const getASingleBusinessByIdWithUsersService = async (query) => {
     //find out all users who are interested to this business
     const interestedUsers = await InterestedModel.find({businessId: businessId}).populate({
     path: "userId",
-    select: "role", // only fetch 'role' from User model
+    select: "image role", // only fetch 'role' from User model
    });
 
 
@@ -490,14 +299,17 @@ export const deleteBusinessService = async (query) => {
     }
 
     // 2️⃣ Delete image from uploads folder if exists
-    if (business.image) {
-      const imagePath = path.join(process.cwd(), "uploads/business-image", business.image);
+    if (business.image && business.image.length > 0) {
+    
+        business.image.forEach((img) => {
 
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath); // delete file
-      }
-      console.log("business img deleted");
-      
+            const filePath = path.join("uploads/business-image", img);
+
+            if (fs.existsSync(filePath)) {
+
+            fs.unlinkSync(filePath); // delete the file
+            }
+        });
     }
 
     // 3️⃣ Delete business from DB
@@ -659,11 +471,15 @@ export const getBusinessValuationService = async (req) => {
 
 //filter business service
 export const filterBusinessService = async (query) => {
-    const {category,country,location,askingPrice,businessType,ownerShipType,ageOfListing,sortBy,searchText,businessRole} = query;
+    const {category,subCategory,country,location,askingPrice,businessType,ownerShipType,ageOfListing,sortBy,searchText,businessRole} = query;
 
     //filter all data by various query
     if(!category && !country && !location && !askingPrice && !businessType && !ownerShipType && !ageOfListing && !sortBy && !searchText && !businessRole){
         const business = await BusinessModel.find({isApproved: true});
+        return business;
+    }
+    else if(category && subCategory){
+        const business = await BusinessModel.find({category: category,subCategory: subCategory,isApproved: true});
         return business;
     }
     else if(category){
@@ -826,13 +642,17 @@ export const filterBusinessByBusinessRoleService = async (query) => {
 
 //filter business by business most viewed
 export const filterBusinessByMostViewService = async (query) => {
-    console.log(query.role,query.userId);
+    // console.log(query.role,query.userId);
 
     //if no user logged in then this api will work
     if(!query.role && !query.userId){
-        console.log(query.role,query.userId);
+        // if country selected from navabr then country wise business will be displayed
+        let filter = { isApproved: true };
+        if(query.country){
+            filter.country = query.country;
+        }
         // if(!query.role && !query.userId)
-        const business = await BusinessModel.find({isApproved: true}).sort({ views: -1});
+        const business = await BusinessModel.find(filter).sort({ views: -1});
 
         if(!business) throw new ApiError(404, "No data found");
 
@@ -844,7 +664,7 @@ export const filterBusinessByMostViewService = async (query) => {
     if(query.userId && (query.role === "Seller" || query.role === "Broker" || query.role === "Asset Seller" || query.role === "Francise Seller" || query.role === "Business Idea Lister" ) ){
 
         const userId = query.userId;
-        console.log('comoing');
+        // console.log('comoing');
         
         const business = await BusinessModel.find({user: userId, isApproved: true}).sort({ views: -1 });
 
@@ -852,9 +672,10 @@ export const filterBusinessByMostViewService = async (query) => {
     
         return business;
 
-    }else if(query.role === "Buyer") {
+    }
+    else if(query.role === "Buyer") {
 
-       const business = await BusinessModel.find({
+        let filter = {
             businessRole: { 
                 $in: [
                     "Seller",
@@ -864,14 +685,22 @@ export const filterBusinessByMostViewService = async (query) => {
                 ]
             },
             isApproved: true
-        }).sort( { views: -1 } );
+        }
+
+        if (query.country) { filter.country = query.country } 
+
+       const business = await BusinessModel.find(filter).sort( { views: -1 } );
 
         if(!business) throw new ApiError(404, "No data found");
                 
         return business;
-    } else if( query.role = "Investor"){
+    }
+     else if( query.role = "Investor"){
+        let filter = { businessRole: "Business Idea Lister", isApproved: true};
 
-        const business = await BusinessModel.find({ businessRole: "Business Idea Lister", isApproved: true}).sort({ views: -1});
+        if(query.country) { filter.country = query.country }
+
+        const business = await BusinessModel.find(filter).sort({ views: -1});
 
         if(!business) throw new ApiError(404, "No data found");
 
@@ -882,7 +711,7 @@ export const filterBusinessByMostViewService = async (query) => {
 
 }
 
-//filter business by business role service
+//filter business by top category service
 export const filterBusinessByCategoryWithBusinessService = async () => {
     
     const categories = await BusinessModel.aggregate([
@@ -931,6 +760,15 @@ export const filterBusinessByCategoryWithBusinessService = async () => {
     return categories;
 }
 
+//filter business by top country service
+export const topCountryWithMaximumBusinesService = async (query) => {
+    // const country = query.country;
+
+    // const countries = await fetch(`https://restcountries.com/v3.1/name/${country}`);
+
+    // return countries;
+}
+
 //marked your business as sold service
 export const markedBusinessSoldService = async (query) => {
     const { businessId, isSold } = query;
@@ -946,16 +784,27 @@ export const markedBusinessSoldService = async (query) => {
 
 //featured business in home page
 export const featuredBusinessService = async (query) => {
-    const {businessRole} = query;
+    const {businessRole,country} = query;
+
     if(!businessRole) throw new ApiError(400, "businessRole is required");
+
+    // //business role = business idea lister then operation will be different
+    if(businessRole === "Business Idea Lister"){
+        const business = await BusinessModel.find({businessRole}).sort({views: -1 });
+        return business;
+    }
+
+    let filter;
+    if(country){
+        filter = { country: country, businessRole: businessRole, isApproved:true }; 
+    }else{
+        filter = { businessRole: businessRole, isApproved:true };
+    }
 
     const businessesWithMaxPricePlan = await BusinessModel.aggregate([
         // Step 1: Join Business with User
         {
-             $match:{
-                businessRole: businessRole,
-                isApproved:true
-            }
+             $match: filter
         },
          //join with users
         {

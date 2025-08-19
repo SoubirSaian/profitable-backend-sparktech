@@ -14,7 +14,7 @@ const ndaSchema =  new mongoose.Schema({
     exception:{
         type: String
     },
-    noGuarantee:{
+    guaranteeSale:{
         type: String
     },
     
@@ -24,7 +24,7 @@ const ndaSchema =  new mongoose.Schema({
     durationAndEnforcement:{
         type: String
     },
-    loverningLaw:{
+    governingLaw:{
         type: String
     },
     entireAgreement:{

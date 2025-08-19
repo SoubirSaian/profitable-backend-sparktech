@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import ApiError from "../../../error/ApiError.js";
 import UserModel from "./user.model.js";
-
+import path from "path";
+import fs from "fs";
 
 //user details service
 export const getUserDetailsService = async (user) => {
@@ -37,16 +38,30 @@ export const userProfileUpdateService = async (req) => {
 
     const {name, mobile, profession, location, description} = req.body;
 
+    const user = await UserModel.findById(userId).select("name email image");
+    if(!user) throw new ApiError(404, "User not found to update user");
+
+    //delete user image before update user
+    if(req.file){
+        if(user.image){
+            // Step 2: Remove old images from filesystem      
+            const filePath = path.join("uploads/user-image", user.image);
+            
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath); // delete the file
+            }
+        }
+    }
     //need user email id to find out user in db
-    const user = await UserModel.findByIdAndUpdate(userId,{
+    const updatedUser = await UserModel.findByIdAndUpdate(userId,{
         image,name, mobile, profession, location, description
     }).select('name email');
 
-    if(!user){
+    if(!updatedUser){
         throw new ApiError(404, "User not found and failed to update profile");
     }
     
-    return user;
+    return updatedUser;
 
 }
 
@@ -57,11 +72,15 @@ export const sellerDetailService = async (req) => {
     if(!userId || !buyerId){
         throw new ApiError(400, "UserId and buyerId required to get seller details");
     }
+    // console.log(userId);
+    
 
     //check buyer's subscription plan
     const buyer = await UserModel.findById(buyerId).populate({
-        path: "subsacriptionPlan", select: "subscriptionPlanType"
+        path: "subscriptionPlan", select: "subscriptionPlanType"
     }).select('subscriptionPlanPrice');
+    // console.log(buyer);
+    
 
     if(!buyer) throw new ApiError(404, "User subscription plan not found");
 
@@ -73,6 +92,7 @@ export const sellerDetailService = async (req) => {
     else if(buyer.subscriptionPlan && buyer.subscriptionPlan.subscriptionPlanType !== "Free Plan"){
         
         const userDetails = await UserModel.findById(userId).select("name email image location mobile role");
+        // console.log(userDetails);
         
         if(!userDetails){
             throw new ApiError(404, "user details not found");

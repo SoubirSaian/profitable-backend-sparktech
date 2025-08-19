@@ -9,8 +9,9 @@ const businessSchema = new mongoose.Schema({
         required: [true, "User Id is required to create a new business"]
     },
     image: {
-        type: String,
-        required: [true, "Business image is required"]
+        type: [String],
+        required: [true, "Business image is required"],
+        default:[]
     },
     title: {
         type: String,
@@ -19,15 +20,27 @@ const businessSchema = new mongoose.Schema({
     businessRole:{
         type: String,
         required: [true, "business role is required"],
-        enum:["Sellers-business","Franchise","Asset-seller","Business-Idea-lister","Broker-business"]
+        enum:["Seller","Francise Seller","Asset Seller","Business Idea Lister","Broker"]
     },
     category: {
         type: String,
         required: [true, "Business category is required"]
     },
+    subCategory: {
+        type: String,
+        default: null
+    },
     country: {
         type: String,
         required: [true, "Business country is required"]
+    },
+    state: {
+        type: String,
+        default: null
+    },
+    city: {
+        type: String,
+        default: null
     },
     location: {
         type: String,

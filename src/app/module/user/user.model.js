@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema({
         required: [true, "User's role is required to complete register"],
         enum: ["Admin","Buyer","Seller","Investor","Broker","Asset Seller","Francise Seller","Business Idea Lister"]
     },
+    isOnline:{
+        type: Boolean,
+        default: false
+    },
     isSubscribed:{
         type: Boolean,
         default: false,

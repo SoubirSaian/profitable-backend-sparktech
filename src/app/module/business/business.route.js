@@ -1,8 +1,9 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
+import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByCountryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
+// import ApiError from "../../../error/ApiError.js";
 
 
 
@@ -42,7 +43,7 @@ var upload = multer({
         cb(null, true);
 
       } else {
-        cb(new Error("Only .jpg, .png or .jpeg format allowed!"));
+        cb( new Error("Only .jpg, .png or .jpeg format allowed!"));
       }
     
   },
@@ -69,8 +70,8 @@ const uploadPdf = multer({
 });
 
 
-businessRouter.post("/create-business", authorizeUser , upload.single("business-image"), createNewBusiness);
-businessRouter.patch("/update-business", authorizeUser,   upload.single("business-image"), updateABusiness);
+businessRouter.post("/create-business", authorizeUser , upload.array("business_image",5), createNewBusiness);
+businessRouter.patch("/update-business", authorizeUser,   upload.array("business_image",5), updateABusiness);
 businessRouter.get("/all-business", getAllBusiness);
 
 businessRouter.get("/single-business", getASingleBusinessDetails);
@@ -96,6 +97,9 @@ businessRouter.get("/most-viewed", filterBusinessByMostView);
 
 //category-wise-most-numbered-business
 businessRouter.get("/top-category", filterBusinessByCategoryWithBusinessCount);
+
+//top country
+businessRouter.get("/top-country",filterBusinessByCountryWithBusinessCount);
 
 //isSold route.
 businessRouter.patch("/sold-business", markedBusinessAsSold);
