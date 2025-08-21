@@ -25,6 +25,23 @@ export const postNewSubscriptionPlanService = async (payload) => {
     
 }
 
+//update subscription plan service
+export const updateSubscriptionService = async (req) => {
+
+    const {subscriptionId} = req.query;
+    if(!subscriptionId) throw new ApiError(400, "Subscription id is required");
+
+    const {subscriptionPlanType,subscriptionPlanRole,price,features,duration} = req.body;
+
+    const subscription = await SubscriptionPlanModel.findByIdAndUpdate(subscriptionId,{
+        subscriptionPlanType,subscriptionPlanRole,price,features,duration
+    },{new: true});
+
+    if(!subscription) throw new ApiError(500, "Subcription update failed");
+
+    return subscription;
+}
+
 //get user role based subscription plan service
 export const getAllSubscriptionPlanByUserRoleService = async(query) => {
     const {role} = query;

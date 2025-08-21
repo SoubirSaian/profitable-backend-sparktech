@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByCountryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
+import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByCountryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markBusinessAsApprovedTrue, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 // import ApiError from "../../../error/ApiError.js";
 
@@ -106,6 +106,10 @@ businessRouter.patch("/sold-business", markedBusinessAsSold);
 
 //featured business
 businessRouter.get("/featured-business", featuredBusinessHomePage);
+
+//dashboard
+//approve a listed business
+businessRouter.patch("/approve-business", markBusinessAsApprovedTrue);
 
 
 export default businessRouter;

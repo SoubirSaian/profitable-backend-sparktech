@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 import config from "../../../config/index.js";
 import termsAndConditionModel from "./termsAndCondition.model.js";
 import privacyPolicyModel from "./privacyPolicy.model.js";
+import QueryBuilder from "../../../builder/queryBuilder.js";
 
 
 
@@ -16,24 +17,28 @@ export const homePageSearch = catchAsync(
         if(!searchText){
             throw new ApiError(400, "Search text is required to perform search");
         }
-
-
         //$regex: searchTerm → Matches titles that contain the given term.
         //$options: "i" → Makes it case-insensitive (so "Coffee" matches "coffee").
-        const response = await BusinessModel.aggregate([
-           {
-            $match: {
-                title: { $regex: searchText, $options: "i" }
-            }
-           } 
-        ]);
+        // const response = await BusinessModel.aggregate([ 
+        //    {
+        //         $match: { title: { $regex: searchText, $options: "i" }, isApproved: true }
+        //    }
+        // ]);
 
+        //using query builder to execute query
+        const businessQuery = new QueryBuilder(
+            BusinessModel.find({}), query
+        ).search(["title"])
+        .filter();
+
+        const business = await businessQuery.modelQuery;
+        const total = await businessQuery.countTotal();
 
         sendResponse(res,{
             statusCode: 200,
             success: true,
             message: "Got data after searching",
-            data: response
+            data: {business,total}
         })
 
     }

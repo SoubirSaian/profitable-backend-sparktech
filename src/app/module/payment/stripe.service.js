@@ -68,12 +68,12 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
     // update user subscription
     // calculate and stamp subscriptionStartDate and subscriptionEndDate date based on the duration
     const subscriptionStartDate = new Date();
-    const subscriptionEndDate = getEndDate(payment.subscriptionPlan.duration);
+    const subscriptionEndDate = getEndDate(payment.subscriptionPlan.duration || "6 Months");
 
     const updateUserData = {
       $set: {
         isSubscribed: true,
-        subscriptionPlanPrice: payment.subscriptionPlan.price ,
+        subscriptionPlanPrice: payment.subscriptionPlan.price[0] ,
         subscriptionPlan: payment.subscriptionPlan._id,
         subscriptionStartDate,
         subscriptionEndDate,
@@ -122,10 +122,10 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
 
 //perform stripe checkout service
 export const postCheckoutService = async (userData, payload) => {
-  const {userId} = userData;
-  const {subscriptionId,couponCode} = payload;
-  validateFields(payload, ["subscriptionId"]);
-
+  const {userId,role} = userData;
+  const {subscriptionId,price,couponCode} = payload;
+  validateFields(payload, ["subscriptionId","price"]);
+  const priceNumber = Number(price);
   // check if user is already subscribed
   // const user = await User.findById(userData.userId).lean();
 
@@ -139,12 +139,19 @@ export const postCheckoutService = async (userData, payload) => {
   if (!subscriptionPlan){
       throw new ApiError(400 , "SubscriptionPlan not found");
   }
+
+  //only for broker
+  // if(role === "Broker"){
+  //   if(price === 1399 || price === 1799 || price === 4999){ subscriptionPlan.duration = "1 Months"; }
+  //   else if(price === 1999 || price === 5999 || price === 9999){ subscriptionPlan.duration = "3 Months" }
+  //   else if(price === 3599 || price === 8999 || price === 17499){ subscriptionPlan.duration = "6 Months" }
+  // }
   //calculate subscription start date and end date
   const subscriptionStartDate = new Date();
-  const subscriptionEndDate = getEndDate(subscriptionPlan.duration);
+  const subscriptionEndDate = getEndDate(subscriptionPlan.duration || "6 Months");
 
   //if user prefer a free plan
-  if(subscriptionPlan.price === 0){
+  if(priceNumber === 0){
 
     await UserModel.findByIdAndUpdate(userId,{
       isSubscribed: true,subscriptionPlan: subscriptionId, subscriptionPlanPrice: 0, subscriptionStartDate,subscriptionEndDate
@@ -154,7 +161,7 @@ export const postCheckoutService = async (userData, payload) => {
   }
 
   //get the amount in bdt and convert it to dollar
-  var amountInCents = Math.ceil( subscriptionPlan.price.toFixed(2) * 100 );
+  var amountInCents = Math.ceil( priceNumber.toFixed(2) * 100 );
   var amount = amountInCents / 100;
 
   //handle coupon
@@ -183,7 +190,7 @@ export const postCheckoutService = async (userData, payload) => {
       amountInCents = amountInCents - discountAmount;
 
       // 6️⃣ Increase usage count
-      coupon.couponUsesCount += 1;
+      coupon.couponUsesCount = coupon.couponUsesCount + 1;
       await coupon.save();
 
   }

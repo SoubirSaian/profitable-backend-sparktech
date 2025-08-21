@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import {postNewSubscriptionPlanService, getAllSubscriptionPlanByUserRoleService, getSingleSubscriptionPlanService } from "./subscriptrion.service.js";
+import {postNewSubscriptionPlanService, getAllSubscriptionPlanByUserRoleService, getSingleSubscriptionPlanService, updateSubscriptionService } from "./subscriptrion.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 //api ending point to create a subscription plan
@@ -11,6 +11,19 @@ export const createSubscriptionPlan = catchAsync( async (req,res) => {
         statusCode: 201,
         success: true,
         message: "Subscription plan created",
+        data: newPlan
+    })
+});
+
+//api ending point to update a subscription plan
+export const updateSubscriptionPlan = catchAsync( async (req,res) => {
+
+    const newPlan = await updateSubscriptionService(req);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Subscription plan updated",
         data: newPlan
     })
 });

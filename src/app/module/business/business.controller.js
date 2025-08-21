@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService, topCountryWithMaximumBusinesService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService, topCountryWithMaximumBusinesService, businessApproveService } from "./business.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -130,7 +130,8 @@ export const filterBusinessByVariousFields = catchAsync (
             statusCode: 200,
             success: true,
             message: "Retrieved business as per your condition",
-            data: response
+            meta: response.meta,
+            data: response.business
         });
     }
 );
@@ -184,7 +185,7 @@ export const filterBusinessByCategoryWithBusinessCount = catchAsync(
 export const filterBusinessByCountryWithBusinessCount = catchAsync(
     async (req,res) => {
 
-        const response = await topCountryWithMaximumBusinesService(req.query);
+        const response = await topCountryWithMaximumBusinesService();
         
         sendResponse(res,{
             statusCode: 200,
@@ -219,4 +220,16 @@ export const featuredBusinessHomePage = catchAsync( async (req,res) => {
             message: "Got business which business owner's has maximum subscription plan",
             data: response
         });
+});
+
+//dashboard
+//mark a businesss as approved to display in website
+export const markBusinessAsApprovedTrue = catchAsync( async (req,res) => {
+     await businessApproveService(req.query);
+
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Marked this business as approved true",
+    })
 });

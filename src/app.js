@@ -16,7 +16,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 //to get/retrieve upload folder image
-app.use('/uploads', express.static('uploads'));
+// app.use('/uploads', express.static('uploads'));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -25,8 +26,14 @@ app.use(cors({
     origin: ["http://10.10.20.60:3005"],
     credentials: true
 }));
+
+//to get/retrieve upload folder image
+app.use('/uploads', express.static('uploads'));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 //use webhook route before app.use(express.json())
 app.use("/api/v1/webhook", webhookRouter);
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());

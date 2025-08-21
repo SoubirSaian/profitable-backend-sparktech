@@ -9,6 +9,7 @@ import path from "path";
 import CategoryModel from "../category/category.model.js";
 import UserModel from "../user/user.model.js";
 import postNotification from "../../../utils/postNotification.js";
+import QueryBuilder from "../../../builder/queryBuilder.js";
 
 
 //create new business service
@@ -54,7 +55,7 @@ export const createNewBusinessService = async (req) => {
         }
 
         //update user's total business
-        user.totalBusiness += 1;
+        user.totalBusiness = user.totalBusiness + 1;
         await user.save();
 
         //send notification to admin and user
@@ -185,15 +186,8 @@ export const createNewBusinessService = async (req) => {
 
 //update a business service
 export const updateABusinessService = async (req) => {
-    //if image comes then have to extract image name from req.file.filename
-    let imgNames;
-    if(req.files){
-        imgNames = req.files.map( (file) => file.filename);
-    }
-
     const {businessId,user} = req.query;
     const { userId } = req.user;
-    // console.log(businessId);
     
     if(!businessId || !user){
         throw new ApiError(400, "BusinessId and userId is required to update a business");
@@ -206,44 +200,58 @@ export const updateABusinessService = async (req) => {
 
     //destructure property
     const { title,category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
+    // console.log(req.body);
+    //existing image
+    let businessImage = req.body.business_image;
 
+    // Step 1: Parse JSON string → Object
+    let parsed = JSON.parse(businessImage);
+    let updatedImage = parsed.business_image;
+
+    // Step 2: Add new image
+    if(req.files){
+       req.files.forEach( (file) => updatedImage.push(file.filename));
+    }
+    // console.log(updatedImage);
     //no need to validate update service payload . because during updation all fields are not necessery
-    //before update delete previous listed image
+    //before update store previous listed image to delete before
      const business = await BusinessModel.findById(businessId).select('title user image');
+     const oldImages = business.image; //console.log(oldImages);
+     
       if (!business) {
         throw new ApiError(404, "Busines not found to update");
       }
 
-      // Step 2: Remove old images from filesystem
-      if(req.files){
-
-          if (business.image && business.image.length > 0) {
-    
-            business.image.forEach((img) => {
-    
-              const filePath = path.join("uploads/business-image", img);
-    
-              if (fs.existsSync(filePath)) {
-    
-                fs.unlinkSync(filePath); // delete the file
-              }
-            });
-          }
-          console.log('deleted');
-          
-      }
 
     //findout which business instance have to update
     const updatedBusiness = await BusinessModel.findByIdAndUpdate(businessId,{
-        image: imgNames,title,category,subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description
+        image: updatedImage,title,category,subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description
     },{ new: true });
 
     if(!updatedBusiness){
         throw new ApiError(500, "Failed to update a business");
     }
+
+    //Step 2: Remove old images from filesystem
+    const removedImg = oldImages.filter((img) => !updatedImage.includes(img));
+    if (removedImg && removedImg.length > 0) {
+
+        removedImg.forEach((img) => {
+
+            const filePath = path.join("uploads/business-image", img);
+
+            if (fs.existsSync(filePath)) {
+
+            fs.unlinkSync(filePath); // delete the file
+            }
+        });
+        console.log('deleted');
+    }
+          
     //send update notification to user
     postNotification(" Your business is updated", `Your business named ${updatedBusiness.title} is updated`, userId);
-
+    // console.log(updatedBusiness);
+    
     return updatedBusiness;
 }
 
@@ -294,6 +302,7 @@ export const deleteBusinessService = async (query) => {
 
     // 1️⃣ Find business by ID
     const business = await BusinessModel.findById(businessId);
+
     if (!business) {
       throw new ApiError(404, "Business not found to delete");
     }
@@ -314,6 +323,14 @@ export const deleteBusinessService = async (query) => {
 
     // 3️⃣ Delete business from DB
     const deleted = await BusinessModel.findByIdAndDelete(businessId);
+
+    //update user's total business count after deletion
+    if(deleted){
+        const businessCount = await BusinessModel.countDocuments({user: business.user});
+        await UserModel.findByIdAndUpdate(business.user,{ 
+                $set: {totalBusiness: businessCount}
+        });
+    }
 
     return deleted;
 
@@ -471,160 +488,46 @@ export const getBusinessValuationService = async (req) => {
 
 //filter business service
 export const filterBusinessService = async (query) => {
-    const {category,subCategory,country,location,askingPrice,businessType,ownerShipType,ageOfListing,sortBy,searchText,businessRole} = query;
-
-    //filter all data by various query
-    if(!category && !country && !location && !askingPrice && !businessType && !ownerShipType && !ageOfListing && !sortBy && !searchText && !businessRole){
-        const business = await BusinessModel.find({isApproved: true});
-        return business;
-    }
-    else if(category && subCategory){
-        const business = await BusinessModel.find({category: category,subCategory: subCategory,isApproved: true});
-        return business;
-    }
-    else if(category){
-        const business = await BusinessModel.find({category: category,isApproved: true});
-        return business;
-    }
-    else if(country){
-        const business = await BusinessModel.find({country: country,isApproved: true});
-        return business;
-    }
-    else if(location){
-        const business = await BusinessModel.find({location: location,isApproved: true});
-        return business;
-    }
-    else if(askingPrice){
-        const business = await BusinessModel.find({askingPrice: askingPrice,isApproved: true});
-        return business;
-    }
-    else if(businessType){
-        const business = await BusinessModel.find({businessType: businessType,isApproved: true});
-        return business;
-    }
-    else if(ownerShipType){
-        const business = await BusinessModel.find({ownerShipType: ownerShipType,isApproved: true});
-        return business;
-    }
-    else if(ageOfListing){
-        //present date
-        const todaysDate = new Date();
-
-        if(ageOfListing === "Anytime"){
-            //newest business to show first
-            const business = await BusinessModel.find({isApproved: true}).sort({createdAt: -1});
-            return business;
-        }
-        else if(ageOfListing === "Last 3 Days"){
-
-            //set date 3 days ago
-            todaysDate.setDate(todaysDate.getDate() - 3);
-            const business = await BusinessModel.find({ isApproved: true, createdAt: { $gte: todaysDate } });
-            return business;
-        }
-        else if(ageOfListing === "Last 14 Days"){
-            //set date 14 days ago
-            todaysDate.setDate(todaysDate.getDate() - 14);
-            const business = await BusinessModel.find({ isApproved: true, createdAt: { $gte: todaysDate } });
-            return business;
-        }
-        else if(ageOfListing === "Last Month"){
-            //set date 30 days ago
-            todaysDate.setDate(todaysDate.getDate() - 30);
-            const business = await BusinessModel.find({ isApproved: true, createdAt: { $gte: todaysDate } });
-            return business;
-        }
-        else if(ageOfListing === "Last 3 Months"){
-            //set date 90 days ago
-            todaysDate.setDate(todaysDate.getDate() - 90);
-            const business = await BusinessModel.find({ isApproved: true, createdAt: { $gte: todaysDate } });
-            return business;
-        }
-    }
-    else if(sortBy){
-
-        if(sortBy=== "Newest First"){
-            const business = await BusinessModel.find({isApproved: true}).sort( { createdAt: -1 } );
-            return business;
-        }
-
-        else if(sortBy === "Price (Low to High)"){
-            //here I am using mongoose aggregation to filter price
-            const business = await BusinessModel.aggregate([
-                {
-                    $match:{
-                        askingPrice: "Under $50k",
-                        isApproved: true
-                    }
-                },
-                {
-                    $match:{
-                        askingPrice: "$50k - $100k", isApproved: true
-                    }
-                },
-                {
-                    $match:{
-                        askingPrice: "$100k - $250k", isApproved: true
-                    }
-                },
-                {
-                    $match:{
-                        askingPrice: "$250k - $500k", isApproved: true
-                    }
-                },
-                {
-                    $match:{
-                        askingPrice: "$500k - 1M", isApproved: true
-                    }
-                },
-                {
-                    $match:{
-                        askingPrice: "Over 1M", isApproved: true
-                    }
-                }
-            ]);
-
-            return business;
-
-        }
-
-        else if( sortBy === "Most Viewed"){
-            //.find() retrieves all business documents.
-            //.sort({ views: -1 }):
-           //-1 = descending order (most views → fewest views).
-            //If two businesses have the same number of views, they will appear based on creation time or MongoDB’s default order.
-            const mostViewedApproved = await BusinessModel.find({
-                isApproved: true,
-                // isSold: false
-            }).sort({ views: -1 });
-            
-
-            return mostViewedApproved;
-
-        }
-       
-
-    }
-    else if(searchText){
-        //$regex: searchTerm → Matches titles that contain the given term.
-        //$options: "i" → Makes it case-insensitive (so "Coffee" matches "coffee").
-        const business = await BusinessModel.aggregate([
-           {
-            $match: {
-                title: { $regex: searchText, $options: "i" }
-            }
-           } 
-        ]);
-
-        return business;
-    }
-    else if(businessRole){
-        const business = await BusinessModel.find({businessRole: businessRole});
-        return business;
-    }
+    console.log(query);
     
+    //using query builder to execute query
+    let businessQuery;
+    // if(query.searchText){
+    //     businessQuery = new QueryBuilder(
+    //         BusinessModel.find({}), query
+    //     ).search(["title"]);
+    //      query = {};
+    // }
+    // else if(query.sortBy){
+    //     businessQuery = new QueryBuilder(
+    //         BusinessModel.find({}), query
+    //     ).sort();
+    //     query = {};
+    // }
+    // else if(query.ageOfListing){
+    //     businessQuery = new QueryBuilder(
+    //         BusinessModel.find({}), query
+    //     ).ageOfListing();
+    //     query = {};
+    // }
+    // else{
 
+    //      businessQuery = new QueryBuilder(
+    //         BusinessModel.find({}), query
+    //     ).filter();
+    //     query = {};
+    // }
 
+    businessQuery = new QueryBuilder(
+           BusinessModel.find({}), query
+       ).search(["title"]).filter().sort().ageOfListing();
+
+    const business = await businessQuery.modelQuery;
+    const meta = await businessQuery.countTotal();
+    
+    
+    return {business,meta};
+    
 }
 
 //filter business by business role service
@@ -761,12 +664,35 @@ export const filterBusinessByCategoryWithBusinessService = async () => {
 }
 
 //filter business by top country service
-export const topCountryWithMaximumBusinesService = async (query) => {
-    // const country = query.country;
+export const topCountryWithMaximumBusinesService = async () => {
 
-    // const countries = await fetch(`https://restcountries.com/v3.1/name/${country}`);
+    const business = await BusinessModel.aggregate([
 
-    // return countries;
+        {
+            $match: { isApproved: true }
+        },
+        {
+            $group: {
+                _id: "$country",
+                totalBusinesses: { $sum: 1 }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                country: "$_id",
+                totalBusinesses: 1
+            }
+        },
+        {
+            $sort: { totalBusinesses: -1 }
+        }
+    ]);
+
+    if(!business) throw new ApiError(500, "failed to get country with business count");
+
+    return business;
+
 }
 
 //marked your business as sold service
@@ -869,3 +795,13 @@ export const featuredBusinessService = async (query) => {
 
     return businessesWithMaxPricePlan;
 }
+
+//dashboard
+//business approve service
+export const businessApproveService = async (query) => {
+    const {businessId} = query;
+    if(!businessId) throw new ApiError(400,"Business id is required to make a business approved");
+
+    await BusinessModel.findByIdAndUpdate(businessId,{ isApproved: true });
+}
+
