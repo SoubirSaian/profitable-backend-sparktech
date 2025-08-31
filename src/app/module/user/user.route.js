@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path"
-import { getAllUsers, getSellerDetail, getUserDetails, getUsersTotalListedBusiness, updateUserProfile } from "./user.controller.js";
+import { getSellerDetail, getUserDetails, updateUserProfile } from "./user.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 
 const userRouter = express.Router();
@@ -52,8 +52,6 @@ userRouter.get("/user-detail",authorizeUser, getUserDetails );
 userRouter.patch("/update-profile",authorizeUser ,upload.single("profile-image"), updateUserProfile);
 userRouter.get("/seller-detail", authorizeUser, getSellerDetail);
 
-//dashboard
-userRouter.get("/get-all-user", getAllUsers);
-userRouter.get("/users-business-statistics", getUsersTotalListedBusiness);
+
 
 export default userRouter;

@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import validator from "validator";
 
 
@@ -51,10 +51,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isUserActive:{
-        type: Boolean,
-        default: false
-    },
     verificationCode: {
         type: String,
         default: null
@@ -72,7 +68,7 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isSubscribed:{
+    isBlocked:{
         type: Boolean,
         default: false,
     },
@@ -87,6 +83,10 @@ const userSchema = new mongoose.Schema({
     },
     subscriptionPlanPrice:{
         type: Number,
+        default: null
+    },
+    subscriptionPlanType:{
+        type: String,
         default: null
     },
     subscriptionStartDate:{

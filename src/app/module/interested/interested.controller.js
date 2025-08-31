@@ -1,6 +1,7 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import { getAllInterestedBusinessByUserService, getAllInterestedUsersService, makeAnUserInterestedService } from "./interested.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
+// import { deleteBusinessService } from "../business/business.service.js";
 
 
 
@@ -41,3 +42,16 @@ export const getInterestedBusinessByUser = catchAsync(async (req,res) => {
         data: response
     });
 });
+
+//get all interested business filter by user
+// export const deleteInterestedBusiness = catchAsync(async (req,res) => {
+
+//     const response = await deleteBusinessService(req.query);
+
+//     sendResponse(res,{
+//         statusCode: 200,
+//         success: true,
+//         message: "deleted interesesd business",
+//         data: response
+//     });
+// });

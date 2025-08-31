@@ -1,6 +1,6 @@
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
-import { getAllUserService, getUserDetailsService, sellerDetailService, userProfileUpdateService, usersTotalListedBusinessService } from "./user.service.js";
+import {  getUserDetailsService, sellerDetailService, userProfileUpdateService } from "./user.service.js";
 
 
 //api ending point to update user
@@ -42,31 +42,7 @@ export const getSellerDetail = catchAsync( async (req,res) => {
     });
 });
 
-//dashboard
 
-//api ending point to get all user
-export const getAllUsers = catchAsync( async (req,res) => {
-   
-    const response = await getAllUserService();
 
-    sendResponse(res,{
-        statusCode: 200,
-        success: true,
-        message: "Got all user",
-        data: response
-    });
-});
 
-//api ending point to get user's total listed business
-export const getUsersTotalListedBusiness = catchAsync( async (req,res) => {
-   
-    const response = await usersTotalListedBusinessService(req.query);
-
-    sendResponse(res,{
-        statusCode: 200,
-        success: true,
-        message: "Got userr's total listed business with statistics",
-        data: response
-    });
-});
 

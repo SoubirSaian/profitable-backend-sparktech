@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { createNewAgreement } from "./agreement.controller.js";
+import { createNewAgreement, getAllNdaAgreement } from "./agreement.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 
 
@@ -30,21 +30,23 @@ const uploadPdf = multer({
     fileSize: 1 * 1024 * 1024, // 1MB max per file
   },
 
-  // fileFilter: (req, file, cb) => {
+  fileFilter: (req, file, cb) => {
    
-  //     if (file.mimetype === "file/pdf") {
+      if (file.mimetype === "application/pdf") {
 
-  //       cb(null, true);
+        cb(null, true);
 
-  //     } else {
-  //       cb(new Error("Only .pdf format allowed!"));
-  //     }
+      } else {
+        cb(new Error("Only .pdf format allowed!"));
+      }
     
-  // }
+  }
 });
 
-agreementRouter.post("/create-agreement",authorizeUser , uploadPdf.array("file",3), createNewAgreement);
-// agreementRouter.get("/get-all-agreement", );
+agreementRouter.post("/create-agreement",authorizeUser , uploadPdf.array("nda-file",3), createNewAgreement);
+
+//dashboard
+agreementRouter.get("/get-all-agreement", getAllNdaAgreement);
 // agreementRouter.get("/get-single-agreement", );
 
 export default agreementRouter;

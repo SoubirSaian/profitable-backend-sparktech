@@ -1,15 +1,30 @@
 import ApiError from "../../../error/ApiError.js";
 import validateFields from "../../../utils/validateFields.js";
+import brokerSubscriptionPlanModel from "./brokerSubscriptionPlan.model.js";
 import SubscriptionPlanModel from "./subscription.model.js";
 
 
 
 
 //post a new subscription plan service
-export const postNewSubscriptionPlanService = async (payload) => {
+export const postNewSubscriptionPlanService = async (payload) => { 
     const {subscriptionPlanType, subscriptionPlanRole,features, price, duration  } = payload;
 
     validateFields(payload,["subscriptionPlanType","subscriptionPlanRole","features","price"]);
+
+    if(subscriptionPlanRole === "Broker"){
+         //create a new subscription plan
+        const brokerSubscriptionPlan = await brokerSubscriptionPlanModel.create({
+            subscriptionPlanType, subscriptionPlanRole,features, price 
+        });
+
+        //check if new plan is created or not
+        if(!brokerSubscriptionPlan){
+            throw new ApiError(500, "Failed to create Broker subscription");
+        }
+
+        return brokerSubscriptionPlan;
+    }
 
     //create a new subscription plan
     const newSubscriptionPlan = await SubscriptionPlanModel.create({
@@ -28,10 +43,20 @@ export const postNewSubscriptionPlanService = async (payload) => {
 //update subscription plan service
 export const updateSubscriptionService = async (req) => {
 
-    const {subscriptionId} = req.query;
-    if(!subscriptionId) throw new ApiError(400, "Subscription id is required");
+    const {subscriptionId,role} = req.query;
+    if(!subscriptionId || !role) throw new ApiError(400, "Subscription id, role is required to update");
 
     const {subscriptionPlanType,subscriptionPlanRole,price,features,duration} = req.body;
+
+    if(role === "Broker"){
+        const subscription = await brokerSubscriptionPlanModel.findByIdAndUpdate(subscriptionId,{
+            subscriptionPlanType,subscriptionPlanRole,price,features
+        },{new: true});
+
+        if(!subscription) throw new ApiError(500, "Subcription update failed");
+
+        return subscription;
+    }
 
     const subscription = await SubscriptionPlanModel.findByIdAndUpdate(subscriptionId,{
         subscriptionPlanType,subscriptionPlanRole,price,features,duration
@@ -47,9 +72,19 @@ export const getAllSubscriptionPlanByUserRoleService = async(query) => {
     const {role} = query;
 
     //check if role is available or not
-    if(!role){
-        throw new ApiError(400, "User role is needed to get user's subscription option");   
-     }
+    if(!role) throw new ApiError(400, "User role is needed to get user's subscription option");   
+
+    if(role === "Broker"){
+        //filter subscriptions from subscription collection
+        const brokerSubscription = await brokerSubscriptionPlanModel.find({});
+
+        if(!brokerSubscription){
+            throw new ApiError(500, "failed to get broker subscription plan");
+        }
+
+        return brokerSubscription;
+    }
+     
 
     //filter subscriptions from subscription collection
     const allSubscription = await SubscriptionPlanModel.find({subscriptionPlanRole: role});
@@ -65,11 +100,22 @@ export const getAllSubscriptionPlanByUserRoleService = async(query) => {
 
 //get user role based subscription plan service
 export const getSingleSubscriptionPlanService = async(query) => {
-    const { subscriptionId } = query;
+    const { subscriptionId,role } = query;
 
     //check if role is available or not
-    if(!subscriptionId){
-        throw new ApiError(400, "Subscription Id is needed to get user's subscription plan");   
+    if(!subscriptionId || !role){
+        throw new ApiError(400, "Subscription Id, role are needed to get user's subscription plan");   
+     }
+
+     if(role === "Broker"){
+        //filter subscriptions from subscription collection
+        const subscription = await brokerSubscriptionPlanModel.findById(subscriptionId);
+
+        if(!subscription){
+            throw new ApiError(500, "failed to get subscription plan");
+        }
+
+        return subscription;
      }
 
     //filter subscriptions from subscription collection

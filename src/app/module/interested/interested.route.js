@@ -8,5 +8,6 @@ const interestedRouter = expresss.Router();
 interestedRouter.post("/make-interested", makeAnUserInterested);
 interestedRouter.get("/interested-user", getInterestedUsersByBusiness);
 interestedRouter.get("/interested-business", authorizeUser, getInterestedBusinessByUser);
+// interestedRouter.delete("/delete-interest", authorizeUser, getInterestedBusinessByUser);
 
 export default interestedRouter;

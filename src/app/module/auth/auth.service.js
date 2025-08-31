@@ -93,11 +93,16 @@ export const userLoginService = async (payload) => {
     validateFields(payload,["email","password","role"]);
 
     //checkif user exist
-    const user = await UserModel.findOne({ email,role}).select({name: true, email: true, role: true,password: true, isEmailVerified: true, isSubscribed: true});
+    const user = await UserModel.findOne({ email,role}).select({name: true, email: true, role: true,password: true, isEmailVerified: true,isBlocked: true});
     // console.log(user);
 
     if(!user) {
         throw new ApiError(404,"User not found");
+    }
+
+    // Blocked user cannot login
+    if (user.isBlocked) {
+      throw new ApiError(403, "Your account has been blocked. Contact support to reactivate you account.");
     }
     
     //check if user's email is verified or not
@@ -117,7 +122,6 @@ export const userLoginService = async (payload) => {
         userId: user._id,
         email: user.email,
         role: user.role,
-        isSubscribed: user.isSubscribed
     };
 
     const accessToken =  createToken(tokenPayload, config.jwt.secret, config.jwt.expires_in);

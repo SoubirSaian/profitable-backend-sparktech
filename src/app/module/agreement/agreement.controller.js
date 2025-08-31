@@ -1,4 +1,4 @@
-import { log } from "console";
+import ApiError from "../../../error/ApiError.js";
 import catchAsync from "../../../utils/catchAsync.js";
 import sendResponse from "../../../utils/sendResponse.js";
 import validateFields from "../../../utils/validateFields.js";
@@ -24,11 +24,32 @@ export const createNewAgreement = catchAsync(
            user: userId,role,name,email,phone,nidPassportNumber, nidPassportPdf: file1, tradeLicensePdf: file2, signaturePdf: file3
         });
 
+        if(!agreement) throw new ApiError(500," Failed to create new aggremt");
+
         sendResponse(res,{
             statusCode: 201,
             success: true,
             message: "Created new Agreement successfully",
             data: agreement
         });
+    }
+);
+
+
+//dashboard
+//api ending point to get all nda agreement
+export const getAllNdaAgreement = catchAsync(
+    async (req,res) => {
+
+        const response = await Agreement.find({});
+
+        if(!response) throw new ApiError(404,"No agreement found");
+
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "Retrieved all agreement",
+            data: response
+        })
     }
 );

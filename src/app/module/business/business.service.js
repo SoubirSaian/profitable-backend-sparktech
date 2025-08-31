@@ -10,6 +10,7 @@ import CategoryModel from "../category/category.model.js";
 import UserModel from "../user/user.model.js";
 import postNotification from "../../../utils/postNotification.js";
 import QueryBuilder from "../../../builder/queryBuilder.js";
+import deleteFile from "../../../utils/deleteUnlinkFile.js";
 
 
 //create new business service
@@ -19,34 +20,33 @@ export const createNewBusinessService = async (req) => {
     const role = req.user.role;
     // console.log(req.file.filename); 
     let images;
-    if(req.files){
-         images = req.files.map((file) => file.filename );
+    if(req.file){
+         images = req.file.filename;
     }
     
     if(!images){
         throw new ApiError(400, "Image is required to create new business");
     }
 
-    const { title, category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
+    const { title, category, subCategory, country, state, city, askingPrice, price, ownerShipType, businessType, reason, description} = req.body;
 
     //check if all the fields are available
     validateFields(req.body,[
-         "title", "category", "country", "location", "askingPrice", "ownerShipType", "businessType"
+         "title", "category", "country", "askingPrice", "ownerShipType", "businessType"
     ]);
 
     //user type and subscription wise different add business functionlity
-    const user = await UserModel.findById(userId).populate({
-            path: "subscriptionPlan", select: "subscriptionPlanType"
-        }).select('name isSubscribed totalBusiness');
+    const user = await UserModel.findById(userId);
 
     const businessCount = user.totalBusiness;
-    const subscriptionPlanType = user.subscriptionPlan.subscriptionPlanType;
+    const subscriptionPlanType = user.subscriptionPlanType;
 
+    let newBusiness;
     //create new business function
     const addNewBusiness = async () => {
 
-        const newBusiness = await BusinessModel.create({
-            user: userId,image: images, title, businessRole: role, category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description
+         newBusiness = await BusinessModel.create({
+            user: userId,image: images, title, businessRole: role, category, subCategory, country, state, city, askingPrice,price, ownerShipType, businessType, reason, description
         });
 
         //check if business is created or not
@@ -68,38 +68,15 @@ export const createNewBusinessService = async (req) => {
     //Seller add business
     if(role === "Seller"){
 
-        if(subscriptionPlanType === "Free Plan"){
+        if(subscriptionPlanType){
 
             //check if user can add new business or not
-             if(businessCount >= 1) throw new ApiError(400, "Free plan user can't add more than one business");
+             if(businessCount >= 1) throw new ApiError(400, "A Seller can't add more than one business");
              
              await addNewBusiness();
 
         }
-        else if(subscriptionPlanType === "1 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 2) throw new ApiError(400, "1 month subscription plan user can't add more than 2 business");
-
-             await addNewBusiness();
-
-        }
-        else if(subscriptionPlanType === "3 Months"){
-
-            //check if user can add new business or not
-             if(businessCount >= 5) throw new ApiError(400, "3 Months subscription plan user can't add more than 5 business");
-
-             await addNewBusiness();
-
-        }
-        else if(subscriptionPlanType === "6 Months"){
-
-            //check if user can add new business or not
-            if(businessCount >= 10) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 10 business");
-
-            await addNewBusiness();
-
-        }
+        
     }
     else if(role === "Asset Seller") {
 
@@ -182,50 +159,45 @@ export const createNewBusinessService = async (req) => {
 
     }  
 
+    if(!newBusiness) throw new ApiError(400,"Failed to add new business");
 }
 
 //update a business service
 export const updateABusinessService = async (req) => {
     const {businessId,user} = req.query;
-    const { userId } = req.user;
+    const { userId,role } = req.user;
     
     if(!businessId || !user){
         throw new ApiError(400, "BusinessId and userId is required to update a business");
     }
 
-    //check if user can update or not
-    if(userId !== user){
-        throw new ApiError(403,"You can't update this business");
+    //if user role is Admin then he can update all listed business
+    if(role !== "Admin"){
+        //check if user can update or not
+        if(userId !== user){
+            throw new ApiError(403,"You can't update this business");
+        }
     }
 
     //destructure property
-    const { title,category, subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description} = req.body;
+    const { title,category, subCategory, country, state, city, askingPrice, price, ownerShipType, businessType, reason, description} = req.body;
     // console.log(req.body);
-    //existing image
-    let businessImage = req.body.business_image;
-
-    // Step 1: Parse JSON string → Object
-    let parsed = JSON.parse(businessImage);
-    let updatedImage = parsed.business_image;
-
+    let updatedImage;
     // Step 2: Add new image
-    if(req.files){
-       req.files.forEach( (file) => updatedImage.push(file.filename));
+    if(req.file){
+       updatedImage = req.file.filename;
     }
-    // console.log(updatedImage);
+  
     //no need to validate update service payload . because during updation all fields are not necessery
-    //before update store previous listed image to delete before
+    //before update store previous listed image to delete 
      const business = await BusinessModel.findById(businessId).select('title user image');
      const oldImages = business.image; //console.log(oldImages);
      
-      if (!business) {
-        throw new ApiError(404, "Busines not found to update");
-      }
-
-
+     if (!business)  throw new ApiError(404, "Busines not found to update");
+      
     //findout which business instance have to update
     const updatedBusiness = await BusinessModel.findByIdAndUpdate(businessId,{
-        image: updatedImage,title,category,subCategory, country, state, city, location, askingPrice, ownerShipType, businessType, industryName, description
+        image: updatedImage,title,category,subCategory, country, state, city, askingPrice, price, ownerShipType, businessType, reason, description
     },{ new: true });
 
     if(!updatedBusiness){
@@ -233,19 +205,9 @@ export const updateABusinessService = async (req) => {
     }
 
     //Step 2: Remove old images from filesystem
-    const removedImg = oldImages.filter((img) => !updatedImage.includes(img));
-    if (removedImg && removedImg.length > 0) {
+    if (req.file) {
 
-        removedImg.forEach((img) => {
-
-            const filePath = path.join("uploads/business-image", img);
-
-            if (fs.existsSync(filePath)) {
-
-            fs.unlinkSync(filePath); // delete the file
-            }
-        });
-        console.log('deleted');
+        deleteFile("business-image",oldImages);
     }
           
     //send update notification to user
@@ -297,28 +259,24 @@ export const getASingleBusinessByIdWithUsersService = async (query) => {
 
 //delete business service
 export const deleteBusinessService = async (query) => {
-    const { businessId } = query;
+    const { businessId,role } = query;
     if(!businessId) throw new ApiError(400, "Business Id is required to delete a businesss");
+    console.log(businessId,role);
+    
+    //delete interestest business from interested collection
+    if(role === "Buyer" || role === "Investor"){
+
+        const deleteInterset = await InterestedModel.findByIdAndDelete(businessId);
+        if(!deleteInterset) throw new ApiError(500, "Failed to delete interested business");
+
+        return deleteInterset;
+    }
 
     // 1️⃣ Find business by ID
-    const business = await BusinessModel.findById(businessId);
+    const business = await BusinessModel.findById(businessId).select("title user image");
 
     if (!business) {
       throw new ApiError(404, "Business not found to delete");
-    }
-
-    // 2️⃣ Delete image from uploads folder if exists
-    if (business.image && business.image.length > 0) {
-    
-        business.image.forEach((img) => {
-
-            const filePath = path.join("uploads/business-image", img);
-
-            if (fs.existsSync(filePath)) {
-
-            fs.unlinkSync(filePath); // delete the file
-            }
-        });
     }
 
     // 3️⃣ Delete business from DB
@@ -330,6 +288,12 @@ export const deleteBusinessService = async (query) => {
         await UserModel.findByIdAndUpdate(business.user,{ 
                 $set: {totalBusiness: businessCount}
         });
+    }
+
+    // Delete image from uploads folder if exists
+    if (business.image) {
+
+       deleteFile("business-image",business.image);
     }
 
     return deleted;
@@ -419,7 +383,7 @@ export const getBusinessValuationService = async (req) => {
     const { ownerName,businessName,email, countryCode, mobile, region, country,location,businessType,category, annualTurnover, currency, yearOfEstablishment, annualExpenses,purpose, annualProfit,valueOfAsset,valueOfStock,message } = req.body;
     
         const files = req.files;
-
+        // console.log("files : ",files);
         // Setup Nodemailer
         try {
             
@@ -433,11 +397,12 @@ export const getBusinessValuationService = async (req) => {
     
             // Prepare attachments
             const attachments = files.map(file => ({
-            filename: file.originalname,
-            path: file.path,
-            contentType: 'application/pdf',
+                filename: file.originalname,
+                path: file.path,
+                contentType: 'application/pdf',
             }));
-    
+            // console.log("attachment :",attachments);
+            
             const mailOptions = {
             from: `${config.smtp.NAME} <${config.smtp.smtp_mail}>`,
             to: config.smtp.smtp_mail,
@@ -465,9 +430,9 @@ export const getBusinessValuationService = async (req) => {
                 Message : ${message ? message : "NA"}\n
                 
                 `,
-            attachments,
+                attachments,
             };
-    
+            // console.log(mailOptions);
             // Send email
             await transporter.sendMail(mailOptions);
     
@@ -481,8 +446,6 @@ export const getBusinessValuationService = async (req) => {
         // res.status(500).json({ message: 'Something went wrong.' });
         throw new ApiError(500,"failed to send email to get your business valuation");
     }
-
-
 
 }
 
@@ -520,7 +483,7 @@ export const filterBusinessService = async (query) => {
 
     businessQuery = new QueryBuilder(
            BusinessModel.find({}), query
-       ).search(["title"]).filter().sort().ageOfListing();
+       ).search(["title"]).filter().sort().ageOfListing().paginate();
 
     const business = await businessQuery.modelQuery;
     const meta = await businessQuery.countTotal();
@@ -576,7 +539,7 @@ export const filterBusinessByMostViewService = async (query) => {
         return business;
 
     }
-    else if(query.role === "Buyer") {
+    else if(query.role === "Buyer" || query.role === "Investor") {
 
         let filter = {
             businessRole: { 
@@ -584,7 +547,7 @@ export const filterBusinessByMostViewService = async (query) => {
                     "Seller",
                     "Francise Seller",
                     "Asset Seller",
-                    "Broker"
+                    "Broker",
                 ]
             },
             isApproved: true
@@ -598,20 +561,23 @@ export const filterBusinessByMostViewService = async (query) => {
                 
         return business;
     }
-     else if( query.role = "Investor"){
-        let filter = { businessRole: "Business Idea Lister", isApproved: true};
 
-        if(query.country) { filter.country = query.country }
+}
 
-        const business = await BusinessModel.find(filter).sort({ views: -1});
-
-        if(!business) throw new ApiError(404, "No data found");
-
-        return business;
-
+//filter business idea by most view
+export const businessIdeaByMostViewService = async (query) => {
+    let filter = {
+        businessRole: "Business Idea Lister",
+        isApproved: true
     }
-     
 
+    if (query.country) { filter.country = query.country } 
+
+    const business = await BusinessModel.find(filter).sort( { views: -1 } );
+
+    if(!business) throw new ApiError(404, "No data found");
+            
+    return business;
 }
 
 //filter business by top category service
@@ -796,12 +762,5 @@ export const featuredBusinessService = async (query) => {
     return businessesWithMaxPricePlan;
 }
 
-//dashboard
-//business approve service
-export const businessApproveService = async (query) => {
-    const {businessId} = query;
-    if(!businessId) throw new ApiError(400,"Business id is required to make a business approved");
 
-    await BusinessModel.findByIdAndUpdate(businessId,{ isApproved: true });
-}
 

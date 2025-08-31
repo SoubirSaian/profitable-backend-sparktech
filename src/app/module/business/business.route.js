@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByCountryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markBusinessAsApprovedTrue, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
+import { advancedBusinessSearch, createNewBusiness, deleteBusiness, featuredBusinessHomePage, filterBusineessIdeaByMostView, filterBusinessByBusinessRole, filterBusinessByCategoryWithBusinessCount, filterBusinessByCountryWithBusinessCount, filterBusinessByMostView, filterBusinessByVariousFields, getAllBusiness, getASingleBusinessDetails, getASingleBusinessWithusers, getBusinessValuation, interestedBuyersDetails, markedBusinessAsSold, updateABusiness } from "./business.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 // import ApiError from "../../../error/ApiError.js";
 
@@ -70,8 +70,8 @@ const uploadPdf = multer({
 });
 
 
-businessRouter.post("/create-business", authorizeUser , upload.array("business_image",5), createNewBusiness);
-businessRouter.patch("/update-business", authorizeUser,   upload.array("business_image",5), updateABusiness);
+businessRouter.post("/create-business", authorizeUser , upload.single("business_image"), createNewBusiness);
+businessRouter.patch("/update-business", authorizeUser,   upload.single("business_image"), updateABusiness);
 businessRouter.get("/all-business", getAllBusiness);
 
 businessRouter.get("/single-business", getASingleBusinessDetails);
@@ -94,6 +94,7 @@ businessRouter.get("/filter-business-by-business-role", filterBusinessByBusiness
 
 //most viewed
 businessRouter.get("/most-viewed", filterBusinessByMostView);
+businessRouter.get("/most-viewed-idea", filterBusineessIdeaByMostView);
 
 //category-wise-most-numbered-business
 businessRouter.get("/top-category", filterBusinessByCategoryWithBusinessCount);
@@ -107,9 +108,7 @@ businessRouter.patch("/sold-business", markedBusinessAsSold);
 //featured business
 businessRouter.get("/featured-business", featuredBusinessHomePage);
 
-//dashboard
-//approve a listed business
-businessRouter.patch("/approve-business", markBusinessAsApprovedTrue);
+
 
 
 export default businessRouter;

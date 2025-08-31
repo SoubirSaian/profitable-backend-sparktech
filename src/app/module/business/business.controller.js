@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService, topCountryWithMaximumBusinesService, businessApproveService } from "./business.service.js";
+import { createNewBusinessService, getAllBusinessService, updateABusinessService, advancedSearchService, getBusinessValuationService, getASingleBusinessByIdWithUsersService, interestedBuyersDetailsService, singleBusinessDetailsService, filterBusinessService, filterBusinessByBusinessRoleService, filterBusinessByMostViewService, filterBusinessByCategoryWithBusinessService, markedBusinessSoldService, featuredBusinessService, deleteBusinessService, topCountryWithMaximumBusinesService, businessIdeaByMostViewService } from "./business.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 
@@ -117,7 +117,7 @@ export const getBusinessValuation = catchAsync(async (req,res) => {
     sendResponse(res,{
         statusCode: 200,
         success: true,
-        message: "Your information submitted to get valuation"
+        message: "Your information submitted to admin for further assessment"
     });
 });
 
@@ -161,6 +161,21 @@ export const filterBusinessByMostView = catchAsync(
             statusCode: 200,
             success: true,
             message: "retrieved business as per business view",
+            data: response
+        });
+    }
+);
+
+//api ending point to filter business idea by most viewed
+export const filterBusineessIdeaByMostView = catchAsync(
+    async (req,res) => {
+
+        const response = await businessIdeaByMostViewService(req.query);
+        
+        sendResponse(res,{
+            statusCode: 200,
+            success: true,
+            message: "retrieved business idea as per view",
             data: response
         });
     }
@@ -222,14 +237,3 @@ export const featuredBusinessHomePage = catchAsync( async (req,res) => {
         });
 });
 
-//dashboard
-//mark a businesss as approved to display in website
-export const markBusinessAsApprovedTrue = catchAsync( async (req,res) => {
-     await businessApproveService(req.query);
-
-    sendResponse(res,{
-        statusCode: 200,
-        success: true,
-        message: "Marked this business as approved true",
-    })
-});

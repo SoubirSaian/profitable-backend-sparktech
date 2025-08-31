@@ -17,6 +17,7 @@ import agreementRouter from "../module/agreement/agreement.route.js";
 import categoryRouter from "../module/category/category.route.js";
 import chatRouteRouter from "../module/chat/chat.routes.js";
 import notificationRouter from "../module/notification/notification.route.js";
+import dashboardRouter from "../module/dashboard/dashboard.route.js";
 
 
 const allRouter = express.Router();
@@ -89,6 +90,10 @@ const moduleRoutes = [
     {
         path: "/notification",
         router: notificationRouter
+    },
+    {
+        path: "/dashboard",
+        router: dashboardRouter
     },
      
 

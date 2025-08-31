@@ -37,16 +37,16 @@ export const sendResetPasswordEmail = async (email, data) => {
   }
 };
 
-export const sendActivationEmail = async (email, data) => {
+export const sendBuyersEnquiryEmail = async (email,data) => {
   try {
     await sendEmail({
       email,
-      subject: "Activate Your Account",
+      subject: "You have received a new enquiry from Profitable Business For Sale",
       html: signUpEmailTemp(data),
     });
   } catch (error) {
     console.log(error);
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, "Email was not sent");
+    throw new ApiError(500, "Email was not sent");
   }
 };
 

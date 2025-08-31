@@ -67,16 +67,16 @@ const signUpEmailTemp = (data) => `
     <body>
       <div class="container">
         
-        <h1>Welcome to BetWise Picks</h1>
-        <p>Hello, ${data.user}</p>
-        <p>Thank you for registering with BetWise Picks. To activate your account, please use the following activation code:</p>
-        <div class="code">${data.activationCode}</div>
-        <p>Please enter this code on the activation page within the next <strong>${data.activationCodeExpire} minutes</strong>.</p>
-        <p>If you have any questions, please contact us at <a href="mailto:thakursaad613@gmail.com">thakursaad613@gmail.com</a>.</p>
-        <p>Thank you,<br>The BetWise Picks Team</p>
+        <h1>Welcome to Profitable Business For Sale</h1>
+        <p>Dear Seller</p>
+        <p>Thank you for being with Profitable Business. You have received a new enquiry for your listed business from a buyer/investor</p>
+        
+        <p>For more information, please login Profitable business and check activity</p>
+        <p>If you have any questions, please contact us at <a href="profitablebusinessforsale@gmail.com">profitablebusinessforsale@gmail.com</a>.</p>
+        <p>Thank you,<br>Profitable Business Team</p>
       </div>
       <div class="footer">
-        <p>&copy; BetWise Picks - All Rights Reserved.</p>
+        <p>&copy; ProfitableBusiness - All Rights Reserved.</p>
         <p>
           <a href="https://yourwebsite.com/privacy">Privacy Policy</a> |
           <a href="https://yourwebsite.com/contact">Contact Support</a>

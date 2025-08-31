@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 
 const businessSchema = new mongoose.Schema({
@@ -9,9 +9,8 @@ const businessSchema = new mongoose.Schema({
         required: [true, "User Id is required to create a new business"]
     },
     image: {
-        type: [String],
+        type: String,
         required: [true, "Business image is required"],
-        default:[]
     },
     title: {
         type: String,
@@ -42,13 +41,13 @@ const businessSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    location: {
-        type: String,
-        required: [true, "Business location is required"]
-    },
     askingPrice: {
         type: String,
         required: [true, "Business asking price is required"]
+    },
+    price:{
+        type: Number,
+        default: 0
     },
     ownerShipType: {
         type: String,
@@ -58,7 +57,7 @@ const businessSchema = new mongoose.Schema({
         type: String,
         required: [true, "Business business type is required"]
     },
-    industryName: {
+    reason: {
         type: String
     },
     description: {

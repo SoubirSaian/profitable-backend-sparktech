@@ -11,10 +11,13 @@ const paymentSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    duration:{
+      type: String,
+      required: true
+    },
     checkout_session_id: {
       type: String,
-      unique: true,
-      required: true,
+      required: true
     },
     payment_intent_id: {
       type: String,
@@ -42,7 +45,7 @@ const paymentSchema = new mongoose.Schema(
     },
     subscriptionPlan: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SubscriptionPlan",
+      
     },
   }, { timestamps: true,}
 );

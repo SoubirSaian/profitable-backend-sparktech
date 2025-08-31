@@ -1,7 +1,9 @@
 import validateFields from "../../../utils/validateFields.js";
 import FormationModel from "./formation.model.js";
-import ApiError from "../../../error/ApiError.js";
 import FormationInterestedModel from "./formationInterested.model.js";
+import ApiError from "../../../error/ApiError.js";
+import deleteFile from "../../../utils/deleteUnlinkFile.js";
+
 
 
 //create new formation service
@@ -74,16 +76,21 @@ export const updateFormationService = async (req) => {
 
     const { title, detail } = req.body;
 
-    //get formation
-    const formation = await FormationModel.findByIdAndUpdate(formatId,{image: imgName,title,detail},{new: true});
+    const format = await FormationModel.findById(formatId);
 
-    if(!formation){
+    //get formation
+    const updatedFormation = await FormationModel.findByIdAndUpdate(formatId,{image: imgName,title,detail},{new: true});
+
+    if(!updatedFormation){
         throw new ApiError(404, "Failed to retrieve formation for update");
     }
 
+    //delete old img
+    if(req.file){
+        deleteFile("formation-image",format.image);
+    }
     //now update format
-    
-    return formation;
+    return updatedFormation;
 }
 
 //delete formation service
@@ -95,13 +102,17 @@ export const deleteFormatservice = async (query) => {
     if(!formatId){
         throw new ApiError(400,"Formation id is required to delete formation");
     }
-
-    const deletedFormat = await FormationModel.findByIdAndDelete(formationId);
+    const format = await FormationModel.findById(formatId);
+    const deletedFormat = await FormationModel.findByIdAndDelete(formatId);
 
     //check if deleteted or not
     if(!deletedFormat){
         throw new ApiError(500, "Failed to delete formation");
     }
+
+    //delete old img
+    deleteFile("formation-image",format.image);
+    
 
     return deletedFormat;
 

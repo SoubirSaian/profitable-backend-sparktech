@@ -26,17 +26,7 @@ class QueryBuilder {
     return this;
   }
 
-  filter() {
-    const queryObj = { ...this.query, isApproved: true };
-
-    const excludeFields = ["searchText", "sort", "limit", "page", "fields","sortBy","ageOfListing"];
-
-    excludeFields.forEach((el) => delete queryObj[el]);
-
-    this.modelQuery = this.modelQuery.find(queryObj);
-
-    return this;
-  }
+  
 
   // sort() {
   //   const sort = (this.query?.sort || "").split(",").join(" ") || "-createdAt";
@@ -138,6 +128,18 @@ class QueryBuilder {
         createdAt: { $gte: dateFilter },
       });
     }
+
+    return this;
+  }
+
+  filter() {
+    const queryObj = { ...this.query, isApproved: true };
+
+    const excludeFields = ["searchText", "sort", "limit", "page", "fields","sortBy","ageOfListing"];
+
+    excludeFields.forEach((el) => delete queryObj[el]);
+
+    this.modelQuery = this.modelQuery.find(queryObj);
 
     return this;
   }

@@ -1,7 +1,9 @@
 import Stripe from "stripe";
 import config from "../../../config/index.js";
+import { v4 as uuidv4 } from "uuid";
 import validateFields from "../../../utils/validateFields.js";
 import SubscriptionPlanModel from "../subscriptionPlan/subscription.model.js";
+import brokerSubscriptionPlanModel from "../subscriptionPlan/brokerSubscriptionPlan.model.js";
 import { errorLogger,logger} from "../../../utils/logger.js";
 import ApiError from "../../../error/ApiError.js";
 import PaymentModel from "./payment.model.js";
@@ -45,46 +47,94 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
   try {
     const { id: checkout_session_id, payment_intent } = webhookEventData;
 
-    // update payment
-    const payment = await PaymentModel.findOneAndUpdate(
-      { checkout_session_id: checkout_session_id },
-      {
-        $set: {
-          payment_intent_id: payment_intent,
-          status: "Paid",
-          subscriptionStatus: "Active",
-        },
-      },
-      { new: true, runValidators: true }
+    // let userRole = await PaymentModel.findOne({ checkout_session_id: checkout_session_id }).populate({path: "user",select:"role"});
+    let userRole = await PaymentModel.findOne({ checkout_session_id }).populate(
+      { path: "user", select: "role subscriptionPlan subscriptionStartDate subscriptionEndDate" }
+    );
+    
+    // Step 2: Dynamically decide which collection to populate
+    const planModel =
+      userRole.user.role === "Broker" ? brokerSubscriptionPlanModel : SubscriptionPlanModel;
 
-    )
-    .populate([
-      {
-        path: "subscriptionPlan",
-        select: "subscriptionPlanType price duration",
-      },
-    ]);
+    // Step 3: Populate subscriptionPlan with correct collection
+    userRole = await PaymentModel.populate(userRole, {
+      path: "subscriptionPlan",
+      model: planModel, // dynamic model name here
+    });
+
+    // update payment
+    let payment;
+    if( userRole.user.role === "Broker"){
+
+      payment = await PaymentModel.findOneAndUpdate(
+        { checkout_session_id: checkout_session_id },
+        {
+          $set: {
+            payment_intent_id: payment_intent,
+            status: "Paid",
+            subscriptionStatus: "Active",
+          },
+        },
+        { new: true, runValidators: true }
+  
+      );
+    }
+
+    else{
+
+      payment = await PaymentModel.findOneAndUpdate(
+        { checkout_session_id: checkout_session_id },
+        {
+          $set: {
+            payment_intent_id: payment_intent,
+            status: "Paid",
+            subscriptionStatus: "Active",
+          },
+        },
+        { new: true, runValidators: true }
+  
+      )
+      .populate([
+        {
+          path: "subscriptionPlan",
+          select: "subscriptionPlanType price duration",
+        },
+      ]);
+    }
 
     // update user subscription
     // calculate and stamp subscriptionStartDate and subscriptionEndDate date based on the duration
     const subscriptionStartDate = new Date();
     const subscriptionEndDate = getEndDate(payment.subscriptionPlan.duration || "6 Months");
 
-    const updateUserData = {
-      $set: {
-        isSubscribed: true,
-        subscriptionPlanPrice: payment.subscriptionPlan.price[0] ,
-        subscriptionPlan: payment.subscriptionPlan._id,
-        subscriptionStartDate,
-        subscriptionEndDate,
-      },
-    };
+    let updateUserData;
+    if(userRole.user.role === "Broker"){
+      updateUserData = {
+        $set: {
+          // isSubscribed: true,
+          subscriptionPlanType: userRole.subscriptionPlan.subscriptionPlanType,
+          subscriptionPlanPrice: userRole.amount ,
+          subscriptionPlan: userRole.subscriptionPlan,
+          subscriptionStartDate: userRole.subscriptionStartDate,
+          subscriptionEndDate: userRole.subscriptionEndDate,
+        },
+      };
+    }
+    else{
 
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      payment.user,
-      updateUserData,
-      { new: true }
-    );
+      updateUserData = {
+        $set: {
+          // isSubscribed: true,
+          subscriptionPlanType: payment.duration,
+          subscriptionPlanPrice: payment.amount ,
+          subscriptionPlan: payment.subscriptionPlan,
+          subscriptionStartDate: payment.subscriptionStartDate,
+          subscriptionEndDate: payment.subscriptionEndDate,
+        },
+      };
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(payment.user,updateUserData,{ new: true });
 
     // send email to user
     const emailData = {
@@ -123,38 +173,50 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
 //perform stripe checkout service
 export const postCheckoutService = async (userData, payload) => {
   const {userId,role} = userData;
-  const {subscriptionId,price,couponCode} = payload;
-  validateFields(payload, ["subscriptionId","price"]);
+  const {subscriptionId,price,couponCode,duration} = payload;
+  console.log(payload);
+
+  validateFields(payload, ["subscriptionId","price","duration"]);
   const priceNumber = Number(price);
-  // check if user is already subscribed
-  // const user = await User.findById(userData.userId).lean();
+  // console.log(price);
 
-  // if (user.isSubscribed)
-  //   throw new ApiError(status.BAD_REQUEST, "User is already subscribed");
+  let subscriptionPlan;
+  if(role === "Broker"){
 
-  const subscriptionPlan = await SubscriptionPlanModel.findById(
-    subscriptionId
-  ).lean();
+    subscriptionPlan = await brokerSubscriptionPlanModel.findById(subscriptionId);
+  }else{
+
+     subscriptionPlan = await SubscriptionPlanModel.findById(
+      subscriptionId
+    ).lean();
+  }
+
 
   if (!subscriptionPlan){
       throw new ApiError(400 , "SubscriptionPlan not found");
   }
 
-  //only for broker
-  // if(role === "Broker"){
-  //   if(price === 1399 || price === 1799 || price === 4999){ subscriptionPlan.duration = "1 Months"; }
-  //   else if(price === 1999 || price === 5999 || price === 9999){ subscriptionPlan.duration = "3 Months" }
-  //   else if(price === 3599 || price === 8999 || price === 17499){ subscriptionPlan.duration = "6 Months" }
-  // }
   //calculate subscription start date and end date
   const subscriptionStartDate = new Date();
-  const subscriptionEndDate = getEndDate(subscriptionPlan.duration || "6 Months");
+  const subscriptionEndDate = getEndDate(duration);
 
   //if user prefer a free plan
-  if(priceNumber === 0){
+  if(priceNumber == 0){
+
+    //check if user has already used Free plan or not
+    const freePlan = await PaymentModel.findOne({user: userId, amount: 0});
+    if(freePlan) throw new ApiError(403,"Already you have used free plan. You can't use it for twice");
+
+    const paymentData = {
+      user: userId, amount: 0,duration,checkout_session_id: `FREE-${uuidv4()}`,subscriptionPlan: subscriptionPlan._id,
+      status: "Paid", subscriptionStatus: "Active", subscriptionStartDate, subscriptionEndDate,
+    };
+
+    const payment = await PaymentModel.create(paymentData);
+    if(!payment) throw new ApiError(500," Failed to create new Payment");
 
     await UserModel.findByIdAndUpdate(userId,{
-      isSubscribed: true,subscriptionPlan: subscriptionId, subscriptionPlanPrice: 0, subscriptionStartDate,subscriptionEndDate
+      subscriptionPlan: subscriptionId, subscriptionPlanPrice: 0, subscriptionPlanType: duration, subscriptionStartDate,subscriptionEndDate
     });
 
     return 'http://10.10.20.60:3005/payment-successfull';
@@ -176,7 +238,7 @@ export const postCheckoutService = async (userData, payload) => {
 
       // 3️⃣ Check if coupon is active
       if (coupon.status !== "Active") {
-          throw new ApiError(400, "COupon is already Expired");
+          throw new ApiError(400, "This coupon is already expired. you can't use it.");
       }
 
       // 4️⃣ Check date validity
@@ -234,6 +296,7 @@ export const postCheckoutService = async (userData, payload) => {
   const paymentData = {
     user: userId,
     amount,
+    duration,
     checkout_session_id,
     subscriptionPlan: subscriptionPlan._id,
     status: "Unpaid",
@@ -317,7 +380,7 @@ const updateExpiredSubscriptions = catchAsync(async () => {
 const updateUserSubscriptionStatus = catchAsync(async () => {
 
   const subscriptionExpiredUsers = await UserModel.find({
-    isSubscribed: true,
+    subscriptionPlan: { $ne: null},
     subscriptionEndDate: { $lt: new Date() },
   });
 
@@ -333,14 +396,15 @@ const updateUserSubscriptionStatus = catchAsync(async () => {
 
   const updatedUser = await UserModel.updateMany(
     {
-      isSubscribed: true,
+      subscriptionPlan: { $ne: null},
       subscriptionEndDate: { $lt: new Date() },
     },
     {
       $set: {
-        isSubscribed: false,
-        subscriptionPlanPrice: null,
+        // isSubscribed: false,
         subscriptionPlan: null,
+        subscriptionPlanPrice: null,
+        subscriptionPlanType: null,
         subscriptionStartDate: null,
         subscriptionEndDate: null,
       },

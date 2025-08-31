@@ -15,10 +15,17 @@ const subscriptionPlanSchema = new mongoose.Schema({
         type: Array,
         required: true
     },
-    property: {
-        price: {type: [Number], required: true },
-        duration: { type: String, required: true }
-    },
+    price: [{
+        duration: {
+            type: String,
+            required: true,
+            enum: ["15 Days", "1 Months", "3 Months", "6 Months"]
+        },
+        price: {
+            type: Number,
+            required: true
+        }
+    }],
     
 },{ timestamps: true});
 
