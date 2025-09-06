@@ -4,7 +4,7 @@ import { getAllChatsService, getChatMessagesService, postNewChatService, updateM
 
 
 //api ending point to post chat
-export const postChat = catchAsync( async (req,res) => {
+export const initiateChat = catchAsync( async (req,res) => {
 
     const result = await postNewChatService(req.user,req.body);
 
@@ -19,7 +19,7 @@ export const postChat = catchAsync( async (req,res) => {
 //api ending point to get chat messages
 export const getChatMessages = catchAsync(async (req, res) => {
 
-  const result = await getChatMessagesService(req.user, req.query);
+  const result = await getChatMessagesService(req.query);
 
   sendResponse(res, {
     statusCode: 200,
@@ -33,7 +33,7 @@ export const getChatMessages = catchAsync(async (req, res) => {
 //api ending point to get all chats
 export const getAllChats = catchAsync(async (req, res) => {
 
-  const result = await getAllChatsService(req.user, req.query);
+  const result = await getAllChatsService(req.user);
 
   sendResponse(res, {
     statusCode: 200,

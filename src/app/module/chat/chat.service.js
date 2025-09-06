@@ -32,7 +32,7 @@ export const postNewChatService = async ( userDetail,payload ) => {
     const newChat = await ChatModel.create({ participants: [userId,receiverId], messages: [] });
 
     //send notification
-    postNotification("New message","You have started a new conversation", receiverId);
+    postNotification("New message","You have received a new conversation request", receiverId);
 
     postNotification("New message","You have started a new conversation", userId);
 
@@ -41,7 +41,7 @@ export const postNewChatService = async ( userDetail,payload ) => {
 }
 
 //get chat messages service
-export const getChatMessagesService = async (userDetail,query) => {
+export const getChatMessagesService = async (query) => {
     const { chatId } = query;
 
     validateFields(query,["chatId"]);
@@ -59,65 +59,107 @@ export const getChatMessagesService = async (userDetail,query) => {
 }
 
 //get all chat message service
-export const getAllChatsService = async (userDetail,query) => {
-    // const userId = mongoose.Types.ObjectId.createFromHexString(userDetail.userId);
-    const {userId} = userDetail;
+export const getAllChatsService = async (userDetail) => {
+    const userId = mongoose.Types.ObjectId.createFromHexString(userDetail.userId);
+    // const {userId} = userDetail;
     //get all chatlist by a user
+    // const chats = await ChatModel.find({participants: { $in: [userId]}}).populate({path:"participants",select:"name image"});
     const chats = await ChatModel.aggregate([
-    {
-      $match: {
-        participants: {
-          $in: [userId],
-        },
+      // 1. Find chats where user is a participant
+      {
+        $match: {
+          participants: { $in: [userId] }
+        }
       },
-    },
-    {
-      $lookup: {
-        from: "messages",
-        let: {
-          messageIds: "$messages",
-        },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $in: ["$_id", "$$messageIds"] },
-                  { $eq: ["$receiver", userId] },
-                  { $eq: ["$isRead", false] },
-                ],
-              },
-            },
-          },
-        ],
-        as: "unreadMessages",
+
+      // 2. Lookup all messages of this chat
+      {
+        $lookup: {
+          from: "messages",
+          localField: "messages",
+          foreignField: "_id",
+          as: "messages"
+        }
       },
-    },
-    {
-      $addFields: {
-        unRead: { $size: "$unreadMessages" },
+
+      // 3. Get last message (sort + slice)
+      {
+        $addFields: {
+          lastMessage: { $arrayElemAt: [{ $slice: ["$messages", -1] }, 0] }
+        }
       },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "participants",
-        foreignField: "_id",
-        as: "participants",
+
+      // 4. Count unread messages for this user
+      {
+        $addFields: {
+          unreadCount: {
+            $size: {
+              $filter: {
+                input: "$messages",
+                as: "msg",
+                cond: {
+                  $and: [
+                    { $eq: ["$$msg.receiver", userId] },
+                    { $eq: ["$$msg.isRead", false] }
+                  ]
+                }
+              }
+            }
+          }
+        }
       },
-    },
-    {
-      $project: {
-        unreadMessages: 0,
+
+      // 5. Populate participants
+      {
+        $lookup: {
+          from: "users",
+          localField: "participants",
+          foreignField: "_id",
+          as: "participants"
+        }
       },
-    },
+
+      // 6. Remove current user from participants list
+      {
+        $addFields: {
+          participants: {
+            $filter: {
+              input: "$participants",
+              as: "p",
+              cond: { $ne: ["$$p._id", userId] }
+            }
+          }
+        }
+      },
+
+      // 7. Keep only required fields
+      {
+        $project: {
+          "participants._id": 1,
+          "participants.name": 1,
+          "participants.image": 1,
+          lastMessage: 1,
+          unreadCount: 1,
+          createdAt: 1,
+          updatedAt: 1
+        }
+      },
+
+      // 8. Sort chats by last message time (like WhatsApp)
+      {
+        $sort: { "lastMessage.createdAt": -1 }
+      }
   ]);
 
-  if(!chats){
-    throw new ApiError(404,"Failed to get chat list");
-  }
 
-  return chats;
+
+
+    if(!chats){
+      throw new ApiError(404,"Failed to get chat list");
+    }
+    // console.log(chats);
+
+    return chats;
 
 }
 

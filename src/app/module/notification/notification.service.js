@@ -31,7 +31,7 @@ export const getNotificationService = async (userdata,query) => {
 }
 
 //get all notification service
-export const getAllNotificationService = async (userData,query) => {
+export const getAllNotificationService = async (userData) => {
     const { role,userId } = userData;
 
     let notification;
@@ -39,7 +39,25 @@ export const getAllNotificationService = async (userData,query) => {
     if(role === "Admin"){
         notification = await AdminNotificationModel.find({}).sort({ createdAt: -1 });
     }else{
-        notification = await NotificationModel.find({toId: userId}).sort({ createdAt: -1 });
+        notification = await NotificationModel.find({toId: userId}).populate({path: "toId",select:"-_id image"}).sort({ createdAt: -1 });
+    }
+
+    if(!notification){
+        throw new ApiError(500, "Failed to get all notification");
+    }
+
+    return notification;
+}
+
+export const unreadNotificationCountService =async(userData) => {
+    const {userId,role} = userData;
+
+    let notification;
+
+    if(role === "Admin"){
+        notification = await AdminNotificationModel.countDocuments({});
+    }else{
+        notification = await NotificationModel.countDocuments({toId: userId, isRead: false});
     }
 
     if(!notification){
@@ -50,32 +68,34 @@ export const getAllNotificationService = async (userData,query) => {
 }
 
 //mark a notifification is read service
-export const updateNotificationReadUnreadService = async (userData,payload) => {
-    const { role } = userData;
+export const updateNotificationReadUnreadService = async (query) => {
+    const {role,notificationId} = query;
 
-    let result;
+    validateFields(query,["role","notificationId"]);
 
-    /*
-        const queryObj = role === EnumUserRole.USER ? { toId: userData.userId } : {};
-        queryObj.isRead = !payload.isRead;
-    */
+    let updatedNotification;
 
     if(role === "Admin"){
-        result = await AdminNotificationModel.updateMany({},{ $set: { isRead: payload.isRead }});
+        updatedNotification = await AdminNotificationModel.findByIdAndDelete(notificationId);
     }
     else{
-        result = await NotificationModel.updateMany({toId: userData.userId,},{$set: {isRead: payload.isRead}});
+        updatedNotification = await NotificationModel.findByIdAndUpdate(notificationId,{isRead: true},{new: true});
     }
 
-    return result;
+    //check if notification deleted or not
+    if(!updatedNotification){
+        throw new ApiError(500, "notification not found to update");
+    }
+
+    return updatedNotification;
 }
 
 //delete notification service
-export const deleteNotificationService = async (userData,query) => {
-    const { role } = userData;
-    const notificationId = query.notificationId;
+export const deleteNotificationService = async (query) => {
 
-    validateFields(query,["notificationId"]);
+    const {role,notificationId} = query;
+
+    validateFields(query,["role","notificationId"]);
 
     let deletedNotification;
 

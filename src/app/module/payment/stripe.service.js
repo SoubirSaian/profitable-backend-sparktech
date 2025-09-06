@@ -318,7 +318,7 @@ export const webhookManagerService = async (req) => {
   let event;
   const date = new Date();
 
-  console.log("webhook hit");
+  console.log("webhook hiting successfully");
 
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endPointSecret);

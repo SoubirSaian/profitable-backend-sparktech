@@ -75,4 +75,27 @@ export const authorizeAdmin = (req, res, next) => {
   }
 };
 
+// socketAuth.js
+export const authorizeUserSocket = (socket, next) => {
+  try {
+    // token can come from query or headers
+    const token =
+      socket.handshake.auth?.token || socket.handshake.headers["authorization"];
+
+    if (!token) {
+      throw new ApiError( 401,"Authorization token missing");
+    }
+
+    const decoded = verifyToken(token, config.jwt.secret);
+
+    // attach user to socket
+    socket.user = decoded;
+
+    return next();
+  } catch (err) {
+    return next(new Error("Unauthorized: Invalid token"));
+  }
+};
+
+
 

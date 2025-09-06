@@ -56,13 +56,13 @@ export const getASingleBusinessWithusers = catchAsync(async (req,res) => {
 //api ending point to get a single business
 export const deleteBusiness = catchAsync(async (req,res) => {
 
-    const response = await deleteBusinessService(req.query);
+    const {deleted,message} = await deleteBusinessService(req.query);
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
-        message: "Successfully deleteted a business",
-        data : response
+        message: message,
+        data : deleted
     });
     
 });
@@ -219,7 +219,7 @@ export const markedBusinessAsSold = catchAsync( async (req,res) => {
      sendResponse(res,{
             statusCode: 200,
             success: true,
-            message: "Marked your business as sold",
+            message: "Changed the status of your business",
             data: response
         });
 });

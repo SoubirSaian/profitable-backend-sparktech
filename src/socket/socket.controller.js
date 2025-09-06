@@ -1,5 +1,6 @@
 import UserModel from "../app/module/user/user.model.js"
 import { emitError } from "./emitError.js";
+import { emitResult } from "./emitResult.js";
 import socketCatchAsync from "../utils/socketCatchAsync.js";
 // import postNotification from "../utils/postNotification.js";
 import validateSocketFields from "../utils/validateSocketFields.js";
@@ -48,9 +49,6 @@ export const updateOnlineStatus = socketCatchAsync(async (socket, io, payload) =
 });
 
 
-export const SocketController = {
-  validateUser,
-  updateOnlineStatus,
-};
+
 
 

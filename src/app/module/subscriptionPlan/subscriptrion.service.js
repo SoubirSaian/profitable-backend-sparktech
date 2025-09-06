@@ -2,7 +2,7 @@ import ApiError from "../../../error/ApiError.js";
 import validateFields from "../../../utils/validateFields.js";
 import brokerSubscriptionPlanModel from "./brokerSubscriptionPlan.model.js";
 import SubscriptionPlanModel from "./subscription.model.js";
-
+import PaymentModel from "../payment/payment.model.js";
 
 
 
@@ -68,7 +68,9 @@ export const updateSubscriptionService = async (req) => {
 }
 
 //get user role based subscription plan service
-export const getAllSubscriptionPlanByUserRoleService = async(query) => {
+export const getAllSubscriptionPlanByUserRoleService = async(userDetails,query) => {
+    const userId = userDetails.userId;
+    // console.log(userId);
     const {role} = query;
 
     //check if role is available or not
@@ -87,10 +89,20 @@ export const getAllSubscriptionPlanByUserRoleService = async(query) => {
      
 
     //filter subscriptions from subscription collection
-    const allSubscription = await SubscriptionPlanModel.find({subscriptionPlanRole: role});
+    let allSubscription;
+    allSubscription = await SubscriptionPlanModel.find({subscriptionPlanRole: role});
 
     if(!allSubscription){
         throw new ApiError(500, "failed to get subscription option");
+    }
+
+    //check if this user already have used Free Plan or not
+    const hasFreePlan = await PaymentModel.findOne({user: userId,amount: 0});
+    // console.log(hasFreePlan);
+    if(hasFreePlan){
+        //if used free plan then don't show free plan again
+        allSubscription = allSubscription.filter((plan) => plan.price[0] !== 0 );
+        // console.log(allSubscription);
     }
 
     return allSubscription;

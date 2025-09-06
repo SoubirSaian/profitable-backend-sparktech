@@ -3,16 +3,26 @@ import { sendBuyersEnquiryEmail } from "../../../utils/emailHelpers.js";
 import validateFields from "../../../utils/validateFields.js";
 import BusinessModel from "../business/business.model.js";
 import InterestedModel from "./interested.model.js";
+import postNotification from "../../../utils/postNotification.js";
 
 
 
 //make an user interested to a particular service
 export const makeAnUserInterestedService = async (req) => {
-    // const userRole = req.user.role;
+    const role = req.user.role;
+    
     const {businessId,userId,name,countryCode,mobile,sector,activity,email,serviceZone,message,businessRole} = req.body;
+    // console.log(req.body);
 
     //check if all the fields are available
     validateFields(req.body,["businessId","userId","name","email","businessRole"]);
+
+    const business = await BusinessModel.findById(businessId).select("title businessRole").lean();
+
+    //Broker and Buyer can not show interest on business ideas
+    if((role === "Buyer" && business.businessRole === "Business Idea Lister") || (role === "Broker" && business.businessRole === "Business Idea Lister")){
+        throw new ApiError(400,"You can not show interest on Business Ideas");
+    }
 
     //check if this business is already buyer's interested list or not
     const interestedBusiness = await InterestedModel.findOne({businessId,userId});
@@ -22,16 +32,21 @@ export const makeAnUserInterestedService = async (req) => {
     } 
 
     const newInterestedUser = await InterestedModel.create({
-        businessId,userId,businessRole,name,countryCode,mobile,sector,activity,email,serviceZone,message
+        businessId,userId,businessRole,userRole: role,name,countryCode,mobile,sector,activity,email,serviceZone,message
     });
 
     if(!newInterestedUser){
         throw new ApiError(500,"Failed to create new user interested to this Business");
     }
 
+    const seller = await BusinessModel.findById(businessId).populate({path: "user", select:"email  subscriptionPlan subscriptionPlanPrice"}).select("title");
+
+    //send notification to seller
+    postNotification("New Enquiry",`You have a new inquiry from ${name}, email: ${email} about your listed business. View and respond to keep the deal moving.`,seller.user._id);
+
     //send email to Seller that his business got new interested buyer
-    const seller = await BusinessModel.findById(businessId).populate({path: "user", select:"email"}).select({title: true});
-    if(seller.user.email){
+    if(seller.user.subscriptionPlan && seller.user.subscriptionPlanPrice > 0){
+        
         sendBuyersEnquiryEmail(seller.user.email,{name,email,mobile});
         console.log("Email sent for buyer enquery");
     }
@@ -93,7 +108,7 @@ export const getAllInterestedBusinessByUserService = async (req) => {
         
     }
 
-    else if(role === "Seller" || role == "Broker" || role === "Francise Seller" || role === "Business Idea Lister" || role === "Asset Seller"){
+    else if(role === "Seller" || role === "Francise Seller" || role === "Business Idea Lister" || role === "Asset Seller"){
 
         const [myBusiness,mySoldBusiness] = await Promise.all([
 
@@ -101,6 +116,20 @@ export const getAllInterestedBusinessByUserService = async (req) => {
         ]);
 
         return {myBusiness,mySoldBusiness};
+    }   
+
+    else if(role === "Broker"){
+
+        const [myBusiness,mySoldBusiness,interestedBusiness,interestedBusinessAsset,interestedFranchise] = await Promise.all([
+
+            BusinessModel.find({user: userId, isSold: false}),
+            BusinessModel.find({user: userId, isSold: true}),
+            InterestedModel.find({userId: userId, businessRole: { $in: ["Seller", "Broker"] } }).populate({ path: "businessId"}),
+            InterestedModel.find({userId: userId, businessRole: "Asset Seller" }).populate({ path: "businessId"}),
+            InterestedModel.find({userId: userId, businessRole: "Francise Seller" }).populate({ path: "businessId"}),
+        ]);
+
+        return {myBusiness,mySoldBusiness,interestedBusiness,interestedBusinessAsset,interestedFranchise};
     }   
 
 }

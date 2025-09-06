@@ -1,18 +1,17 @@
 import express from "express";
-import { getAllChats, getChatMessages, postChat, updateMessageAsSeen } from "./chat.controller.js";
+import { getAllChats, getChatMessages, initiateChat, updateMessageAsSeen } from "./chat.controller.js";
 import { authorizeUser } from "../../middleware/AuthMiddleware.js";
 // const auth = require("../../middleware/auth");
 // const config = require("../../../config");
 
 const chatRouter = express.Router();
 
-chatRouter
-  .post("/post-chat",authorizeUser , postChat)
+chatRouter.post("/post-chat",authorizeUser , initiateChat);
 
-  .get("/get-chat-messages", authorizeUser, getChatMessages)
+chatRouter.get("/get-chat-message", getChatMessages);
 
-  .get("/get-all-chats",authorizeUser, getAllChats)
+chatRouter.get("/get-all-chat",authorizeUser, getAllChats);
 
-  .patch("/update-message-as-seen", authorizeUser, updateMessageAsSeen);
+chatRouter.patch("/update-message", authorizeUser, updateMessageAsSeen);
 
 export default chatRouter;

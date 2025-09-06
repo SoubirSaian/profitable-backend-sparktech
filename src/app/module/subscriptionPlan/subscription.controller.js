@@ -31,7 +31,7 @@ export const updateSubscriptionPlan = catchAsync( async (req,res) => {
 //api ending point to get all subscription based on user role
 export const getAllSubscriptionPlanByUserRole = catchAsync( async (req,res) =>{
 
-    const allPlan = await getAllSubscriptionPlanByUserRoleService(req.query);
+    const allPlan = await getAllSubscriptionPlanByUserRoleService(req.user,req.query);
 
     sendResponse(res, {
         statusCode: 200,

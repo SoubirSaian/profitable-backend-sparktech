@@ -16,11 +16,9 @@ const validateSocketFields = (socket, payload, requiredFields) => {
   }
 
   for (const field of requiredFields) {
-    if (
-      payload[field] === undefined ||
-      payload[field] === null ||
-      (typeof payload[field] === "string" && payload[field].trim() === "")
-    ) {
+
+    if ( payload[field] === undefined || payload[field] === null || (typeof payload[field] === "string" && payload[field].trim() === "")) {
+      
       emitError(socket, 400, `${field} is required`);
     }
   }

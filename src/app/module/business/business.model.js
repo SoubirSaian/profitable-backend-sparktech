@@ -41,6 +41,10 @@ const businessSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    countryName: {
+        type: String,
+        default: null
+    },
     askingPrice: {
         type: String,
         required: [true, "Business asking price is required"]

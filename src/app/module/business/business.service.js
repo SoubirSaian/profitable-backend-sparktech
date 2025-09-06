@@ -13,6 +13,18 @@ import QueryBuilder from "../../../builder/queryBuilder.js";
 import deleteFile from "../../../utils/deleteUnlinkFile.js";
 
 
+//utility function
+//send notification to all buyer and investor
+const sendNotificationToAllBuyerAndInvestor = async (title,name,email,country) => {
+    //find out all buyer and investor who has subscription plan
+    const users = await UserModel.find({role: { $in: ["Buyer","Investor"]},subscriptionPlanPrice: { $gt: 0 }}).select("email").lean();
+
+    //now send notification to all buyer and investor
+    if(users.length > 0){
+        users?.map( (user) => postNotification("Latest listed Business",`Business name: ${title} listed by ${name},country: ${country}, email: ${email}`,user._id) );
+    }
+}
+
 //create new business service
 export const createNewBusinessService = async (req) => {
     const userId = req.user.userId;
@@ -28,12 +40,13 @@ export const createNewBusinessService = async (req) => {
         throw new ApiError(400, "Image is required to create new business");
     }
 
-    const { title, category, subCategory, country, state, city, askingPrice, price, ownerShipType, businessType, reason, description} = req.body;
+    const { title, category, subCategory, country, state, city, countryName, askingPrice, price, ownerShipType, businessType, reason, description} = req.body;
 
     //check if all the fields are available
     validateFields(req.body,[
          "title", "category", "country", "askingPrice", "ownerShipType", "businessType"
     ]);
+    console.log(country,state,city,countryName);
 
     //user type and subscription wise different add business functionlity
     const user = await UserModel.findById(userId);
@@ -46,7 +59,7 @@ export const createNewBusinessService = async (req) => {
     const addNewBusiness = async () => {
 
          newBusiness = await BusinessModel.create({
-            user: userId,image: images, title, businessRole: role, category, subCategory, country, state, city, askingPrice,price, ownerShipType, businessType, reason, description
+            user: userId,image: images, title, businessRole: role, category, subCategory, country, state, city,countryName, askingPrice,price, ownerShipType, businessType, reason, description
         });
 
         //check if business is created or not
@@ -138,28 +151,23 @@ export const createNewBusinessService = async (req) => {
     }
     else if(role === "Francise Seller"){
 
-        if(subscriptionPlanType === "1 Months"){
+        if(subscriptionPlanType){
+
             //check if user can add new business or not
-            if(businessCount >= 1) throw new ApiError(400, "1 Month subscriptiopn plan user can't add more than 1 business");
+             if(businessCount >= 1) throw new ApiError(400, "A Francise Seller can't add more than one business");
+             
+             await addNewBusiness();
 
-            await addNewBusiness();
         }
-        else if(subscriptionPlanType === "3 Months"){
-            //check if user can add new business or not
-            if(businessCount >= 3) throw new ApiError(400, "3 Month subscriptiopn plan user can't add more than 3 business");
-
-            await addNewBusiness();
-        }
-        else if(subscriptionPlanType === "6 Months"){
-            //check if user can add new business or not
-            if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
-
-            await addNewBusiness();
-        }
-
-    }  
+    }
+    
 
     if(!newBusiness) throw new ApiError(400,"Failed to add new business");
+
+    //send notification to all buyer and investor that a new business listed
+    if(newBusiness){
+        sendNotificationToAllBuyerAndInvestor(title,user.name,user.email,user.countryName);
+    }
 }
 
 //update a business service
@@ -180,7 +188,7 @@ export const updateABusinessService = async (req) => {
     }
 
     //destructure property
-    const { title,category, subCategory, country, state, city, askingPrice, price, ownerShipType, businessType, reason, description} = req.body;
+    const { title,category, subCategory, country, state, city, countryName, askingPrice, price, ownerShipType, businessType, reason, description} = req.body;
     // console.log(req.body);
     let updatedImage;
     // Step 2: Add new image
@@ -197,7 +205,7 @@ export const updateABusinessService = async (req) => {
       
     //findout which business instance have to update
     const updatedBusiness = await BusinessModel.findByIdAndUpdate(businessId,{
-        image: updatedImage,title,category,subCategory, country, state, city, askingPrice, price, ownerShipType, businessType, reason, description
+        image: updatedImage,title,category,subCategory, country, state, city, countryName, askingPrice, price, ownerShipType, businessType, reason, description
     },{ new: true });
 
     if(!updatedBusiness){
@@ -249,7 +257,7 @@ export const getASingleBusinessByIdWithUsersService = async (query) => {
     //find out all users who are interested to this business
     const interestedUsers = await InterestedModel.find({businessId: businessId}).populate({
     path: "userId",
-    select: "image role", // only fetch 'role' from User model
+    select: "name email image role", // only fetch 'role' from User model
    });
 
 
@@ -260,20 +268,49 @@ export const getASingleBusinessByIdWithUsersService = async (query) => {
 //delete business service
 export const deleteBusinessService = async (query) => {
     const { businessId,role } = query;
+
     if(!businessId) throw new ApiError(400, "Business Id is required to delete a businesss");
-    console.log(businessId,role);
+    // console.log(businessId,role);
     
+    let message = "Successfully deleted your business";
     //delete interestest business from interested collection
-    if(role === "Buyer" || role === "Investor"){
+    const business = await BusinessModel.findById(businessId).select("title user image");
+
+    if(role === "Broker"){
+        const deleteInterset = await InterestedModel.findByIdAndDelete(businessId);
+        const deleted = await BusinessModel.findByIdAndDelete(businessId);
+
+        if(deleted){
+            const businessCount = await BusinessModel.countDocuments({user: business.user});
+            await UserModel.findByIdAndUpdate(business.user,{ 
+                    $set: {totalBusiness: businessCount}
+            });
+
+            // Delete image from uploads folder if exists
+            if (business.image) {
+    
+                deleteFile("business-image",business.image);
+            }
+        }
+
+
+
+        message = "Successfully deleted";
+        return {deleted,message};
+    }
+
+    if(role === "Buyer" || role === "Investor" ){
 
         const deleteInterset = await InterestedModel.findByIdAndDelete(businessId);
         if(!deleteInterset) throw new ApiError(500, "Failed to delete interested business");
 
-        return deleteInterset;
+        message = "Successfully deleted your interest";
+
+        return {deleteInterset,message};
     }
 
     // 1️⃣ Find business by ID
-    const business = await BusinessModel.findById(businessId).select("title user image");
+    // const business = await BusinessModel.findById(businessId).select("title user image");
 
     if (!business) {
       throw new ApiError(404, "Business not found to delete");
@@ -296,7 +333,7 @@ export const deleteBusinessService = async (query) => {
        deleteFile("business-image",business.image);
     }
 
-    return deleted;
+    return {deleted,message};
 
 }
 
@@ -336,7 +373,7 @@ export const interestedBuyersDetailsService = async (query) => {
         throw new ApiError(404,"No business found on this businessId");
     }
 
-    const interestedUser = await InterestedModel.findById(interestedId);
+    const interestedUser = await InterestedModel.findById(interestedId).populate({path: "userId",select:"image role"});
     if(!interestedUser){
         throw new ApiError(404,"No Interested user found on this InterestedId");
     }
@@ -487,7 +524,6 @@ export const filterBusinessService = async (query) => {
 
     const business = await businessQuery.modelQuery;
     const meta = await businessQuery.countTotal();
-    
     
     return {business,meta};
     
