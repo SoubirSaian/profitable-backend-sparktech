@@ -67,12 +67,19 @@ const signUpEmailTemp = (data) => `
     <body>
       <div class="container">
         
-        <h1>Welcome to Profitable Business For Sale</h1>
+        <h1>You have received a new enquiry email  from Profitable Business For Sale</h1>
         <p>Dear Seller</p>
-        <p>Thank you for being with Profitable Business. You have received a new enquiry for your listed business from a buyer/investor</p>
-        
+        <p>Thank you for being with Profitable Business. You have received a new enquiry for your listed business from a buyer</p>
+
+        ${!data.name && "<h4>Please buy a subscription plan to receive buyer's contact details</h4>"}
+        ${data.name ? "<h4>Buyer Name: {data.name}</h4>" : "<></>"}
+        ${data.email ? "<h4>Buyer Email: {data.email}</h4>" : "<></>"}
+        ${data.mobile ? "<h4>Buyer Mobile: {data.mobile}</h4>" : "<></>"}
+      
         <p>For more information, please login Profitable business and check activity</p>
+
         <p>If you have any questions, please contact us at <a href="profitablebusinessforsale@gmail.com">profitablebusinessforsale@gmail.com</a>.</p>
+
         <p>Thank you,<br>Profitable Business Team</p>
       </div>
       <div class="footer">

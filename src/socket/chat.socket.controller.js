@@ -85,7 +85,7 @@ export const initiateChat = socketCatchAsync(
         );
 
         //send notification
-        postNotification("New message Request",`You have received a new conversation request from name: ${user.name} email: ${user.email} chatId: ${existChat._id}`, receiverId);
+        postNotification("New message Request",`You have received a new conversation request from name: ${user.name} email: ${user.email}`, receiverId);
 
         // postNotification("You started a new conversation",`You have started a new conversation with name: ${receiver.name} email: ${receiver.email} chatId: ${existChat}`, userId);
 
@@ -96,9 +96,9 @@ export const initiateChat = socketCatchAsync(
     const newChat = await ChatModel.create({ participants: [userId,receiverId], messages: [] });
 
     //send notification
-    postNotification("New message Request",`You have received a new conversation request from name: ${user.name} email: ${user.email} chatId: ${newChat._id}`, receiverId);
+    postNotification("New message Request",`You have received a new conversation request from name: ${user.name} email: ${user.email}`, receiverId);
 
-    postNotification("You started a new conversation",`You have started a new conversation with name: ${receiver.name} email: ${receiver.email} chatId: ${newChat._id}`, userId);
+    postNotification("You started a new conversation",`You have started a new conversation with name: ${receiver.name} email: ${receiver.email}`, userId);
 
     // Broadcast to sender and receiver simultaneously
         io.to([userId,receiverId]).emit(

@@ -49,6 +49,10 @@ export const makeAnUserInterestedService = async (req) => {
         
         sendBuyersEnquiryEmail(seller.user.email,{name,email,mobile});
         console.log("Email sent for buyer enquery");
+    }else if(seller.user.subscriptionPlan && seller.user.subscriptionPlanPrice === 0){
+
+        sendBuyersEnquiryEmail(seller.user.email,{});
+        console.log("Email sent for buyer enquery");
     }
 
     return newInterestedUser;
@@ -61,6 +65,15 @@ export const getAllInterestedUsersService = async (query) => {
     if(!businessId){
         throw new ApiError(400, "businessId  is required to filter interested user");
     }
+    //get seller details, check subscription plan if no subscription plan
+    const business = await BusinessModel.findById(businessId).populate({path: "user", select:"subscriptionPlan subscriptionPlanPrice"}).select("title").lean();
+
+    //then seller won't see any interested buyer list
+    if(business.user.subscriptionPlan && business.user.subscriptionPlanPrice === 0){
+
+        throw new ApiError(403,"To see all interested buyer's detail you have to buy a subscription plan");
+    }
+
 
     const interestedUsers = await InterestedModel.find({businessId: businessId});
     

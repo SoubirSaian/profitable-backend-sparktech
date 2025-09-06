@@ -79,7 +79,7 @@ export const createNewBusinessService = async (req) => {
     }
 
     //Seller add business
-    if(role === "Seller"){
+    if(role === "Seller" || role === "Asset Seller"){
 
         if(subscriptionPlanType){
 
@@ -91,33 +91,33 @@ export const createNewBusinessService = async (req) => {
         }
         
     }
-    else if(role === "Asset Seller") {
+    // else if(role === "Asset Seller") {
 
-         if(subscriptionPlanType === "1 Months"){
+    //      if(subscriptionPlanType === "1 Months"){
 
-            //check if user can add new business or not
-            if(businessCount >= 1) throw new ApiError(400, "1 month subscription plan user can't add more than 1 business");
+    //         //check if user can add new business or not
+    //         if(businessCount >= 1) throw new ApiError(400, "1 month subscription plan user can't add more than 1 business");
 
-            await addNewBusiness();
+    //         await addNewBusiness();
 
-         }
-        else if(subscriptionPlanType === "3 Months"){
+    //      }
+    //     else if(subscriptionPlanType === "3 Months"){
 
-            //check if user can add new business or not
-             if(businessCount >= 3) throw new ApiError(400, "3 Months subscription plan user can't add more than 3 business");
+    //         //check if user can add new business or not
+    //          if(businessCount >= 3) throw new ApiError(400, "3 Months subscription plan user can't add more than 3 business");
 
-             await addNewBusiness();
+    //          await addNewBusiness();
 
-        }
-        else if(subscriptionPlanType === "6 Months"){
+    //     }
+    //     else if(subscriptionPlanType === "6 Months"){
 
-            //check if user can add new business or not
-             if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
+    //         //check if user can add new business or not
+    //          if(businessCount >= 5) throw new ApiError(400, "6 Month subscriptiopn plan user can't add more than 5 business");
 
-             await addNewBusiness();
+    //          await addNewBusiness();
 
-        }
-    }
+    //     }
+    // }
     else if(role === "Business Idea Lister"){
         //for Business Idea lister there is no limitation to add new Business
         await addNewBusiness();
@@ -723,77 +723,136 @@ export const featuredBusinessService = async (query) => {
     }
 
     let filter;
-    if(country){
-        filter = { country: country, businessRole: businessRole, isApproved:true }; 
+    
+    if(businessRole === "Seller"){
+        if(country){
+            filter = { country: country, businessRole: { $in: ["Seller","Broker"] }, isApproved:true }; 
+        }else{
+            filter = { businessRole: { $in: ["Seller", "Broker"] }, isApproved: true }
+        }
     }else{
-        filter = { businessRole: businessRole, isApproved:true };
+        if(country){
+            filter = { country: country, businessRole: businessRole, isApproved:true }; 
+        }else{
+            filter = { businessRole: businessRole, isApproved:true };
+        }
     }
 
+
     const businessesWithMaxPricePlan = await BusinessModel.aggregate([
-        // Step 1: Join Business with User
-        {
-             $match: filter
-        },
-         //join with users
-        {
-            $lookup: {
-                from: "users",
-                localField: "user",
-                foreignField: "_id",
-                as: "userData"
-            }
-        },
-        { $unwind: "$userData" },
+    // 1️⃣ Match approved businesses with optional country + businessRole filter
+    { 
+        $match: filter 
+    },
 
-        // 2️⃣ Join with subscription plans
-        {
-            $lookup: {
-            from: "subscriptionplans",
-            localField: "userData.subscriptionPlan",
+    // 2️⃣ Join with users (owners)
+    {
+        $lookup: {
+            from: "users",
+            localField: "user",
             foreignField: "_id",
-            as: "planData"
-            }
-        },
-        { $unwind: "$planData" },
-
-        // 3️⃣ Find max price for each role
-        {
-            $lookup: {
-            from: "subscriptionplans",
-            let: { role: "$planData.subscriptionPlanRole" },
-            pipeline: [
-                { $match: { $expr: { $eq: ["$subscriptionPlanRole", "$$role"] } } },
-                { $group: { _id: null, maxPrice: { $max: "$price" } } }
-            ],
-            as: "maxPriceData"
-            }
-        },
-        { $unwind: "$maxPriceData" },
-
-        // 4️⃣ Keep only businesses where user's plan price == max price for their role
-        {
-            $match: {
-                $expr: { $eq: ["$planData.price", "$maxPriceData.maxPrice"] }
-            }
-        },
-
-        // 5️⃣ Project only business details + subscriptionPlanName
-        {
-            $project: {
-            _id: 1,
-            title: 1,
-            image: 1,
-            category: 1,
-            country: 1,
-            location: 1,
-            askingPrice: 1,
-            businessRole: 1,
-            createdAt: 1,
-            subscriptionPlanPrice: "$userData.subscriptionPlanPrice",
-            planPrice: "$planData.price"
-            }
+            as: "userData"
         }
+    },
+    { $unwind: "$userData" },
+
+    // 3️⃣ Keep only businesses where owner's subscriptionPlanPrice > 0
+    {
+        $match: {
+        "userData.subscriptionPlanPrice": { $gt: 0 }
+        }
+    },
+
+    // 5️⃣ Sort businesses by subscriptionPlanPrice (highest first)
+    {
+        $sort: { "userData.subscriptionPlanPrice": -1, createdAt: -1 }
+    },
+
+    // 6️⃣ Final projection of required fields
+    {
+        $project: {
+        _id: 1,
+        title: 1,
+        image: 1,
+        category: 1,
+        country: 1,
+        location: 1,
+        askingPrice: 1,
+        businessRole: 1,
+        createdAt: 1,
+        "userData._id": 1,
+        "userData.name": 1,
+        "userData.email": 1,
+        "userData.subscriptionPlanPrice": 1,
+        }
+    }
     ]);
+
+    // const businessesWithMaxPricePlan = await BusinessModel.aggregate([
+    //     // Step 1: Join Business with User
+    //     {
+    //          $match: filter
+    //     },
+    //      //join with users
+    //     {
+    //         $lookup: {
+    //             from: "users",
+    //             localField: "user",
+    //             foreignField: "_id",
+    //             as: "userData"
+    //         }
+    //     },
+    //     { $unwind: "$userData" },
+
+    //     // 2️⃣ Join with subscription plans
+    //     {
+    //         $lookup: {
+    //         from: "subscriptionplans",
+    //         localField: "userData.subscriptionPlan",
+    //         foreignField: "_id",
+    //         as: "planData"
+    //         }
+    //     },
+    //     { $unwind: "$planData" },
+
+    //     // 3️⃣ Find max price for each role
+    //     {
+    //         $lookup: {
+    //         from: "subscriptionplans",
+    //         let: { role: "$planData.subscriptionPlanRole" },
+    //         pipeline: [
+    //             { $match: { $expr: { $eq: ["$subscriptionPlanRole", "$$role"] } } },
+    //             { $group: { _id: null, maxPrice: { $max: "$price" } } }
+    //         ],
+    //         as: "maxPriceData"
+    //         }
+    //     },
+    //     { $unwind: "$maxPriceData" },
+
+    //     // 4️⃣ Keep only businesses where user's plan price == max price for their role
+    //     {
+    //         $match: {
+    //             $expr: { $eq: ["$planData.price", "$maxPriceData.maxPrice"] }
+    //         }
+    //     },
+
+    //     // 5️⃣ Project only business details + subscriptionPlanName
+    //     {
+    //         $project: {
+    //         _id: 1,
+    //         title: 1,
+    //         image: 1,
+    //         category: 1,
+    //         country: 1,
+    //         location: 1,
+    //         askingPrice: 1,
+    //         businessRole: 1,
+    //         createdAt: 1,
+    //         subscriptionPlanPrice: "$userData.subscriptionPlanPrice",
+    //         planPrice: "$planData.price"
+    //         }
+    //     }
+    // ]);
 
     return businessesWithMaxPricePlan;
 }
