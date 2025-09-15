@@ -78,7 +78,7 @@ businessRouter.get("/single-business", getASingleBusinessDetails);
 
 businessRouter.delete("/delete-business", deleteBusiness);
 
-businessRouter.get("/get-single-business-with-users", getASingleBusinessWithusers);
+businessRouter.get("/get-single-business-with-users",authorizeUser, getASingleBusinessWithusers);
 
 businessRouter.get("/interested-buyers-details", interestedBuyersDetails);
 

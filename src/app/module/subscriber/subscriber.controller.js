@@ -31,16 +31,27 @@ export const createNewSubscriber = catchAsync(
 //api ending point to retrieve all subscriber
 export const retrieveSubscriberList = catchAsync(
     async (req,res) => {
+        let page = req.query.page;
 
-        const subscriberList = await SubscriberModel.find({});
+        page = parseInt(page) || 1;
+
+        let limit = 10; // default limit = 10
+
+        let skip = (page - 1) * limit;
+
+        const subscriberList = await SubscriberModel.find({}).skip(skip).limit(limit);
         if(!subscriberList){
             throw new ApiError(500,"Failed to get subscriber list");
         }
+
+        const total = await SubscriberModel.countDocuments();
+        const totalPage = Math.ceil(total / limit);
 
         sendResponse(res,{
             statusCode: 200,
             success: true,
             message: "Retrieved subscriber list suceessfully",
+            meta: {page,limit,total,totalPage},
             data: subscriberList
         });
     }

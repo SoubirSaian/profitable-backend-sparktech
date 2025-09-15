@@ -22,10 +22,11 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(cors({
-    origin: ["http://10.10.20.60:3005"],
-    credentials: true
-}));
+// app.use(cors({
+//     origin: ["http://10.10.20.60:3005"],
+//     credentials: true
+// }));
+app.use(cors());
 
 //to get/retrieve upload folder image
 app.use('/uploads', express.static('uploads'));
@@ -43,7 +44,7 @@ app.use("/api/v1", allRouter);
 // app.use("/api/v1/auth", authRouter);
 
 
-app.get("/test",(req,res)=> {
+app.get("/",(req,res)=> {
     res.send("server is running . welcome .");
 })
 

@@ -19,7 +19,7 @@ async function main(){
          // mainServer.listen(Number(config.port), config.base_url, () => {
         mainServer.listen(Number(config.port), () => {
             logger.info(`App listening on http://${config.base_url}:${config.port}`);
-            console.log(`server hitting port : ${port}`);
+            console.log(`server hitting port : http://${config.base_url}:${config.port}`);
         });
 
         //to handle unhandled error

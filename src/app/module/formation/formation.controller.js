@@ -21,13 +21,14 @@ export const createNewFormat = catchAsync( async (req,res) => {
 //api ending point to get all formation
 export const getAllFormation = catchAsync( async (req,res) => {
 
-    const response = await getAllFormationService();
+    const {page,limit,total,totalPage,allFormat} = await getAllFormationService(req.query);
 
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: "Successfully got all formation",
-        data: response
+        meta: {page,limit,total,totalPage},
+        data: allFormat
     });
 
 });

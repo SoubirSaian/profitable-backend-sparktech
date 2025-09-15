@@ -21,13 +21,14 @@ export const createNewCoupon = catchAsync( async (req,res) => {
 //api ending point to get all faq by user role
 export const getAllCoupon = catchAsync(async (req,res) => {
 
-    const result = await getAllCouponService();
+    const {page,limit,total,totalPage,allCoupon} = await getAllCouponService(req.query);
 
     sendResponse(res,{
         statusCode:200,
         success: true,
         message: "Got all coupon",
-        data: result
+        meta: {page,limit,total,totalPage},
+        data: allCoupon
     });
 
 });

@@ -7,7 +7,7 @@ const agreementSchema = new mongoose.Schema({
         ref: "User",
         required: [true, "User Id is required to create new Aggrement"]
     },
-    role:{
+    userRole:{
         type: String,
         required: [true, "User role is required to create new Aggrement"]
     },
@@ -27,18 +27,11 @@ const agreementSchema = new mongoose.Schema({
         type: String,
         required: [true, "Passport/Nid number is required to create new Aggrement"]
     },
-    nidPassportPdf:{
+    nda:{
         type: String,
-        
+        required: [true,"Nda pdf is required to create a new agreement"]
     },
-    tradeLicensePdf:{
-        type: String,
-        
-    },
-    signaturePdf:{
-        type: String,
-        
-    },
+    
 },{ timestamps: true });
 
 const Agreement = mongoose.models.Agreement || mongoose.model("Agreement", agreementSchema);

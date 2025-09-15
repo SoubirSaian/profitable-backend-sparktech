@@ -49,20 +49,25 @@ export const updateSubscriptionService = async (req) => {
     const {subscriptionPlanType,subscriptionPlanRole,price,features,duration} = req.body;
 
     if(role === "Broker"){
-        const subscription = await brokerSubscriptionPlanModel.findByIdAndUpdate(subscriptionId,{
-            subscriptionPlanType,subscriptionPlanRole,price,features
-        },{new: true});
+        const subscription = await brokerSubscriptionPlanModel.findById(subscriptionId);
 
-        if(!subscription) throw new ApiError(500, "Subcription update failed");
+        if(!subscription) throw new ApiError(404, "Subcription not found to update");
+
+        if(features) subscription.features = features;
+        if(price) subscription.price = price;
 
         return subscription;
     }
 
-    const subscription = await SubscriptionPlanModel.findByIdAndUpdate(subscriptionId,{
-        subscriptionPlanType,subscriptionPlanRole,price,features,duration
-    },{new: true});
+    const subscription = await SubscriptionPlanModel.findById(subscriptionId);
 
-    if(!subscription) throw new ApiError(500, "Subcription update failed");
+    if(!subscription) throw new ApiError(404, "Subcription not found to update");
+
+    if(price) subscription.price[0] = price;
+    if(duration) subscription.duration = duration;
+    if(features) subscription.features = features;
+
+    await subscription.save();
 
     return subscription;
 }
@@ -139,6 +144,38 @@ export const getSingleSubscriptionPlanService = async(query) => {
 
     return subscription;
 
+}
+
+//dashboard
+
+//dashboard single plan service
+export const dashboardSinglePlanService = async (query) => {
+    const { subscriptionName,role } = query;
+
+    //check if role is available or not
+    if(!subscriptionName || !role){
+        throw new ApiError(400, "Subscription Plan Name, role are needed to get user's subscription plan");   
+     }
+
+     if(role === "Broker"){
+        //filter subscriptions from subscription collection
+        const subscription = await brokerSubscriptionPlanModel.findOne({subscriptionPlanType: subscriptionName});
+
+        if(!subscription){
+            throw new ApiError(500, "failed to get subscription plan");
+        }
+
+        return subscription;
+     }
+
+    //filter subscriptions from subscription collection
+    const subscription = await SubscriptionPlanModel.findOne({subscriptionPlanType: subscriptionName, subscriptionPlanRole: role});
+
+    if(!subscription){
+        throw new ApiError(500, "failed to get subscription plan");
+    }
+
+    return subscription;
 }
 
     

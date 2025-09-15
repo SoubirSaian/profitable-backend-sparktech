@@ -31,16 +31,25 @@ export const createNewFormatService = async (req) => {
 
 
 //get all formation service
-export const getAllFormationService = async () => {
+export const getAllFormationService = async (query) => {
+    let {page} = query;
+
+    page = parseInt(page) || 1;
+    // default limit = 10
+    let limit = 4;
+    let skip = (page - 1) * limit;
 
     //get all info from db
-    const allFormat = await FormationModel.find({});
+    const allFormat = await FormationModel.find({}).skip(skip).limit(limit);
 
     if(!allFormat){
         throw new ApiError(404, "Failed to get all formation");
     }
 
-    return allFormat;
+    let total = await FormationModel.countDocuments();
+    let totalPage = Math.ceil(total / limit);
+
+    return {page,limit,total,totalPage,allFormat};
 }
 
 //get a single formation service

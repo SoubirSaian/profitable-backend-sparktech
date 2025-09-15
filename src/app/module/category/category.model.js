@@ -8,7 +8,7 @@ const categorySchema = new mongoose.Schema({
     },
     categoryImage:{
         type: String,
-        default: null
+        required: [true, "Category image is required to create a new category"]
     },
     subCategories:[{
         type: mongoose.Schema.Types.ObjectId,

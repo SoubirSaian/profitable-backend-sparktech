@@ -1,5 +1,5 @@
 import express from "express";
-import { createPrivacyPolicy, createtermsAndCondition, getPrivacyPolicy, gettermsAndCondition, helpAndSupportController, homePageSearch } from "./home.controller.js";
+import { updatePrivacyPolicy, getPrivacyPolicy, gettermsAndCondition, helpAndSupportController, homePageSearch, updateTermsAndCondition } from "./home.controller.js";
 
 
 const homeRouter = express.Router();
@@ -7,10 +7,10 @@ const homeRouter = express.Router();
 homeRouter.get("/home-search", homePageSearch);
 homeRouter.post("/help-and-support", helpAndSupportController);
 
-homeRouter.post("/create-privacy-policy", createPrivacyPolicy);
+homeRouter.patch("/update-privacy-policy", updatePrivacyPolicy);
 homeRouter.get("/get-privacy-policy", getPrivacyPolicy);
 
-homeRouter.post("/create-terms-condition", createtermsAndCondition);
+homeRouter.patch("/update-terms-condition", updateTermsAndCondition);
 homeRouter.get("/get-terms-condition", gettermsAndCondition);
 
 

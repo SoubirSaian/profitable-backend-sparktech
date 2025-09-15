@@ -24,7 +24,7 @@ const paymentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: "unpaid",
+      default: "Unpaid",
       enum: {
         values: ["Unpaid", "Paid"],
         message: `Invalid payment status. Allowed values: paid or unpaid`,

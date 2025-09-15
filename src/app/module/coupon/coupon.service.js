@@ -22,17 +22,25 @@ export const createNewCouponService = async (payload) => {
 }
 
 //get all faq filtered bu user role
-export const getAllCouponService = async () => {
-    
+export const getAllCouponService = async (query) => {
+    let {page} = query;
+
+    page = parseInt(page) || 1;
+    // default limit = 10
+    let limit = 10;
+    let skip = (page - 1) * limit;
 
     //filter faq by user role from faq collection
-    const allCoupon = await CouponModel.find({});
+    const allCoupon = await CouponModel.find({}).skip(skip).limit(limit);
 
     if(!allCoupon){
         throw new ApiError(404,"Failed to get all coupon");
     }
 
-    return allCoupon;
+    let total = await CouponModel.countDocuments();
+    let totalPage = Math.ceil(total / limit);
+
+    return {page,limit,total,totalPage,allCoupon};
 }
 
 //get single coupon

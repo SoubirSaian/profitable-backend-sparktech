@@ -5,6 +5,8 @@ import BusinessModel from "../business/business.model.js";
 import CategoryModel from "../category/category.model.js";
 import ApiError from "../../../error/ApiError.js";
 import mongoose from "mongoose";
+import validateFields from "../../../utils/validateFields.js";
+import postNotification from "../../../utils/postNotification.js";
 
 
 //api ending point to get data for dashboard
@@ -56,18 +58,30 @@ export const dashboardController = catchAsync( async (req,res) => {
 
 //api ending point to get all user
 export const getAllUsers = catchAsync( async (req,res) => {
+
+    // Get page & limit from query params
+    let { page } = req.query;
+
+    page = parseInt(page) || 1;    // default page = 1
+    let limit = 10; // default limit = 10
+
+    const skip = (page - 1) * limit;
    
-    const users = await UserModel.find({}).sort({createdAt: -1}).populate({
+    const users = await UserModel.find({}).populate({
         path: "subscriptionPlan", select: "subscriptionPlanType"
-    }).select('name email mobile country role');
+    }).select('name email mobile country role isBlocked').sort({createdAt: -1}).skip(skip).limit(limit);
 
     if(!users) throw new ApiError(500, "No user found. Server Error");
+    
+    const total = await UserModel.countDocuments();
+    const totalPage = Math.ceil(total / limit);
     
 
     sendResponse(res,{
         statusCode: 200,
         success: true,
         message: "Got all user",
+        meta:{page,limit: 10,total, totalPage},
         data: users
     });
 });
@@ -76,9 +90,12 @@ export const getAllUsers = catchAsync( async (req,res) => {
 export const blockUserController = catchAsync( async (req,res) => {
    
     const {userId} = req.query;
+    
     if(!userId) throw new ApiError(400, "User Id is required to block a User");
 
     const user = await UserModel.findById(userId).select('name email isBlocked');
+
+    let msg = (user.isBlocked === true ? "User is UnBlocked" : "User is Blocked");
 
     //toggole isBlock
     user.isBlocked = !user.isBlocked;
@@ -87,7 +104,7 @@ export const blockUserController = catchAsync( async (req,res) => {
     sendResponse(res,{
         statusCode: 200,
         success: true,
-        message: "User blocked",
+        message: msg,
         data: user
     });
 });
@@ -96,66 +113,146 @@ export const blockUserController = catchAsync( async (req,res) => {
 export const getUsersTotalBusiness = catchAsync( async (req,res) => {
    
     const {userId} = req.query;
+
     if(!userId) throw new ApiError(400, "User id is required to get user's total listed business");
 
+    // const result = await BusinessModel.aggregate([
+    //   {
+    //     $match: { 
+    //         user: new mongoose.Types.ObjectId(userId),
+    //     } 
+    //   },
+    //   {
+    //     $facet: {
+    //       totalListed: [{ $count: "count" }],
+    //       totalSold: [
+    //         { $match: { isSold: true } }, // assuming you have a "status" field
+    //         { $count: "count" }
+    //       ],
+    //       totalApproved: [
+    //         { $match: { isApproved: true } },
+    //         { $count: "count" }
+    //       ],
+    //       businessTitles: [
+    //         { $project: { title: 1, _id: 0 } }
+    //       ],
+    //       businessCategories: [
+    //         { $project: { category: 1, _id: 0 } }
+    //       ],
+    //       businessCountries: [
+    //         { $project: { country: 1, _id: 0 } }
+    //       ]
+    //     }
+    //   },
+    //   {
+    //     $project: {
+    //       totalListed: { $ifNull: [{ $arrayElemAt: ["$totalListed.count", 0] }, 0] },
+    //       totalSold: { $ifNull: [{ $arrayElemAt: ["$totalSold.count", 0] }, 0] },
+    //       totalApproved: { $ifNull: [{ $arrayElemAt: ["$totalApproved.count", 0] }, 0] },
+    //       businessTitles: "$businessTitles.title",
+    //       businessCategories: "$businessCategories.category",
+    //       businessCountries: "$businessCountries.country"
+    //     }
+    //   }
+    // ]);
     const result = await BusinessModel.aggregate([
-      {
-        $match: { user: new mongoose.Types.ObjectId(userId) } // Filter by user
-      },
-      {
-        $facet: {
-          totalListed: [{ $count: "count" }],
-          totalSold: [
-            { $match: { isSold: true } }, // assuming you have a "status" field
-            { $count: "count" }
-          ],
-          totalApproved: [
-            { $match: { isApproved: true } },
-            { $count: "count" }
-          ],
-          businessTitles: [
-            { $project: { title: 1, _id: 0 } }
-          ],
-          businessCategories: [
-            { $project: { category: 1, _id: 0 } }
-          ],
-          businessCountries: [
-            { $project: { country: 1, _id: 0 } }
-          ]
+        {
+            $match: {
+            user: new mongoose.Types.ObjectId(userId) // filter by owner
+            }
+        },
+        {
+            $facet: {
+                // 1️⃣ Total businesses listed by user
+                totalListed: [{ $count: "count" }],
+
+                // 2️⃣ Total sold businesses
+                totalSold: [
+                    { $match: { isSold: true } },
+                    { $count: "count" }
+                ],
+
+                // 4️⃣ Total approved businesses
+                totalApproved: [
+                    { $match: { isApproved: true } },
+                    { $count: "count" }
+                ],
+
+                // 5️⃣ Total not approved businesses
+                totalNotApproved: [
+                    { $match: { isApproved: false } },
+                    { $count: "count" }
+                ],
+
+                // 6️⃣ Approved businesses with user details
+                approvedBusinesses: [
+                    { $match: { isApproved: true } },
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "user",
+                            foreignField: "_id",
+                            as: "userData"
+                        }
+                    },
+                    { $unwind: "$userData" },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            category: 1,
+                            subCategory: 1,
+                            country: 1,
+                            askingPrice: 1,
+                            ownerShipType: 1,
+                            createdAt: 1,
+                            "userData._id": 1,
+                            "userData.name": 1,
+                            "userData.email": 1,
+                            "userData.image": 1,
+                            "userData.role": 1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project: {
+                totalListed: { $ifNull: [{ $arrayElemAt: ["$totalListed.count", 0] }, 0] },
+                totalSold: { $ifNull: [{ $arrayElemAt: ["$totalSold.count", 0] }, 0] },
+                totalApproved: { $ifNull: [{ $arrayElemAt: ["$totalApproved.count", 0] }, 0] },
+                totalNotApproved: { $ifNull: [{ $arrayElemAt: ["$totalNotApproved.count", 0] }, 0] },
+                approvedBusinesses: 1
+            }
         }
-      },
-      {
-        $project: {
-          totalListed: { $ifNull: [{ $arrayElemAt: ["$totalListed.count", 0] }, 0] },
-          totalSold: { $ifNull: [{ $arrayElemAt: ["$totalSold.count", 0] }, 0] },
-          totalApproved: { $ifNull: [{ $arrayElemAt: ["$totalApproved.count", 0] }, 0] },
-          businessTitles: "$businessTitles.title",
-          businessCategories: "$businessCategories.category",
-          businessCountries: "$businessCountries.country"
-        }
-      }
     ]);
 
     const totalListed = result[0].totalListed;
     const totalApproved = result[0].totalApproved;
     const totalSold = result[0].totalSold
-    const rejectedListing = totalListed - totalApproved;
-
-    console.log(result);
-    console.log(result[0].totalListed,);
+    const rejectedListing = result[0].totalNotApproved;
+    const approvedBusiness = result[0].approvedBusinesses;
+    // console.log(result);
+    // console.log(result[0].totalListed,);
     
     // return {totalListed,totalApproved,totalSold,rejectedListing};
     sendResponse(res,{
         statusCode: 200,
         success: true,
         message: "Got userr's total listed business with statistics",
-        data: {totalListed,totalApproved,totalSold,rejectedListing,result}
+        data: {totalListed,totalApproved,totalSold,rejectedListing,approvedBusiness}
     });
 });
 
 //api ending point to get user's total listed business
 export const allListedBusiness = catchAsync( async (req,res) => {
-    const { businessRole } = req.query;
+    let { businessRole, page } = req.query;
+    // Get page & limit from query params
+
+    page = parseInt(page) || 1;    // default page = 1
+    let limit = 10; // default limit = 10
+
+    const skip = (page - 1) * limit;
 
     let filter = {};
 
@@ -179,11 +276,15 @@ export const allListedBusiness = catchAsync( async (req,res) => {
             filter = {}; // optional fallback
     }
 
-    const business = await BusinessModel.find(filter).populate({path: "user", select:"name email image"});
+    const business = await BusinessModel.find(filter).populate({path: "user", select:"name email image"}).skip(skip).limit(limit);
+
+    const total = await BusinessModel.countDocuments();
+    const totalPage = Math.ceil(total / limit);
    
     sendResponse(res,{
         statusCode: 200,
         success: true,
+        meta:{page,limit: 10,total, totalPage},
         message: "Got all listed business",
         data: business
     });
@@ -195,13 +296,65 @@ export const approveBusinessController = catchAsync( async (req,res) => {
     const {businessId} = req.query;
     if(!businessId) throw new ApiError(400,"Business id is required to make a business approved");
 
-    await BusinessModel.findByIdAndUpdate(businessId,{ $set:{ isApproved: true } });
+    const business = await BusinessModel.findById(businessId);
+    if(!business)throw new ApiError(404,"Business not found to approved");
+    // console.log(business);
+
+    let msg
+    if(business.isApproved === true){
+        msg = "Rejected this business";
+    } else{
+        msg = "Approved this business"
+    }
+      
+    business.isApproved = !business.isApproved;
+    await business.save();
+
+    //send notification to user that his business got approval
+    if(business.isApproved === true){
+        postNotification("Your business got Approval","Admin approved your business and it is open to all buyers and investors",business.user);
+    }else{
+        postNotification("Your business is Rejected","Admin rejected your business. Contact with Admin to get support",business.user);
+    }
+
     
     // return {totalListed,totalApproved,totalSold,rejectedListing};
     sendResponse(res,{
         statusCode: 200,
         success: true,
-        message: "Approval done for this business",
+        message: msg,
+        data: business
+    });
+});
+
+//api ending point to change password
+export const changePasswodController = catchAsync( async (req,res) => {
+   
+    const {email,currentPassword,newPassword,confirmPassword} = req.body;
+
+    validateFields(req.body,["email","currentPassword","newPassword","confirmPassword"]);
+
+    const admin = await UserModel.findOne({email: email, role: "Admin"});
+
+    if(!admin) throw new ApiError(404, "No Admin found on this email id");
+
+    if(admin.password !== currentPassword){
+        throw new ApiError(400,"You current password has not matched with admin password");
+    }
+
+    if(newPassword !== confirmPassword){
+        throw new ApiError(400,"New password and confirm password not matched. Please check");
+    }
+    
+    admin.password = newPassword;
+    await admin.save();
+
+    
+    sendResponse(res,{
+        statusCode: 200,
+        success: true,
+        message: "Admin password changed successfully",
+
     });
 });
 

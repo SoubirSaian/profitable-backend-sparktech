@@ -88,6 +88,3 @@ const BusinessModel = mongoose.models.Business || mongoose.model("Business",busi
 export default BusinessModel;
 
 
-/*
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODhiMmU1NDc0OWFkNjVkM2JhNWZjZmQiLCJlbWFpbCI6InNvdWJpcjIwMThAZ21haWwuY29tIiwicm9sZSI6IlNlbGxlciIsImlhdCI6MTc1NDExMTM4MSwiZXhwIjoxNzg1NjQ3MzgxfQ.HwXwTU4vYfxjEPqD8PDk_TY88eLnkNnPKALUgeVgY4E
-*/

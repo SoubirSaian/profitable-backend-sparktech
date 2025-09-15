@@ -42,7 +42,7 @@ export const makeAnUserInterestedService = async (req) => {
     const seller = await BusinessModel.findById(businessId).populate({path: "user", select:"email  subscriptionPlan subscriptionPlanPrice"}).select("title");
 
     //send notification to seller
-    postNotification("New Enquiry",`You have a new inquiry from ${name}, email: ${email} about your listed business. View and respond to keep the deal moving.`,seller.user._id);
+    postNotification("New Enquiry",`You have a new inquiry from ${name} about your listed business. View and respond to keep the deal moving.`,seller.user._id);
 
     //send email to Seller that his business got new interested buyer
     if(seller.user.subscriptionPlan && seller.user.subscriptionPlanPrice > 0){

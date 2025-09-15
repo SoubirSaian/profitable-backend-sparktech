@@ -105,15 +105,15 @@ export const helpAndSupportController = catchAsync(
 );
 
 //api ending point to create terms and condition
-export const createtermsAndCondition = catchAsync(
+export const updateTermsAndCondition = catchAsync(
     async (req,res) => {
 
-        // const { termsId } = req.query;
+        const  termsId  = "6899d140df8b42b2014be785";
         const { description } = req.body;
-        if(!description) throw new ApiError(400, "Terms and condition description is needed to create and update");
+        if(!description) throw new ApiError(400, "Terms and condition description is needed to update");
 
-        const response = await termsAndConditionModel.findByIdAndUpdate('6899d140df8b42b2014be785',{description},{new: true});
-        if(!response) throw new ApiError(500, "Failed to create new terms and condition");
+        const response = await termsAndConditionModel.findByIdAndUpdate(termsId,{description},{new: true});
+        if(!response) throw new ApiError(500, "Failed to update terms and condition");
 
         sendResponse(res,{
             statusCode: 201,
@@ -128,7 +128,9 @@ export const createtermsAndCondition = catchAsync(
 export const gettermsAndCondition = catchAsync(
     async (req,res) => {
 
-        const response = await termsAndConditionModel.find({});
+        const termsId = "6899d140df8b42b2014be785";
+        const response = await termsAndConditionModel.findById(termsId);
+
         if (!response) throw new ApiError(500, "Failed to get terms and condition");
 
         sendResponse(res,{
@@ -140,19 +142,21 @@ export const gettermsAndCondition = catchAsync(
     }
 );
 //api ending point to create terms and condition
-export const createPrivacyPolicy = catchAsync(
+export const updatePrivacyPolicy = catchAsync(
     async (req,res) => {
 
         const {description} = req.body;
         if(!description) throw new ApiError(400, "Privacy policy is needed to create");
+        
+        const policyId = "6899ce82d3d2b8cb90f96d39";
 
-        const response = await privacyPolicyModel.findByIdAndUpdate("6899ce82d3d2b8cb90f96d39",{description},{new: true});
-        if(!response) throw new ApiError(500, "Failed to create Privacy Policy");
+        const response = await privacyPolicyModel.findByIdAndUpdate(policyId,{description},{new: true});
+        if(!response) throw new ApiError(500, "Failed to update Privacy Policy");
 
         sendResponse(res,{
-            statusCode: 201,
+            statusCode: 200,
             success: true,
-            message: "created and updated privacy policy",
+            message: "updated privacy policy",
             data: response
         });
     }
@@ -160,8 +164,8 @@ export const createPrivacyPolicy = catchAsync(
 //api ending point to create terms and condition
 export const getPrivacyPolicy = catchAsync(
     async (req,res) => {
-
-        const response = await privacyPolicyModel.find({});
+        const privacyId = "6899ce82d3d2b8cb90f96d39";
+        const response = await privacyPolicyModel.findById(privacyId);
         if (!response) throw new ApiError(500, "Failed to get privacy policy");
 
         sendResponse(res,{

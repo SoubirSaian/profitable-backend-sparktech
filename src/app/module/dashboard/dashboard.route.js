@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllUsers,getUsersTotalBusiness,dashboardController, blockUserController,allListedBusiness, approveBusinessController } from "./dashboard.controller.js";
+import { getAllUsers,getUsersTotalBusiness,dashboardController, blockUserController,allListedBusiness, approveBusinessController, changePasswodController } from "./dashboard.controller.js";
 
 
 const dashboardRouter = express.Router();
@@ -12,5 +12,8 @@ dashboardRouter.get("/users-business-statistics", getUsersTotalBusiness);
 dashboardRouter.get("/listed-business", allListedBusiness);
 //approve a listed business
 dashboardRouter.patch("/approve-business", approveBusinessController);
+
+//change-password
+dashboardRouter.patch("/admin-change-password", changePasswodController);
 
 export default dashboardRouter;

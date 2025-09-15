@@ -21,7 +21,7 @@ const sendNotificationToAllBuyerAndInvestor = async (title,name,email,country) =
 
     //now send notification to all buyer and investor
     if(users.length > 0){
-        users?.map( (user) => postNotification("Latest listed Business",`Business name: ${title} listed by ${name},country: ${country}, email: ${email}`,user._id) );
+        users?.map( (user) => postNotification("Latest listed Business",`Business name: ${title} listed by ${name},country: ${country},`,user._id) );
     }
 }
 
@@ -72,7 +72,7 @@ export const createNewBusinessService = async (req) => {
         await user.save();
 
         //send notification to admin and user
-        postNotification('New Business Added',`${user.name} added a new business and waiting for approval`);
+        postNotification("New Listing Request",`${user.name} submitted a new listing: ${title}`);
         postNotification('Your business listed successfully','Now wait for admins approval', user._id);
 
         return newBusiness;
@@ -166,7 +166,8 @@ export const createNewBusinessService = async (req) => {
 
     //send notification to all buyer and investor that a new business listed
     if(newBusiness){
-        sendNotificationToAllBuyerAndInvestor(title,user.name,user.email,user.countryName);
+        
+        sendNotificationToAllBuyerAndInvestor(title,user.name,user.email,countryName);
     }
 }
 
@@ -214,12 +215,11 @@ export const updateABusinessService = async (req) => {
 
     //Step 2: Remove old images from filesystem
     if (req.file) {
-
         deleteFile("business-image",oldImages);
     }
           
     //send update notification to user
-    postNotification(" Your business is updated", `Your business named ${updatedBusiness.title} is updated`, userId);
+    postNotification(" Your business is updated", `Your business named ${updatedBusiness.title} is updated`, updatedBusiness._id);
     // console.log(updatedBusiness);
     
     return updatedBusiness;
@@ -239,8 +239,8 @@ export const getAllBusinessService = async () => {
 }
 
 //get a single business by id with interested users
-export const getASingleBusinessByIdWithUsersService = async (query) => {
-
+export const getASingleBusinessByIdWithUsersService = async (userDetails,query) => {
+    const currentUserId = userDetails.userId;
     const {businessId} = query;
     // console.log(businessId);
     
@@ -248,17 +248,40 @@ export const getASingleBusinessByIdWithUsersService = async (query) => {
         throw new ApiError(400,"business id is required to get business");
     }
 
+    //get seller details, check subscription plan if no subscription plan
+    // const business = await BusinessModel.findById(businessId).populate({path: "user", select:"subscriptionPlan subscriptionPlanPrice"});
+
+    
     const business = await BusinessModel.findById(businessId);
+
+    //increment views by 1 if 
+    if (business.user?._id.toString() !== currentUserId.toString()) {
+        // await BusinessModel.findByIdAndUpdate(
+        //     businessId,
+        //     { $inc: { views: 1 } },
+        //     { new: true }
+        // );
+        business.views = business.views + 1;
+        await business.save();
+    }
+
 
     if(!business){
         throw new ApiError(500, "No business details found");
     }
 
+    
     //find out all users who are interested to this business
     const interestedUsers = await InterestedModel.find({businessId: businessId}).populate({
-    path: "userId",
-    select: "name email image role", // only fetch 'role' from User model
-   });
+        path: "userId",
+        select: "name email image role", // only fetch 'role' from User model
+    });
+
+    //then seller won't see any interested buyer list
+//    if(business.user.subscriptionPlan && business.user.subscriptionPlanPrice === 0){
+
+//        return {business,interestedUsers: []}
+//    }
 
 
     return {business,interestedUsers};
@@ -325,6 +348,10 @@ export const deleteBusinessService = async (query) => {
         await UserModel.findByIdAndUpdate(business.user,{ 
                 $set: {totalBusiness: businessCount}
         });
+
+        //delete all interest of this business
+       await InterestedModel.deleteMany({businessId: businessId});
+
     }
 
     // Delete image from uploads folder if exists
@@ -340,6 +367,7 @@ export const deleteBusinessService = async (query) => {
 //get single business details
 export const singleBusinessDetailsService = async (req) => {
     const {businessId} = req.query;
+    // const userId = req.user.userId;
     // console.log(businessId);
     
     if(!businessId){
@@ -348,7 +376,12 @@ export const singleBusinessDetailsService = async (req) => {
 
     //here you will get a business details and also can mark it as viewed
     //$inc: { views: 1 } will increase the views count by 1 atometically, so even under high traffic, the view count stays consistent.
-    const business = await BusinessModel.findByIdAndUpdate(businessId,{ $inc: { views: 1 } },{new: true});
+    const business = await BusinessModel.findById(businessId).lean();
+
+    // if(userId !== business.user){
+
+    //     await BusinessModel.findByIdAndUpdate(businessId,{ $inc: { views: 1 } },{new: true});
+    // }
 
     if(!business){
         throw new ApiError(500, "No business details found on this buisness id");
@@ -775,6 +808,7 @@ export const featuredBusinessService = async (query) => {
         title: 1,
         image: 1,
         category: 1,
+        subCategory: 1,
         country: 1,
         location: 1,
         askingPrice: 1,

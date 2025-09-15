@@ -1,5 +1,5 @@
 import catchAsync from "../../../utils/catchAsync.js";
-import {postNewSubscriptionPlanService, getAllSubscriptionPlanByUserRoleService, getSingleSubscriptionPlanService, updateSubscriptionService } from "./subscriptrion.service.js";
+import {postNewSubscriptionPlanService, getAllSubscriptionPlanByUserRoleService, getSingleSubscriptionPlanService, updateSubscriptionService,dashboardSinglePlanService } from "./subscriptrion.service.js";
 import sendResponse from "../../../utils/sendResponse.js";
 
 //api ending point to create a subscription plan
@@ -50,6 +50,21 @@ export const getSingleSubscriptionPlan = catchAsync( async (req,res) =>{
         statusCode: 200,
         success: true,
         message: "Got single subscription plan",
+        data: allPlan
+    });
+} );
+
+//dashboard
+
+//api ending point to get single subscription plan
+export const dashboardSinglePlanController = catchAsync( async (req,res) =>{
+
+    const allPlan = await dashboardSinglePlanService(req.query);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Got single subscription plan by plan name",
         data: allPlan
     });
 } );

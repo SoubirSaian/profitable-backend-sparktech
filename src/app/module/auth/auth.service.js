@@ -1,5 +1,4 @@
 import validateFields from "../../../utils/validateFields.js";
-import status from "http-status";
 import UserModel from "../user/user.model.js";
 import ApiError from "../../../error/ApiError.js";
 import {createToken} from "../../../utils/jwtHelpers.js";
@@ -7,8 +6,9 @@ import config from "../../../config/index.js";
 import codeGenerator from "../../../utils/codeGenerator.js";
 import { sendEmailVerifyEmail, sendResetPasswordEmail } from "../../../utils/emailHelpers.js";
 import hashPassword, { comapreUserPassword } from "../../../utils/hashPassword.js";
+import postNotification from "../../../utils/postNotification.js";
 // import bcrypt from "bcrypt";
-import { log } from "console";
+
 
 
 //user registration service
@@ -30,15 +30,10 @@ export const userRegistrationProcess = async (payload) => {
     //check if user already exist or not
     const user = await UserModel.findOne({email});
     //if user exist then following steps will be followed
-    if(user){
-        //user exist so create a message
-        const message = (user.isEmailVerified ? "Account Exist. Please Login" : "Already have an account. Please verify");
-
-        //if you want to activate inactivated user
-        //generate code, save this code with user. then send email to user containung code
-
-        return {isEmailVerified: user.isEmailVerified, message};
-    }
+    
+    if(user && (user.role === role)){
+        throw new ApiError(403,"Already you have an account with same Email and Role. So please login");
+    }  
 
     //before saving user, hased the password
     // const hashedPassword = await hashPassword(password);
@@ -53,33 +48,30 @@ export const userRegistrationProcess = async (payload) => {
     }
 
     
-        //generate code for 3 minutes
-        const {code , expiredAt  } =  codeGenerator(3);
-        console.log(code,expiredAt);
+    //generate code for 3 minutes
+    const {code , expiredAt  } =  codeGenerator(3);
+    console.log(code,expiredAt);
+    
+
+    //save otp code and code expiary time in user
+    newUser.verificationCode = code;
+    newUser.verificationCodeExpire = expiredAt;
+    await newUser.save();
+
+
+    const data = {
+        name: newUser.name,
+        code,
+        codeExpireTime: Math.round( (expiredAt - Date.now()) / (60 * 1000)),
+    };
+
+    //send email to user
+    sendEmailVerifyEmail(email,data);
         
-
-        //save otp code and code expiary time in user
-        newUser.verificationCode = code;
-        newUser.verificationCodeExpire = expiredAt;
-        await newUser.save();
-
-
-        const data = {
-            name: newUser.name,
-            code,
-            codeExpireTime: Math.round( (expiredAt - Date.now()) / (60 * 1000)),
-        };
-
-        //send email to user
-        sendEmailVerifyEmail(email,data);
-
-        
-        
+             
     return {
-        isUserActive: false,
         message: "Account created successfully. Verify your email",
-        newUser,
-        
+        newUser,       
     };
 
 }
@@ -177,7 +169,7 @@ export const verifyEmailVerifyOtpService = async (payload) => {
     }
 
     //now check user
-    const user = await UserModel.findOne({email});
+    const user = await UserModel.findOne({email}).lean();
 
     if(!user){
          throw new ApiError(404, "user not found");
@@ -197,14 +189,17 @@ export const verifyEmailVerifyOtpService = async (payload) => {
     const verifiedUser = await UserModel.findOneAndUpdate({email},{isEmailVerified: true, verificationCode: null, verificationCodeExpire: null},{new: true}).select('name email isEmailVerified');
 
     //generate token
-        const tokenPayload = {
-            userId: user._id,
-            email: user.email,
-            role: user.role
-        };
+    const tokenPayload = {
+        userId: user._id,
+        email: user.email,
+        role: user.role
+    };
 
-        const accessToken =  createToken(tokenPayload, config.jwt.secret, config.jwt.expires_in);
-        console.log(accessToken);
+    const accessToken =  createToken(tokenPayload, config.jwt.secret, config.jwt.expires_in);
+    // console.log(accessToken);
+
+    //post notification to admin
+    postNotification("New User Joined",`${user.name} has joined the platform`);
 
     return {verifiedUser, accessToken};
 }
@@ -279,7 +274,7 @@ export const forgetPasswordOtpVerifyService = async (payload) => {
 //reset password service
 export const resetPasswordService = async (payload) => {
     const {email, newPassword,confirmPassword} = payload;
-    console.log(email,newPassword,confirmPassword);
+    // console.log(email,newPassword,confirmPassword);
     
     //check if both password fields matched or not
     if (newPassword !== confirmPassword){
@@ -287,8 +282,8 @@ export const resetPasswordService = async (payload) => {
     }
 
     //get user
-    const user = await UserModel.findOne({email});
-    console.log(user);
+    const user = await UserModel.findOne({email}).lean();
+    // console.log(user);
     
     if (!user) {
         throw new ApiError(404, "User not found!");
@@ -304,23 +299,6 @@ export const resetPasswordService = async (payload) => {
     //now change password in Database
     const resetPassword = await UserModel.findOneAndUpdate({email},{password: newPassword});
     // console.log(resetPassword);
-    
+    return resetPassword;
 }
 
-//select user's role service
-// export const selectUsersRoleService = async (payload) => {
-//     const {email,role} = payload;
-
-//     //check user exist or not
-//     const user = await UserModel.findOne({email});
-
-//     if (!user) {
-//         throw new ApiError(status.NOT_FOUND, "User not found!");
-//     } 
-
-//     //set user's role
-//     user.role = role;
-//     await user.save();
-
-    
-// }

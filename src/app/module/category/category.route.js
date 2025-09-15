@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { createNewCategory, createSubCategory, deleteCategory, getAllCategoryWithSubCategory, updateCategory } from "./category.controller.js";
+import { createNewCategory, createSubCategory, deleteCategory,deleteSubCategory, getAllCategoryDashboard, getAllCategoryWebsite, getAllSubCategory, updateCategory, updateSubCategory } from "./category.controller.js";
 
 const categoryRouter = express.Router();
 
@@ -48,11 +48,17 @@ categoryRouter.post("/create-category", upload.single("category-image") , create
 //create sub category
 categoryRouter.post("/create-sub-category", createSubCategory);
 
-categoryRouter.get("/get-all-category", getAllCategoryWithSubCategory);
+categoryRouter.get("/get-all-category", getAllCategoryWebsite);
+categoryRouter.get("/get-category-dashboard", getAllCategoryDashboard);
+
+categoryRouter.get("/get-all-subcategory", getAllSubCategory);
+
 
 categoryRouter.patch("/update-category",upload.single("category-image") , updateCategory );
+categoryRouter.patch("/update-sub-category", updateSubCategory);
 
 categoryRouter.delete("/delete-category", deleteCategory);
+categoryRouter.delete("/delete-sub-category", deleteSubCategory);
 
 export default categoryRouter;
 
