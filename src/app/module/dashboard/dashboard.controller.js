@@ -7,6 +7,7 @@ import ApiError from "../../../error/ApiError.js";
 import mongoose from "mongoose";
 import validateFields from "../../../utils/validateFields.js";
 import postNotification from "../../../utils/postNotification.js";
+import { sendListingConfirmationEmail } from "../../../utils/emailHelpers.js";
 
 
 //api ending point to get data for dashboard
@@ -296,7 +297,7 @@ export const approveBusinessController = catchAsync( async (req,res) => {
     const {businessId} = req.query;
     if(!businessId) throw new ApiError(400,"Business id is required to make a business approved");
 
-    const business = await BusinessModel.findById(businessId);
+    const business = await BusinessModel.findById(businessId).populate({path: "user", select:"name email"});
     if(!business)throw new ApiError(404,"Business not found to approved");
     // console.log(business);
 
@@ -313,6 +314,7 @@ export const approveBusinessController = catchAsync( async (req,res) => {
     //send notification to user that his business got approval
     if(business.isApproved === true){
         postNotification("Your business got Approval","Admin approved your business and it is open to all buyers and investors",business.user);
+        sendListingConfirmationEmail(business.user.email,{name: business.user.name,title: business.title, location: business.countryName,Date: business.createdAt});
     }else{
         postNotification("Your business is Rejected","Admin rejected your business. Contact with Admin to get support",business.user);
     }

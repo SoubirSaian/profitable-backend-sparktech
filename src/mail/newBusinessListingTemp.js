@@ -1,4 +1,4 @@
-const subscriptionExpiredTemp = (data) =>
+const newBusinessListing = (data) =>
   ` 
     <html>
       <head>
@@ -65,21 +65,22 @@ const subscriptionExpiredTemp = (data) =>
           }
         </style>
       </head>
-
       <body>
         <div class="container">
           
           <p>Hello, ${data.name}</p>
-          <p>Your subscription with ProfitableBusinessesForSale.com has expired on ${data.subscriptionEndDate.getDate()}. </p>
-          <p> Don’t miss out on buyer leads, premium listings, and investor access. <br>
-              Renew now to continue enjoying all the benefits. </p>
+          <p>A new business opportunity has just been listed on ProfitableBusinessesForSale.com that may interest you. </p>
+          <h3>Business: ${data.title}</h3>
+          <h3>Location: ${data.country}</h3>
+          <h3>Type: ${data.businessType}</h3>
           
-          <p>Renew <a href="https://profitablebusinessesforsale.com/">Subscription</a></p>
+          <p> <a href="https://profitablebusinessesforsale.com/">Log In</a> now to explore this opportunity and connect with the seller.</p>
+          <p><a href="https://profitablebusinessesforsale.com/">View Business</a></p>
           <p>Best Regards,<br>Team PBFS</p>
         </div>
         <div class="footer">
           // <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" clas="logo-img"/></a>
-        <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
+          <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
           <p> Follow Us on 
             <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905497453?context=%7B%22contextType%22%3A%22chat%22%7D">Facebook</a> |
             <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905492500?context=%7B%22contextType%22%3A%22chat%22%7D">Instagram</a>
@@ -89,4 +90,4 @@ const subscriptionExpiredTemp = (data) =>
     </html>
   `;
 
-export default subscriptionExpiredTemp;
+export default newBusinessListing;

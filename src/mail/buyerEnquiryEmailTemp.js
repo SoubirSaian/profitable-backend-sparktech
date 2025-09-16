@@ -1,4 +1,4 @@
-const signUpEmailTemp = (data) => `
+const buyerEnquiryEmailTemp = (data) => `
   <html>
     <head>
       <style>
@@ -35,8 +35,8 @@ const signUpEmailTemp = (data) => `
           text-align: center;
         }
         .logo-img {
-          max-width: 100%;
-          margin-bottom: 20px;
+          max-width: 20%;
+
         }
         .code {
           text-align: center;
@@ -64,33 +64,32 @@ const signUpEmailTemp = (data) => `
         }
       </style>
     </head>
+     
     <body>
       <div class="container">
         
-        <h1>You have received a new enquiry email  from Profitable Business For Sale</h1>
-        <p>Dear Seller</p>
-        <p>Thank you for being with Profitable Business. You have received a new enquiry for your listed business from a buyer</p>
-
-        ${!data.name && "<h4>Please buy a subscription plan to receive buyer's contact details</h4>"}
-        ${data.name ? "<h4>Buyer Name: {data.name}</h4>" : "<></>"}
-        ${data.email ? "<h4>Buyer Email: {data.email}</h4>" : "<></>"}
-        ${data.mobile ? "<h4>Buyer Mobile: {data.mobile}</h4>" : "<></>"}
-      
-        <p>For more information, please login Profitable business and check activity</p>
-
-        <p>If you have any questions, please contact us at <a href="profitablebusinessforsale@gmail.com">profitablebusinessforsale@gmail.com</a>.</p>
-
-        <p>Thank you,<br>Profitable Business Team</p>
+        <p>Hello, ${data.sellerName}</p>
+        <p>Good news! A buyer has shown interest in your business listed on ProfitableBusinessesForSale.com.</p>
+        ${data.businesstitle === false ? `<p>To receive the details of new listed business, you have to buy   subscription plan</p>`  : `
+            <h3>Business: ${data.businesstitle}</h3>
+            <h3>Buyer Name: ${data.buyerName}</h3>
+            <h3>Buyer Email: ${data.buyerEmail}</h3>
+          `
+        }
+        <p>Please log in to your account to view the enquiry and respond securely.</p>
+        <p>Login to <a href="https://profitablebusinessesforsale.com/">PBFS</a></p>
+        <p>Best Regards,<br>Team PBFS</p>
       </div>
       <div class="footer">
-        <p>&copy; ProfitableBusiness - All Rights Reserved.</p>
-        <p>
-          <a href="https://yourwebsite.com/privacy">Privacy Policy</a> |
-          <a href="https://yourwebsite.com/contact">Contact Support</a>
+        // <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" clas="logo-img"/></a>
+       <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
+        <p> Follow Us on 
+          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905497453?context=%7B%22contextType%22%3A%22chat%22%7D">Facebook</a> |
+          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905492500?context=%7B%22contextType%22%3A%22chat%22%7D">Instagram</a>
         </p>
       </div>
     </body>
   </html>
 `;
 
-export default signUpEmailTemp;
+export default buyerEnquiryEmailTemp;

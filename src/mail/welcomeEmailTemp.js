@@ -1,4 +1,4 @@
-const subscriptionExpiredTemp = (data) =>
+const welcomeEmailTemp = (data) =>
   ` 
     <html>
       <head>
@@ -70,11 +70,15 @@ const subscriptionExpiredTemp = (data) =>
         <div class="container">
           
           <p>Hello, ${data.name}</p>
-          <p>Your subscription with ProfitableBusinessesForSale.com has expired on ${data.subscriptionEndDate.getDate()}. </p>
-          <p> Don’t miss out on buyer leads, premium listings, and investor access. <br>
-              Renew now to continue enjoying all the benefits. </p>
-          
-          <p>Renew <a href="https://profitablebusinessesforsale.com/">Subscription</a></p>
+          <p>Welcome to ProfitableBusinessesForSale.com (PBFS) - where opportunities meet legacy. </p>
+          <h5> Here’s how you can get started: </h5>
+          <p>✔ Complete your profile for better visibility <br>
+            ✔ Sellers - List your business, franchise, or assets <br>
+            ✔ Buyers/Investors - Browse opportunities worldwide <br>
+            ✔ Brokers & Franchisors - Maximize your reach with tailored packages 
+          </p>
+          <p> <a href="https://profitablebusinessesforsale.com/">Log In</a> and get started</p>
+          <p>We’re excited to have you on board! For urgent support, you may contact us at info@ProfitableBusinessesForSale.com or through Live chat on website.</p>
           <p>Best Regards,<br>Team PBFS</p>
         </div>
         <div class="footer">
@@ -89,4 +93,4 @@ const subscriptionExpiredTemp = (data) =>
     </html>
   `;
 
-export default subscriptionExpiredTemp;
+export default welcomeEmailTemp;

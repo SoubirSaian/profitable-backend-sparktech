@@ -3,14 +3,14 @@ const resetPassEmailTemp = (data) => `
     <head>
       <style>
         body {
-          font-family: 'Verdana', 'Arial', sans-serif;
+          font-family: 'Verdana', 'Arial', sans-serif;        
           font-family: Arial, sans-serif;
           background-color: #f2f3f8;
           margin: 0;
           padding: 0;
         }
         .container {
-          font-family: 'Verdana', 'Arial', sans-serif;      
+          font-family: 'Verdana', 'Arial', sans-serif;        
           max-width: 600px;
           margin: 40px auto;
           background-color: #ffffff;
@@ -19,11 +19,11 @@ const resetPassEmailTemp = (data) => `
           box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
         h1 {
-          text-align: center;
           color: #022C22;
           font-size: 26px;
-          font-weight: bold;
           margin-bottom: 20px;
+          font-weight: bold;
+          text-align: center;
         }
         p {
           color: #555555;
@@ -35,8 +35,8 @@ const resetPassEmailTemp = (data) => `
           text-align: center;
         }
         .logo-img {
-          max-width: 100%;
-          margin-bottom: 20px;
+          max-width: 20%;
+
         }
         .code {
           text-align: center;
@@ -64,31 +64,23 @@ const resetPassEmailTemp = (data) => `
         }
       </style>
     </head>
+     
     <body>
       <div class="container">
         
-        <h1>Password Reset Request</h1>
         <p>Hello, ${data.name}</p>
-        <p>
-          We have received a request to reset your password. Please use the code below to proceed with resetting your password:
-        </p>
-        <div class="code">${data.code}</div>
-        <p>
-          This code will be valid for the next <strong>${
-            data.codeExpireTime
-          } minutes</strong> and can only be used once.
-          If you attempt to reset your password again, you will need a new code.
-        </p>
-        <p>
-          If you did not request a password reset, please disregard this email or contact support.
-        </p>
-        <p>Thank you,<br>Profitable Business</p>
+        <p>We received a request to reset your password for ProfitableBusinessesForSale.com. Use the OTP below to proceed<p>
+        <h3>Your Otp: ${data.code}</h3>
+        <p>This code will expire in 10 minutes. If you didnt request this, please ignore this email.</p>
+        
+        <p>Best Regards,<br>Team PBFS</p>
       </div>
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Profitable Business - All Rights Reserved.</p>
-        <p>
-          <a href="https://yourwebsite.com/privacy">Privacy Policy</a> |
-          <a href="https://yourwebsite.com/contact">Contact Support</a>
+        // <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" clas="logo-img"/></a>
+       <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
+        <p> Follow Us on 
+          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905497453?context=%7B%22contextType%22%3A%22chat%22%7D">Facebook</a> |
+          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905492500?context=%7B%22contextType%22%3A%22chat%22%7D">Instagram</a>
         </p>
       </div>
     </body>

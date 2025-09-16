@@ -1,4 +1,4 @@
-const subscriptionExpiredTemp = (data) =>
+const changePasswordConfirmationTemp = (data) =>
   ` 
     <html>
       <head>
@@ -65,16 +65,21 @@ const subscriptionExpiredTemp = (data) =>
           }
         </style>
       </head>
+Hello [User Name], 
 
+This is a confirmation that your password for ProfitableBusinessesForSale.com was successfully updated. 
+
+If you did not make this change, please reset your password immediately and contact our support team. 
+
+Reset Password 
       <body>
         <div class="container">
           
           <p>Hello, ${data.name}</p>
-          <p>Your subscription with ProfitableBusinessesForSale.com has expired on ${data.subscriptionEndDate.getDate()}. </p>
-          <p> Don’t miss out on buyer leads, premium listings, and investor access. <br>
-              Renew now to continue enjoying all the benefits. </p>
+          <p>This is a confirmation that your password for ProfitableBusinessesForSale.com was successfully updated.  </p>
+          <p> If you did not make this change, please reset your password immediately and contact our support team. </p>
           
-          <p>Renew <a href="https://profitablebusinessesforsale.com/">Subscription</a></p>
+          <p><a href="https://profitablebusinessesforsale.com/">Reset Password</a></p>
           <p>Best Regards,<br>Team PBFS</p>
         </div>
         <div class="footer">
@@ -89,4 +94,4 @@ const subscriptionExpiredTemp = (data) =>
     </html>
   `;
 
-export default subscriptionExpiredTemp;
+export default changePasswordConfirmationTemp;

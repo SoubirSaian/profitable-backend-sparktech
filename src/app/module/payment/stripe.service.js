@@ -144,7 +144,7 @@ const updatePaymentAndRelatedAndSendMail = async (webhookEventData) => {
       currency: "USD",
       startDate: subscriptionStartDate,
       endDate: subscriptionEndDate,
-      payment_intent_id: payment_intent,
+      // payment_intent_id: payment_intent,
     };
 
     //send mail to user with payment details
@@ -382,16 +382,19 @@ const updateUserSubscriptionStatus = catchAsync(async () => {
   const subscriptionExpiredUsers = await UserModel.find({
     subscriptionPlan: { $ne: null},
     subscriptionEndDate: { $lt: new Date() },
-  });
+  }).select("name email subscriptionEndDate").lean();
 
-  const emailOfExpiredUsers = subscriptionExpiredUsers.map(
-    (user) => user.email
+  const emailOfExpiredUsers = subscriptionExpiredUsers.map((user) => ({
+        name: user.name,
+        email: user.email,
+        subscriptionEndDate: user.subscriptionEndDate,
+    }) 
   );
 
   // send email to each expired user
-  emailOfExpiredUsers.forEach((email) => {
-    sendSubscriptionExpiredEmail(email);
-    console.log("email sent to", email);
+  emailOfExpiredUsers.forEach((user) => {
+    sendSubscriptionExpiredEmail(user.email,{name: user.name, subscriptionEndDate: user.subscriptionEndDate});
+    console.log("email sent to", user.email);
   });
 
   const updatedUser = await UserModel.updateMany(

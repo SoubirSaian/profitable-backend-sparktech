@@ -93,11 +93,11 @@ async function generateNDAPdf(ndaText) {
 
   //Title
   page.drawText("Non-Disclosure Agreement (NDA)", {x: 150,y,size: 18,font,color: rgb(0, 0, 0),});
-  page.drawText("ProfitableBusinessesForSale.com", {x: 170,y: 730,size: 14,font,color: rgb(0, 0, 0),});
-  page.drawText("From Listing to legacy", {x: 200,y: 710,size: 10,font,color: rgb(0, 0, 0),});
+  page.drawText("ProfitableBusinessesForSale.com", {x: 175,y: 725,size: 14,font,color: rgb(0, 0, 0),});
+  page.drawText("From Listing to legacy", {x: 210,y: 700,size: 12,font,color: rgb(0, 0, 0),});
   
 
-  y -= 90;
+  y -= 80;
 
   // Nda legal document
   ({ page, y } = drawWrappedText(pdfDoc, page, ndaText, 50, y, font, 12, 500, 18));

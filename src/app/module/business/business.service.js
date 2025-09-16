@@ -11,17 +11,36 @@ import UserModel from "../user/user.model.js";
 import postNotification from "../../../utils/postNotification.js";
 import QueryBuilder from "../../../builder/queryBuilder.js";
 import deleteFile from "../../../utils/deleteUnlinkFile.js";
+import { newBusinessListingEmail,businessValuationReturnEmail } from "../../../utils/emailHelpers.js";
+
 
 
 //utility function
 //send notification to all buyer and investor
-const sendNotificationToAllBuyerAndInvestor = async (title,name,email,country) => {
+const sendNotificationToAllBuyerAndInvestor = async (title,country,businessType,role) => {
     //find out all buyer and investor who has subscription plan
-    const users = await UserModel.find({role: { $in: ["Buyer","Investor"]},subscriptionPlanPrice: { $gt: 0 }}).select("email").lean();
+    if(role === "Business Idea Lister"){
+        const users = await UserModel.find({role: Investor,subscriptionPlanPrice: { $gt: 0 }}).select("name email").lean();
+    
+        //now send notification to all buyer and investor
+        if(users.length > 0){
+            users?.map( (user) => {
+                postNotification("Latest listed Business",`Business Idea: ${title},location: ${country},`,user._id);
+                newBusinessListingEmail(user.email,{name: user.name, title,country,businessType});
+            });
+        }
+    }
+    else {
 
-    //now send notification to all buyer and investor
-    if(users.length > 0){
-        users?.map( (user) => postNotification("Latest listed Business",`Business name: ${title} listed by ${name},country: ${country},`,user._id) );
+        const users = await UserModel.find({role: { $in: ["Buyer","Investor"]},subscriptionPlanPrice: { $gt: 0 }}).select("name email").lean();
+    
+        //now send notification to all buyer and investor
+        if(users.length > 0){
+            users?.map( (user) => {
+                postNotification("Latest listed Business",`Business name: ${title},location: ${country},`,user._id);
+                newBusinessListingEmail(user.email,{name: user.name, title,country,businessType});
+            });
+        }
     }
 }
 
@@ -72,7 +91,7 @@ export const createNewBusinessService = async (req) => {
         await user.save();
 
         //send notification to admin and user
-        postNotification("New Listing Request",`${user.name} submitted a new listing: ${title}`);
+        postNotification("New Listing Request",`${user.name} submitted a new business: ${title}`);
         postNotification('Your business listed successfully','Now wait for admins approval', user._id);
 
         return newBusiness;
@@ -167,7 +186,7 @@ export const createNewBusinessService = async (req) => {
     //send notification to all buyer and investor that a new business listed
     if(newBusiness){
         
-        sendNotificationToAllBuyerAndInvestor(title,user.name,user.email,countryName);
+        sendNotificationToAllBuyerAndInvestor(title,countryName,businessType,role);
     }
 }
 
@@ -452,6 +471,8 @@ export const getBusinessValuationService = async (req) => {
     //destructure all data from payload
     const { ownerName,businessName,email, countryCode, mobile, region, country,location,businessType,category, annualTurnover, currency, yearOfEstablishment, annualExpenses,purpose, annualProfit,valueOfAsset,valueOfStock,message } = req.body;
     
+    validateFields(req.body,["ownerName","email"]);
+
         const files = req.files;
         // console.log("files : ",files);
         // Setup Nodemailer
@@ -516,6 +537,9 @@ export const getBusinessValuationService = async (req) => {
         // res.status(500).json({ message: 'Something went wrong.' });
         throw new ApiError(500,"failed to send email to get your business valuation");
     }
+
+    //send email to user that his info has sent to admin
+    businessValuationReturnEmail(email, {name: ownerName});
 
 }
 

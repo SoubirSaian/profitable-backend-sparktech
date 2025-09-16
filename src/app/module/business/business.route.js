@@ -33,7 +33,7 @@ var upload = multer({
   storage: storage,
 
   limits: {
-    fileSize: 1000000, // 1MB . less than 1mb file allowed
+    fileSize: 5000000, // 5MB . less than 5mb file allowed
   },
 
   fileFilter: (req, file, cb) => {

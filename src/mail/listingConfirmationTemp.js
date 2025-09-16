@@ -1,4 +1,4 @@
-const subscriptionExpiredTemp = (data) =>
+const listigConfirmationEmailTemp = (data) =>
   ` 
     <html>
       <head>
@@ -70,11 +70,13 @@ const subscriptionExpiredTemp = (data) =>
         <div class="container">
           
           <p>Hello, ${data.name}</p>
-          <p>Your subscription with ProfitableBusinessesForSale.com has expired on ${data.subscriptionEndDate.getDate()}. </p>
-          <p> Don’t miss out on buyer leads, premium listings, and investor access. <br>
-              Renew now to continue enjoying all the benefits. </p>
+          <p>Good news – your listing has been published on ProfitableBusinessesForSale.com. </p>
+          <p> Listing: ${data.title}</p>
+          <p> Location: ${data.location}</p>
+          <p> Date: ${data.Date.getDate()}</p>
           
-          <p>Renew <a href="https://profitablebusinessesforsale.com/">Subscription</a></p>
+          <p><a href="https://profitablebusinessesforsale.com/">View</a> your listing</p>
+          <p>Tip: Listings with detailed descriptions and high-quality photo attract up to 50% more buyers. </p>
           <p>Best Regards,<br>Team PBFS</p>
         </div>
         <div class="footer">
@@ -89,4 +91,4 @@ const subscriptionExpiredTemp = (data) =>
     </html>
   `;
 
-export default subscriptionExpiredTemp;
+export default listigConfirmationEmailTemp;

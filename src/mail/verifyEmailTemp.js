@@ -35,8 +35,8 @@ const verifyEmailTemp = (data) => `
           text-align: center;
         }
         .logo-img {
-          max-width: 100%;
-          margin-bottom: 20px;
+          max-width: 20%;
+
         }
         .code {
           text-align: center;
@@ -64,21 +64,23 @@ const verifyEmailTemp = (data) => `
         }
       </style>
     </head>
+     
     <body>
       <div class="container">
         <h1>Welcome to Profitable Business</h1>
         <p>Hello, ${data.name}</p>
-        <p>Thank you for registering with Profitable Business. To activate your account, please use the following activation code:</p>
-        <div class="code">${data.code}</div>
-        <p>Please enter this code on the activation page within the next <strong>${data.codeExpireTime} minutes</strong>.</p>
-        <p>If you have any questions, please contact us at <a href="soubir.sparktech19820@gmail.com">soubir.sparktech19820@gmail.com</a>.</p>
-        <p>Thank you,<br>Profitable business Team</p>
+        <p>Thank you for registering with Profitable Business. To verify your email and secure your account, please use the one-time password (OTP) below:</p>
+        <h3>Your Otp: ${data.code}</h3>
+        <p>This code will expire in 10 minutes. If you didnt request this, please ignore this email.</p>
+        
+        <p>Best Regards,<br>Team PBFS</p>
       </div>
       <div class="footer">
-        <p> Profitabe Business - All Rights Reserved.</p>
-        <p>
-          <a href="https://yourwebsite.com/privacy">Privacy Policy</a> |
-          <a href="https://yourwebsite.com/contact">Contact Support</a>
+        // <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" clas="logo-img"/></a>
+       <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
+        <p> Follow Us on 
+          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905497453?context=%7B%22contextType%22%3A%22chat%22%7D">Facebook</a> |
+          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905492500?context=%7B%22contextType%22%3A%22chat%22%7D">Instagram</a>
         </p>
       </div>
     </body>

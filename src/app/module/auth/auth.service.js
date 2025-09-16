@@ -4,7 +4,7 @@ import ApiError from "../../../error/ApiError.js";
 import {createToken} from "../../../utils/jwtHelpers.js";
 import config from "../../../config/index.js";
 import codeGenerator from "../../../utils/codeGenerator.js";
-import { sendEmailVerifyEmail, sendResetPasswordEmail } from "../../../utils/emailHelpers.js";
+import { sendEmailVerifyEmail, sendPasswordChangeEmail, sendResetPasswordEmail, sendWelcomeEmail } from "../../../utils/emailHelpers.js";
 import hashPassword, { comapreUserPassword } from "../../../utils/hashPassword.js";
 import postNotification from "../../../utils/postNotification.js";
 // import bcrypt from "bcrypt";
@@ -49,8 +49,8 @@ export const userRegistrationProcess = async (payload) => {
 
     
     //generate code for 3 minutes
-    const {code , expiredAt  } =  codeGenerator(3);
-    console.log(code,expiredAt);
+    const {code , expiredAt  } =  codeGenerator(10);
+    // console.log(code,expiredAt);
     
 
     //save otp code and code expiary time in user
@@ -62,7 +62,7 @@ export const userRegistrationProcess = async (payload) => {
     const data = {
         name: newUser.name,
         code,
-        codeExpireTime: Math.round( (expiredAt - Date.now()) / (60 * 1000)),
+        // codeExpireTime: Math.round( (expiredAt - Date.now()) / (60 * 1000)),
     };
 
     //send email to user
@@ -200,6 +200,8 @@ export const verifyEmailVerifyOtpService = async (payload) => {
 
     //post notification to admin
     postNotification("New User Joined",`${user.name} has joined the platform`);
+    //send welcome email to user
+    sendWelcomeEmail(user.email,{name: user.name});
 
     return {verifiedUser, accessToken};
 }
@@ -231,7 +233,7 @@ export const forgetPasswordService = async (payload) => {
     const data = {
         name: user.name,
         code,
-        codeExpireTime: Math.round( (expiredAt - Date.now()) / (60 * 1000)),
+        // codeExpireTime: Math.round( (expiredAt - Date.now()) / (60 * 1000)),
     };
 
     //send email to user
@@ -299,6 +301,7 @@ export const resetPasswordService = async (payload) => {
     //now change password in Database
     const resetPassword = await UserModel.findOneAndUpdate({email},{password: newPassword});
     // console.log(resetPassword);
+    sendPasswordChangeEmail(user.email,{name:user.name});
     return resetPassword;
 }
 
