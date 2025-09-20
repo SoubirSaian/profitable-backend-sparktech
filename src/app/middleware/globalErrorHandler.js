@@ -2,7 +2,7 @@ import mongoosePkg from 'mongoose';
 import config from "../../config/index.js";
 import handleValidationError from "../../error/handleValidationError.js";
 import handleCastError from "../../error/handleCastError.js";
-import {ApiError} from "../../error/ApiError.js";
+import ApiError from "../../error/ApiError.js";
 import handleMulterError from "../../error/handleMulterError.js";
 import createErrorMessage from "../../utils/createErrorMessage.js";
 import pkg from 'jsonwebtoken';
