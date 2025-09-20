@@ -71,7 +71,7 @@ const buyerEnquiryEmailTemp = (data) => `
         <p>Hello, ${data.sellerName}</p>
         <p>Good news! A buyer has shown interest in your business listed on ProfitableBusinessesForSale.com.</p>
         ${data.businesstitle === false ? `<p>To receive the details of new listed business, you have to buy   subscription plan</p>`  : `
-            <h3>Business: ${data.businesstitle}</h3>
+            <h3>Business: ${data.businessTitle}</h3>
             <h3>Buyer Name: ${data.buyerName}</h3>
             <h3>Buyer Email: ${data.buyerEmail}</h3>
           `
@@ -81,11 +81,12 @@ const buyerEnquiryEmailTemp = (data) => `
         <p>Best Regards,<br>Team PBFS</p>
       </div>
       <div class="footer">
-        // <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" clas="logo-img"/></a>
+       
        <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
         <p> Follow Us on 
-          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905497453?context=%7B%22contextType%22%3A%22chat%22%7D">Facebook</a> |
-          <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905492500?context=%7B%22contextType%22%3A%22chat%22%7D">Instagram</a>
+          <a href="https://www.facebook.com/share/1J7PbBaf1G/?mibextid=wwXIfr">Facebook</a> |
+
+          <a href="https://www.instagram.com/profitablebusinessesforsale?igsh=MTc5bTVrcWJoZHNtbQ%3D%3D&utm_source=…">Instagram</a>
         </p>
       </div>
     </body>
@@ -93,3 +94,5 @@ const buyerEnquiryEmailTemp = (data) => `
 `;
 
 export default buyerEnquiryEmailTemp;
+
+//<-- <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" class="logo-img"/></a> -->

@@ -8,6 +8,7 @@ import NotFoundHandler from "./error/NotFoundHandler.js";
 // import authRouter from "./app/module/auth/auth.route.js";
 import allRouter from "./app/routes/routes.js";
 import webhookRouter from "./app/module/payment/webhook.routes.js";
+import { detectCountry } from "./app/middleware/selectCountryMiddleware.js";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,10 @@ app.set("view engine", "ejs");
 // }));
 app.use(cors());
 
+//auto detect country while loading
+// app.use(detectCountry);
+// app.set("trust proxy", true);
+
 //to get/retrieve upload folder image
 app.use('/uploads', express.static('uploads'));
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -39,14 +44,16 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
+
+app.get("/",(req,res)=> {
+    // console.log(req.country);
+    // res.redirect(`/${req.country}`);
+    res.send("server is running . welcome .");
+});
+
 //all implemented route
 app.use("/api/v1", allRouter);
 // app.use("/api/v1/auth", authRouter);
-
-
-app.get("/",(req,res)=> {
-    res.send("server is running . welcome .");
-})
 
 
 //error handler

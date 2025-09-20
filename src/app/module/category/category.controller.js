@@ -78,7 +78,7 @@ export const getAllCategoryDashboard = catchAsync(
 
         let {page} = req.query;
 
-        page = parseInt(page);
+        page = parseInt(page) || 1;
         let limit = 6; // default limit = 10
         let skip = (page - 1) * limit;
 
@@ -240,16 +240,15 @@ export const updateSubCategory = catchAsync(
         const { subCategoryId } = req.query;
         const { name } = req.body;
 
-        if(!categoryId) {
+        if(!subCategoryId) {
             throw new ApiError(400," Sub Category Id is required to update category");
         }
 
 
-        const category = await SubCategoryModel.findById(subCategoryId);
-        if(!category) throw new ApiError(404,"Sub Category not found to update");
-
-
+        // const category = await SubCategoryModel.findById(subCategoryId);
+        
         const response = await SubCategoryModel.findByIdAndUpdate(subCategoryId,{name: name},{ new: true });
+        if(!response) throw new ApiError(404,"Sub Category not found to update");
 
         sendResponse(res,{
             statusCode: 200,

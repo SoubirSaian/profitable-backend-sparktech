@@ -42,6 +42,14 @@ export const webhookManager = catchAsync(async (req, res) => {
 //api ending point to get all paid payment
 export const getAllPaidPayment = catchAsync(
   async (req,res) => {
+    let { page } = req.query;
+
+    page = parseInt(page) || 1;
+    // default page = 1
+    let limit = 10; // default limit = 10
+
+    let skip = (page - 1) * limit;
+
     const year = parseInt(req.query.year); // e.g. 2025
     if(!year) throw new ApiError(400,"Year is required to perform action");
 
@@ -105,16 +113,18 @@ export const getAllPaidPayment = catchAsync(
 
     const response = await PaymentModel.find({ status: "Paid"}).populate({
         path: "user", select: "-_id name email"
-    }).select("amount status createdAt payment_intent_id");
-
-    // const meta = await PaymentModel.countDocuments({status: "Paid"});
+    }).select("amount status createdAt payment_intent_id").skip(skip).limit(limit).sort({createdAt: -1});
 
     if(!response) throw new ApiError(404, "No payment found");
+
+    const total = await PaymentModel.countDocuments({status: "Paid"});
+    let totalPage = Math.ceil(total / limit);
 
     sendResponse(res,{
       statusCode: 200,
       success: true,
       message: "Got all payment",
+      meta:{page,limit,total,totalPage},
       data: {totalEarnings: result[0].totalAmount, monthWiseEarnings: formattedResult, allPayment: response }
     })
   }

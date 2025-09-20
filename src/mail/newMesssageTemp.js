@@ -1,4 +1,4 @@
-const businessValuationEmailTemp = (data) =>
+const newMessageEmailTemp = (data) =>
   ` 
     <html>
       <head>
@@ -65,23 +65,32 @@ const businessValuationEmailTemp = (data) =>
           }
         </style>
       </head>
+Hello [User Name], 
 
+You’ve received a new reply from [Sender Name] on PBFS. 
+
+View Message & Respond 
+
+Stay engaged – quick replies lead to stronger business connections. 
+
+Best regards, 
+Team PBFS 
       <body>
         <div class="container">
           
           <p>Hello, ${data.name}</p>
-          <p>We have received your request for a business valuation on ProfitableBusinessesForSale.com. </p>
-          <p> Our team will review your details and get back to you soon. </p>
+          <p>You’ve received a new reply from [Sender Name] on PBFS.  </p>
+          <p> View Message & Respond</p>
           
-          <p>For urgent support, you may contact us at info@ProfitableBusinessesForSale.com or through Live chat on website.</p>
-          <p>Thank you for trusting PBFS with your business journey.</p>
+          <p>Stay engaged - quick replies lead to stronger business connections.</p>
           <p>Best Regards,<br>Team PBFS</p>
         </div>
         <div class="footer">
-         
-        <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
+          
+          <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
           <p> Follow Us on 
             <a href="https://www.facebook.com/share/1J7PbBaf1G/?mibextid=wwXIfr">Facebook</a> |
+            
             <a href="https://www.instagram.com/profitablebusinessesforsale?igsh=MTc5bTVrcWJoZHNtbQ%3D%3D&utm_source=…">Instagram</a>
           </p>
         </div>
@@ -89,6 +98,6 @@ const businessValuationEmailTemp = (data) =>
     </html>
   `;
 
-export default businessValuationEmailTemp;
+export default newMessageEmailTemp;
 
-//<-- <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" class="logo-img"/></a> -->
+// <-- <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" class="logo-img"/></a> -->

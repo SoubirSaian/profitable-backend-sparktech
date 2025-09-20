@@ -226,8 +226,8 @@ export const markedBusinessAsSold = catchAsync( async (req,res) => {
 
 //api ending point to mark a business sold
 export const featuredBusinessHomePage = catchAsync( async (req,res) => {
-
-    const response = await featuredBusinessService(req.query);
+    console.log(req.params,req.query);
+    const response = await featuredBusinessService(req.params,req.query);
 
      sendResponse(res,{
             statusCode: 200,

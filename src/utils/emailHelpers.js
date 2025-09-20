@@ -13,6 +13,7 @@ import businessValuationEmailTemp from "../mail/businessValuationEmailTemp.js";
 import welcomeEmailTemp from "../mail/welcomeEmailTemp.js";
 import listigConfirmationEmailTemp from "../mail/listingConfirmationTemp.js";
 import changePasswordConfirmationTemp from "../mail/changePasswordTemp.js";
+import newMessageEmailTemp from "../mail/newMesssageTemp.js";
 
 
 
@@ -160,12 +161,26 @@ export const sendListingConfirmationEmail = async (email,data) => {
     throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
   }
 };
+
 export const sendPasswordChangeEmail = async (email,data) => {
   try {
     await sendEmail({
       email,
       subject: "Your Listing is Now Live on PBFS!",
       html: listigConfirmationEmailTemp(data),
+    });
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
+
+export const sendNewMessageEmail = async (email,data) => {
+  try {
+    await sendEmail({
+      email,
+      subject: "You Have a New Message on PBFS ",
+      html: newMessageEmailTemp(data),
     });
   } catch (error) {
     console.log(error);

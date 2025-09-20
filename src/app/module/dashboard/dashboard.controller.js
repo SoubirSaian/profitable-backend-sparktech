@@ -61,7 +61,63 @@ export const dashboardController = catchAsync( async (req,res) => {
 export const getAllUsers = catchAsync( async (req,res) => {
 
     // Get page & limit from query params
-    let { page } = req.query;
+    let { page,searchText } = req.query;
+
+        if(searchText){
+            
+            //$regex: searchTerm → Matches titles that contain the given term.
+            //$options: "i" → Makes it case-insensitive (so "Coffee" matches "coffee").
+            const response = await UserModel.aggregate([
+            // 1️⃣ Search by name (case-insensitive)
+                {
+                    $match: { name: { $regex: searchText, $options: "i" } }
+                },
+
+                // 2️⃣ Lookup subscription plan
+                {
+                    $lookup: {
+                    from: "subscriptionplans", // collection name in MongoDB
+                    localField: "subscriptionPlan",
+                    foreignField: "_id",
+                    as: "subscriptionPlan"
+                    }
+                },
+
+                // 3️⃣ Extract only one subscriptionPlan (not array)
+                { $unwind: { path: "$subscriptionPlan", preserveNullAndEmptyArrays: true } },
+
+                // 4️⃣ Project only required fields
+                {
+                    $project: {
+                    name: 1,
+                    email: 1,
+                    mobile: 1,
+                    country: 1,
+                    role: 1,
+                    isBlocked: 1,
+                    "subscriptionPlan.subscriptionPlanType": 1
+                    }
+                },
+
+                // 5️⃣ Sort by createdAt (newest first)
+                { $sort: { createdAt: -1 } },
+
+                // 6️⃣ Pagination
+                // { $skip: skip },
+                // { $limit: limit }
+            ]);
+
+
+            sendResponse(res,{
+                statusCode: 200,
+                success: true,
+                message: "Got all user",
+                data: response
+            });
+
+            // return;
+
+        }
 
     page = parseInt(page) || 1;    // default page = 1
     let limit = 10; // default limit = 10

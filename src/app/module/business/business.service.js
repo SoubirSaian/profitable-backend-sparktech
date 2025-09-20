@@ -173,7 +173,7 @@ export const createNewBusinessService = async (req) => {
         if(subscriptionPlanType){
 
             //check if user can add new business or not
-             if(businessCount >= 1) throw new ApiError(400, "A Francise Seller can't add more than one business");
+            //  if(businessCount >= 1) throw new ApiError(400, "A Francise Seller can't add more than one business");
              
              await addNewBusiness();
 
@@ -768,9 +768,9 @@ export const markedBusinessSoldService = async (query) => {
 }
 
 //featured business in home page
-export const featuredBusinessService = async (query) => {
+export const featuredBusinessService = async (params,query) => {
     const {businessRole,country} = query;
-
+    // const {country} = params;
     if(!businessRole) throw new ApiError(400, "businessRole is required");
 
     // //business role = business idea lister then operation will be different
@@ -797,53 +797,53 @@ export const featuredBusinessService = async (query) => {
 
 
     const businessesWithMaxPricePlan = await BusinessModel.aggregate([
-    // 1️⃣ Match approved businesses with optional country + businessRole filter
-    { 
-        $match: filter 
-    },
+        // 1️⃣ Match approved businesses with optional country + businessRole filter
+        { 
+            $match: filter 
+        },
 
-    // 2️⃣ Join with users (owners)
-    {
-        $lookup: {
-            from: "users",
-            localField: "user",
-            foreignField: "_id",
-            as: "userData"
+        //2️⃣ Join with users (owners)
+        {
+            $lookup: {
+                from: "users",
+                localField: "user",
+                foreignField: "_id",
+                as: "userData"
+            }
+        },
+        { $unwind: "$userData" },
+
+        // 3️⃣ Keep only businesses where owner's subscriptionPlanPrice > 0
+        {
+            $match: {
+            "userData.subscriptionPlanPrice": { $gt: 0 }
+            }
+        },
+
+        // 5️⃣ Sort businesses by subscriptionPlanPrice (highest first)
+        {
+            $sort: { "userData.subscriptionPlanPrice": -1, createdAt: -1 }
+        },
+
+        // 6️⃣ Final projection of required fields
+        {
+            $project: {
+            _id: 1,
+            title: 1,
+            image: 1,
+            category: 1,
+            subCategory: 1,
+            country: 1,
+            location: 1,
+            askingPrice: 1,
+            businessRole: 1,
+            createdAt: 1,
+            "userData._id": 1,
+            "userData.name": 1,
+            "userData.email": 1,
+            "userData.subscriptionPlanPrice": 1,
+            }
         }
-    },
-    { $unwind: "$userData" },
-
-    // 3️⃣ Keep only businesses where owner's subscriptionPlanPrice > 0
-    {
-        $match: {
-        "userData.subscriptionPlanPrice": { $gt: 0 }
-        }
-    },
-
-    // 5️⃣ Sort businesses by subscriptionPlanPrice (highest first)
-    {
-        $sort: { "userData.subscriptionPlanPrice": -1, createdAt: -1 }
-    },
-
-    // 6️⃣ Final projection of required fields
-    {
-        $project: {
-        _id: 1,
-        title: 1,
-        image: 1,
-        category: 1,
-        subCategory: 1,
-        country: 1,
-        location: 1,
-        askingPrice: 1,
-        businessRole: 1,
-        createdAt: 1,
-        "userData._id": 1,
-        "userData.name": 1,
-        "userData.email": 1,
-        "userData.subscriptionPlanPrice": 1,
-        }
-    }
     ]);
 
     // const businessesWithMaxPricePlan = await BusinessModel.aggregate([
@@ -912,6 +912,7 @@ export const featuredBusinessService = async (query) => {
     //     }
     // ]);
 
+    // console.log(businessesWithMaxPricePlan);
     return businessesWithMaxPricePlan;
 }
 

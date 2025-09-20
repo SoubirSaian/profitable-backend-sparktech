@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import validator from "validator";
 
 const agreementSchema = new mongoose.Schema({
     user:{
@@ -17,11 +17,19 @@ const agreementSchema = new mongoose.Schema({
     },
     email:{
         type: String,
-        required: [true, "Email is required to create new Aggrement"]
+        required: [true, "Valid Email is required to create a new agreement"],
+        validate:{
+            validator: (value) => validator.isEmail(value),
+            message: "Please provide a valid email address"
+        }
     },
     phone:{
         type: String,
-        required: [true, "Mobile Number is required to create new Aggrement"]
+        required: [true, "Mobile Number is required to create new Aggrement"],
+        validate: {
+            validator: (value) => validator.isNumeric(value),
+            message: "Valid Mobile number is required"
+        }
     },
     nidPassportNumber:{
         type: String,

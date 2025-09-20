@@ -55,6 +55,7 @@ export const updateSubscriptionService = async (req) => {
 
         if(features) subscription.features = features;
         if(price) subscription.price = price;
+        await subscription.save();
 
         return subscription;
     }
@@ -63,7 +64,7 @@ export const updateSubscriptionService = async (req) => {
 
     if(!subscription) throw new ApiError(404, "Subcription not found to update");
 
-    if(price) subscription.price[0] = price;
+    if(price) subscription.price = price;
     if(duration) subscription.duration = duration;
     if(features) subscription.features = features;
 

@@ -8,6 +8,7 @@ import { emitResult } from "./emitResult.js";
 import socketCatchAsync from "../utils/socketCatchAsync.js";
 import validateSocketFields from "../utils/validateSocketFields.js";
 import mongoose from "mongoose";
+import { sendNewMessageEmail } from "../utils/emailHelpers.js";
 
 //utility function
 // Add this utility if not already present (you have a similar one, but ensuring it's reusable)
@@ -85,9 +86,10 @@ export const initiateChat = socketCatchAsync(
         );
 
         //send notification
-        postNotification("New message Request",`You have received a new conversation request from name: ${user.name} email: ${user.email}`, receiverId);
+        postNotification("New message Request",`You have received a new conversation request from name: ${user.name}`, receiverId);
 
         // postNotification("You started a new conversation",`You have started a new conversation with name: ${receiver.name} email: ${receiver.email} chatId: ${existChat}`, userId);
+        sendNewMessageEmail(receiver.email,{name: receiver.name});
 
         return;
     }
@@ -96,9 +98,11 @@ export const initiateChat = socketCatchAsync(
     const newChat = await ChatModel.create({ participants: [userId,receiverId], messages: [] });
 
     //send notification
-    postNotification("New message Request",`You have received a new conversation request from name: ${user.name} email: ${user.email}`, receiverId);
+    postNotification("New message Request",`You have received a new conversation request from name: ${user.name}`, receiverId);
 
-    postNotification("You started a new conversation",`You have started a new conversation with name: ${receiver.name} email: ${receiver.email}`, userId);
+    postNotification("You started a new conversation",`You have started a new conversation with name: ${receiver.name}`, userId);
+    //send email
+    sendNewMessageEmail(receiver.email,{name: receiver.name});
 
     // Broadcast to sender and receiver simultaneously
         io.to([userId,receiverId]).emit(

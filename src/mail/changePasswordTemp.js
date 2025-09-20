@@ -65,13 +65,7 @@ const changePasswordConfirmationTemp = (data) =>
           }
         </style>
       </head>
-Hello [User Name], 
 
-This is a confirmation that your password for ProfitableBusinessesForSale.com was successfully updated. 
-
-If you did not make this change, please reset your password immediately and contact our support team. 
-
-Reset Password 
       <body>
         <div class="container">
           
@@ -83,11 +77,12 @@ Reset Password
           <p>Best Regards,<br>Team PBFS</p>
         </div>
         <div class="footer">
-          // <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" clas="logo-img"/></a>
+         
         <p> <a href="https://profitablebusinessesforsale.com/">ProfitableBusinessesForSale.com</a> | <a href="info@ProfitableBusinessesForSale.com">info@ProfitableBusinessesForSale.com</a>.</p>
           <p> Follow Us on 
-            <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905497453?context=%7B%22contextType%22%3A%22chat%22%7D">Facebook</a> |
-            <a href="https://teams.live.com/l/message/19:gEb5h-V1GgaIIT3FLkxQYXL6v9VfiZIwi3Ccj4U7Gyw1@thread.v2/1757905492500?context=%7B%22contextType%22%3A%22chat%22%7D">Instagram</a>
+            <a href="https://www.facebook.com/share/1J7PbBaf1G/?mibextid=wwXIfr">Facebook</a> |
+
+            <a href="https://www.instagram.com/profitablebusinessesforsale?igsh=MTc5bTVrcWJoZHNtbQ%3D%3D&utm_source=…">Instagram</a>
           </p>
         </div>
       </body>
@@ -95,3 +90,5 @@ Reset Password
   `;
 
 export default changePasswordConfirmationTemp;
+
+//  <-- <a href="https://profitablebusinessesforsale.com/"><img src="uploads/logo/pbfs-logo.png" alt="PBFS" class="logo-img"/></a> -->

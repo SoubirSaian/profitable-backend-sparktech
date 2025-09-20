@@ -68,10 +68,10 @@ export const helpAndSupportController = catchAsync(
             subject: 'Help and Suport',
             text: `Hi This is ${firstName ? firstName : "NA"},\n\n
                 I am facing an Issue:\n\n
+                Message : ${message ? message : "NA"}\n\n
                 Name: ${firstName ? firstName : "NA"} ${lastName ? lastName : "NA"}\n
                 Email: ${email ? email : "NA"}\n
-                Phone : ${phone ? phone : "NA"}\n
-                Message : ${message ? message : "NA"}\n\n
+                Phone : ${phone ? phone : "NA"}\n\n
 
                 You please take necessery steps to solve the issue.\n
                 Thank You.

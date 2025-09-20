@@ -22,6 +22,11 @@ export const userRegistrationProcess = async (payload) => {
     //if anu of the field is empty then the below function throw an error
     validateFields(payload,["name","email","password","country","mobile","role"]);
 
+    //check password length
+    if(password.length < 5){
+        throw new ApiError(400,"Password should be at least 5 character");
+    }
+
     //check if both password fields are same
     if (password !== confirmPassword){
         throw new ApiError( 400,"Password and Confirm Password didn't match" );
@@ -278,6 +283,10 @@ export const resetPasswordService = async (payload) => {
     const {email, newPassword,confirmPassword} = payload;
     // console.log(email,newPassword,confirmPassword);
     
+    //check password length
+    if(newPassword.length < 5){
+        throw new ApiError(400,"Password should be at least 5 character");
+    }
     //check if both password fields matched or not
     if (newPassword !== confirmPassword){
         throw new ApiError(400, "Passwords do not match")
